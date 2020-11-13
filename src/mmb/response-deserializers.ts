@@ -28,6 +28,15 @@ function isJobStep(v: number | string): v is Api.JobStep {
 }
 
 export namespace ResponseDeserializers {
+    export function toEmpty(obj: unknown): Api.Empty {
+        if (!isObj(obj))
+            throw new Error('Input variable is not an object');
+
+        if (Object.keys(obj).length > 0)
+            throw new Error('Object is not empty');
+        return {};
+    }
+
     export function toJobInfo(obj: unknown): Api.JobInfo {
         if (!isObj(obj))
             throw new Error('Input variable is not an object');

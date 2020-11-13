@@ -48,15 +48,15 @@ export class Viewer extends React.Component<Viewer.Props> {
                 <div id='viewer'></div>
                 <div className='viewer-controls'>
                     <PushButton
-                        className='pushbutton-flex'
+                        className='pushbutton-flex pushbutton-hc-default'
                         value='Ball-and-stick'
                         onClick={() => this.switchRepresentation('ball-and-stick')} />
                     <PushButton
-                        className='pushbutton-flex'
+                        className='pushbutton-flex pushbutton-hc-default'
                         value='Cartoon'
                         onClick={() => this.switchRepresentation('cartoon')} />
                     <LinkButton
-                        className='pushbutton-flex'
+                        className='pushbutton-flex pushbutton-hc-default'
                         value='Download'
                         url={this.url() ?? ''}
                         downloadAs={`${this.props.structureName}.pdb`} />

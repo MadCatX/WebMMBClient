@@ -19,6 +19,14 @@ export namespace JobQuery {
         return Request.api(req);
     }
 
+    export function del(id: string) {
+        const req: Api.ApiRequest<Api.SimpleJobRqData> = {
+            req_type: 'DeleteJob',
+            data: { id },
+        };
+        return Request.api(req);
+    }
+
     export function list() {
         const req: Api.ApiRequest<null> = {
             req_type: 'ListJobs',

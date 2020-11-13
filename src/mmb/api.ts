@@ -12,6 +12,7 @@ type ApiRequestType =
     'StartJob'    |
     'StopJob'     |
     'ResumeJob'   |
+    'DeleteJob'   |
     'JobStatus'   |
     'ListJobs'    |
     'JobCommands' |
@@ -69,6 +70,9 @@ export type OkResponse<T> = {
     success: boolean,
     data: T,
 }
+
+const Empty = {};
+export type Empty = typeof Empty;
 
 export type JobInfo = {
     id: string,

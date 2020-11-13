@@ -15,21 +15,21 @@ export class JobControls extends React.Component<JobControls.Props, JobControls.
             <div>
                 <div className='job-controls-btns'>
                     <PushButton
-                        className='pushbutton-start'
+                        className='pushbutton-flex pushbutton-hc-green'
                         value='Start'
                         onClick={e => {
                             e.preventDefault();
                             this.props.handleStart();
                         }} />
                     <PushButton
-                        className='pushbutton-flex'
+                        className='pushbutton-flex pushbutton-hc-default'
                         value='Status'
                         onClick={e => {
                             e.preventDefault();
                             this.props.handleStatus();
                         }} />
                     <PushButton
-                        className='pushbutton-stop'
+                        className='pushbutton-flex pushbutton-hc-red'
                         value='Stop'
                         onClick={e => {
                             e.preventDefault();

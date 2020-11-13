@@ -194,45 +194,6 @@
     text-align: center;
     transition: background-color 0.25s;
 }
-.pushbutton-chained:hover {
-    background-color: #e0e0e0;
-}
-
-.pushbutton-logout {
-    color: black;
-    border: 0.1em solid black;
-    display: inline-block;
-    margin: 0.2em;
-    padding-left: 0.2em;
-    padding-right: 0.2em;
-    text-align: center;
-    transition: background-color 0.25s;
-}
-.pushbutton-logout:hover {
-    background-color: #e00000;
-}
-
-.pushbutton-flex, .pushbutton-start, .pushbutton-stop {
-    color: black;
-    border: 0.1em solid black;
-    margin: 0 0.2em;
-    flex-grow: 1;
-    text-align: center;
-    transition: background-color 0.25s;
-}
-.pushbutton-flex:hover {
-    background-color: #e0e0e0;
-}
-.pushbutton-start:hover {
-    background-color: yellowgreen;
-}
-.pushbutton-stop:hover {
-    background-color: red;
-}
-
-.pushbutton-hc-red:hover {
-    background-color: red;
-}
 
 .pushbutton-default {
     color: black;
@@ -240,9 +201,6 @@
     margin: 0.2em;
     text-align: center;
     transition: background-color 0.25s;
-}
-.pushbutton-default:hover {
-    background-color: #e0e0e0;
 }
 
 .pushbutton-delete {
@@ -257,6 +215,25 @@
 }
 .pushbutton-delete:hover {
     background-color: #e00000;
+}
+
+.pushbutton-flex {
+    color: black;
+    border: 0.1em solid black;
+    margin: 0 0.2em;
+    flex-grow: 1;
+    text-align: center;
+    transition: background-color 0.25s;
+}
+
+.pushbutton-hc-default:hover {
+    background-color: #e0e0e0;
+}
+.pushbutton-hc-green:hover {
+    background-color: yellowgreen;
+}
+.pushbutton-hc-red:hover {
+    background-color: red;
 }
 
 .section {

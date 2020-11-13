@@ -30,7 +30,7 @@ export class JobItem extends React.Component<JobItem.Props> {
                 <span className='centered-text job-item-name'>{this.props.name}</span>
                 {this.renderJobStatus(this.props.status)}
                 <PushButton
-                    className='pushbutton-chained'
+                    className='pushbutton-chained pushbutton-hc-default'
                     value='Show >>'
                     onClick={() => this.props.onSelect(this.props.id)} />
                 <PushButton

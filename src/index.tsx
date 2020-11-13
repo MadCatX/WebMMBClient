@@ -43,13 +43,18 @@ export class Main extends React.Component<Props, State> {
         };
 
         this.onSelectJob = this.onSelectJob.bind(this);
-        this.onDeleteJob = this.onDeleteJob.bind(this);
+        this.onJobDeleted = this.onJobDeleted.bind(this);
         this.onJobStarted = this.onJobStarted.bind(this);
         this.onTabChanged = this.onTabChanged.bind(this);
     }
 
-    private onDeleteJob(id: string) {
-        
+    private onJobDeleted(id: string) {
+        if (this.state.activeJob?.info.id === id) {
+            this.setState({
+                ...this.state,
+                activeJob: undefined,
+            });
+        }
     }
 
     private onSelectJob(info?: Api.JobInfo, commands?: JsonCommands) {
@@ -84,7 +89,7 @@ export class Main extends React.Component<Props, State> {
             return (
                 <JobList
                     onSelectJob={this.onSelectJob}
-                    onDeleteJob={this.onDeleteJob} />);
+                    jobDeleted={this.onJobDeleted} />);
         case 'job-control':
             return (
                 <VisualJobRunner

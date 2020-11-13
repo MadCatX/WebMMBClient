@@ -64,7 +64,7 @@ export class Logout extends React.Component<Logout.Props, State> {
             <div className='logout-container'>
                 <div className='inlined'>User: {this.state.username}</div>
                 <PushButton
-                    className='pushbutton-logout'
+                    className='pushbutton-chained pushbutton-hc-red'
                     value='Log out'
                     onClick={() => this.logOut()} />
             </div>

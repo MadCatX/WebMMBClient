@@ -34,49 +34,35 @@ export class JobList extends React.Component<JobList.Props, State> {
     }
 
     componentDidMount() {
-        JobQuery.list().then(resp => {
-            if (resp.status === 200) {
-                resp.json().then(json => {
-                    const r = Response.parse<Api.JobInfo[]>(json, ResponseDeserializers.toJobList);
-
-                    if (Response.isError(r)) {
-                        this.setState({
-                            ...this.state,
-                            jobs: [],
-                            error: 'Invalid job list data',
-                        });
-                    } else if (Response.isOk(r)) {
-                        this.setState({
-                            ...this.state,
-                            jobs: r.data,
-                            error: '',
-                        });
-                    }
-                }).catch(e => {
-                    this.setState({
-                        ...this.state,
-                        jobs: [],
-                        error: `Cannot fetch list of jobs (${e.toString()})`,
-                    });
-                });
-            } else {
-                this.setState({
-                    ...this.state,
-                    jobs: [],
-                    error: `Cannot fetch list of jobs (${resp.status} - ${resp.statusText})`,
-                });
-            }
-        }).catch(e => {
-            this.setState({
-                ...this.state,
-                jobs: [],
-                error: `Cannot fetch list of jobs (${e.toString()})`,
-            });
-        });
+        this.refresh();
     }
 
     private onDeleteJobClicked(id: string) {
-        this.props.onDeleteJob(id);
+        JobQuery.del(id).then(resp => {
+            resp.json().then(json => {
+                const r = Response.parse<Api.Empty>(json, ResponseDeserializers.toEmpty);
+
+                if (Response.isError(r)) {
+                    this.setState({
+                        ...this.state,
+                        error: r.message
+                    });
+                } else {
+                    this.refresh();
+                    this.props.jobDeleted(id);
+                }
+            }).catch(e => {
+                this.setState({
+                    ...this.state,
+                    error: e.toString(),
+                });
+            });
+        }).catch(e => {
+            this.setState({
+                ...this.state,
+                error: e.toString(),
+            });
+        });
     }
 
     private onSelectJobClicked(id?: string) {
@@ -126,6 +112,48 @@ export class JobList extends React.Component<JobList.Props, State> {
         });
     }
 
+    private refresh() {
+        JobQuery.list().then(resp => {
+            if (resp.status === 200) {
+                resp.json().then(json => {
+                    const r = Response.parse<Api.JobInfo[]>(json, ResponseDeserializers.toJobList);
+
+                    if (Response.isError(r)) {
+                        this.setState({
+                            ...this.state,
+                            jobs: [],
+                            error: 'Invalid job list data',
+                        });
+                    } else if (Response.isOk(r)) {
+                        this.setState({
+                            ...this.state,
+                            jobs: r.data,
+                            error: '',
+                        });
+                    }
+                }).catch(e => {
+                    this.setState({
+                        ...this.state,
+                        jobs: [],
+                        error: `Cannot fetch list of jobs (${e.toString()})`,
+                    });
+                });
+            } else {
+                this.setState({
+                    ...this.state,
+                    jobs: [],
+                    error: `Cannot fetch list of jobs (${resp.status} - ${resp.statusText})`,
+                });
+            }
+        }).catch(e => {
+            this.setState({
+                ...this.state,
+                jobs: [],
+                error: `Cannot fetch list of jobs (${e.toString()})`,
+            });
+        });
+    }
+
     private renderInner() {
         if (this.state.error !== '') {
             return (<div className='error-message'>{this.state.error}</div>);
@@ -152,6 +180,7 @@ export class JobList extends React.Component<JobList.Props, State> {
                     {this.renderInner()}
                 </div>
                 <PushButton
+                    className='pushbutton-default pushbutton-hc-green'
                     value='+ New job'
                     onClick={() => this.onSelectJobClicked(undefined)} />
             </div>
@@ -160,7 +189,7 @@ export class JobList extends React.Component<JobList.Props, State> {
 }
 
 export namespace JobList {
-    export interface OnDeleteJob {
+    export interface JobDeleted {
         (id: string): void;
     }
 
@@ -170,6 +199,6 @@ export namespace JobList {
 
     export interface Props {
         onSelectJob: OnSelectJob;
-        onDeleteJob: OnDeleteJob;
+        jobDeleted: JobDeleted;
     }
 }

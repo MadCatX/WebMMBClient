@@ -17,7 +17,7 @@ export class PushButton extends AbstractPushButton<PushButton.Props, {}> {
         return (
             <div
                 id={this.props.id}
-                className={this.props.className ?? 'pushbutton-default'}
+                className={this.props.className ?? 'pushbutton-default pushbutton-hc-default'}
                 onClick={this.props.onClick}>
                 <div className='pushbutton-text'>{this.props.value}</div>
             </div>

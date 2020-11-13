@@ -149,7 +149,6 @@ export class MmbInputForm extends Form<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, Mmb
                     <NtCsInput formId={this.props.id} />
                     <GlobalParametersInput formId={this.props.id} />
                     <PushButton
-                        className='pushbutton-default'
                         value='Generate commands'
                         onClick={e => {
                             e.preventDefault();
