@@ -1,0 +1,5 @@
+node_modules
+dist
+lib
+cpdist.sh
+package-lock.json
