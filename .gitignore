@@ -3,3 +3,5 @@ dist
 lib
 cpdist.sh
 package-lock.json
+tsconfig.tsbuildinfo
+tsconfig.development.tsbuildinfo
