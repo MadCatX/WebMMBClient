@@ -30,16 +30,20 @@ export class JobItem extends React.Component<JobItem.Props> {
                 <span className='centered-text job-item-name'>{this.props.name}</span>
                 {this.renderJobStatus(this.props.status)}
                 <PushButton
-                    className='pushbutton-show-job'
+                    className='pushbutton-chained'
                     value='Show >>'
-                    onClick={() => this.props.onClick(this.props.id)} />
+                    onClick={() => this.props.onSelect(this.props.id)} />
+                <PushButton
+                    className='pushbutton-chained pushbutton-hc-red'
+                    value='Delete'
+                    onClick={() => this.props.onDelete(this.props.id)} />
             </div>
         );
     }
 }
 
 export namespace JobItem {
-    export interface OnClicked {
+    export interface ClickHandler {
         (id: string): void;
     }
 
@@ -47,6 +51,7 @@ export namespace JobItem {
         id: string;
         name: string;
         status: Api.JobStatus;
-        onClick: OnClicked;
+        onSelect: ClickHandler;
+        onDelete: ClickHandler;
     }
 }

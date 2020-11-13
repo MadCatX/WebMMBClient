@@ -29,7 +29,8 @@ export class JobList extends React.Component<JobList.Props, State> {
             error: '',
         };
 
-        this.onJobClicked = this.onJobClicked.bind(this);
+        this.onSelectJobClicked = this.onSelectJobClicked.bind(this);
+        this.onDeleteJobClicked = this.onDeleteJobClicked.bind(this);
     }
 
     componentDidMount() {
@@ -74,9 +75,13 @@ export class JobList extends React.Component<JobList.Props, State> {
         });
     }
 
-    private onJobClicked(id?: string) {
+    private onDeleteJobClicked(id: string) {
+        this.props.onDeleteJob(id);
+    }
+
+    private onSelectJobClicked(id?: string) {
         if (id === undefined) {
-            this.props.onJobSelected(undefined);
+            this.props.onSelectJob(undefined);
             return;
         }
 
@@ -99,7 +104,7 @@ export class JobList extends React.Component<JobList.Props, State> {
                             ...this.state,
                             error: '',
                         });
-                        this.props.onJobSelected(job, r.data);
+                        this.props.onSelectJob(job, r.data);
                     }
                 }).catch(e => {
                     this.setState({
@@ -132,7 +137,8 @@ export class JobList extends React.Component<JobList.Props, State> {
                         id={e.id}
                         name={e.name}
                         status={e.status}
-                        onClick={() => this.onJobClicked(e.id)} />
+                        onSelect={() => this.onSelectJobClicked(e.id)}
+                        onDelete={() => this.onDeleteJobClicked(e.id)} />
                 )
             );
         }
@@ -147,18 +153,23 @@ export class JobList extends React.Component<JobList.Props, State> {
                 </div>
                 <PushButton
                     value='+ New job'
-                    onClick={() => this.onJobClicked(undefined)} />
+                    onClick={() => this.onSelectJobClicked(undefined)} />
             </div>
         );
     }
 }
 
 export namespace JobList {
-    export interface OnJobSelected {
+    export interface OnDeleteJob {
+        (id: string): void;
+    }
+
+    export interface OnSelectJob {
         (job?: Api.JobInfo, commands?: JsonCommands): void;
     }
 
     export interface Props {
-        onJobSelected: OnJobSelected;
+        onSelectJob: OnSelectJob;
+        onDeleteJob: OnDeleteJob;
     }
 }

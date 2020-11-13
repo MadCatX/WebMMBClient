@@ -117,8 +117,8 @@
         "affectsGlobalScope": false
       },
       "./src/ui/job-item.tsx": {
-        "version": "e04e002e4cd79fe3d03e1096208a6f6af2462f3d06239c0d8bf08bba6ec16b4f",
-        "signature": "e65350c1edcf43e02c1d4f347d0b1c5fe5c59c2bc622f66b9531bbf8d76dca1c",
+        "version": "9be49c7bab6eae975d57be93cf11121f4301635bb1f29419d9aca50df235111f",
+        "signature": "c76773fe70365f8058fc574aab93b14bed00ddf0610d8556aa4cd9981cfe6f8f",
         "affectsGlobalScope": false
       },
       "./src/mmb/commands.ts": {
@@ -147,8 +147,8 @@
         "affectsGlobalScope": false
       },
       "./src/ui/job-list.tsx": {
-        "version": "bd92192cf161b2bf72d7ab1b10da47b54666be43529e148e23c4648221406ccd",
-        "signature": "4e1e2dbc6b04f4540ef1583b789f5186655881810c4839767cf722f9cd691f9a",
+        "version": "a4e4bd042c4932d91d0bc8f5fcaf698b7847e48f737e68f95a7c2580cc7d036d",
+        "signature": "f63340e92074eb4c559928038cf87ff759466a9d898af030002bc28460876171",
         "affectsGlobalScope": false
       },
       "./src/mmb/auth-query.ts": {
@@ -372,8 +372,8 @@
         "affectsGlobalScope": false
       },
       "./src/index.tsx": {
-        "version": "82801a9ed5bf9064daecff7122f7fa371f07b0dc063f299fac3918a4c7143053",
-        "signature": "8e40807a97959826c4b56fae342c035863ccb806222988f001f9d0ebb487d26b",
+        "version": "ded458ed579cabab0467405c8972ba1cf63a494e57b268e1199652f2815222da",
+        "signature": "57bad13e551e17099071b8737b6dc62be6b432340f72743e64365d9c7ca0131b",
         "affectsGlobalScope": false
       },
       "./src/ui/login-form-util.ts": {
@@ -384,11 +384,6 @@
       "./src/login.tsx": {
         "version": "81c61973dbac57b92d80509d1e4f1d7642dfafa16df30f9d1eefa512e3175449",
         "signature": "bc8a08a1d5942ecc9e58e60828841f08d8ed9f28cbba9537bf706fb8d91059cc",
-        "affectsGlobalScope": false
-      },
-      "./src/ui/button.tsx": {
-        "version": "a04052c5004993266242afac6dff37035c9ef8d834760d1f9c1561dd125f2ce4",
-        "signature": "12fda38bc207dc69711725ce47e61d69bd8b496958ce102b9d8cb64b5e770e56",
         "affectsGlobalScope": false
       },
       "./src/ui/common/submit-button.tsx": {
@@ -540,9 +535,6 @@
         "./src/ui/common/push-button.tsx",
         "./src/ui/form-context-manager.tsx",
         "./src/ui/mmb-input-form-util.ts"
-      ],
-      "./src/ui/button.tsx": [
-        "./node_modules/@types/react/index.d.ts"
       ],
       "./src/ui/common/check-box.tsx": [
         "./node_modules/@types/react/index.d.ts",
@@ -833,9 +825,6 @@
       "./src/ui/base-interactions-input.tsx": [
         "./src/ui/common/form-block.tsx"
       ],
-      "./src/ui/button.tsx": [
-        "./node_modules/@types/react/index.d.ts"
-      ],
       "./src/ui/common/check-box.tsx": [
         "./src/ui/common/form-field.tsx"
       ],
@@ -1005,7 +994,6 @@
       "./src/model/reporting.ts",
       "./src/model/stages-span.ts",
       "./src/ui/base-interactions-input.tsx",
-      "./src/ui/button.tsx",
       "./src/ui/common/check-box.tsx",
       "./src/ui/common/combo-box.tsx",
       "./src/ui/common/error-box.tsx",

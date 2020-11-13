@@ -51,7 +51,7 @@
 
 .job-item {
     display: grid;
-    grid-template-columns: auto auto auto;
+    grid-template-columns: auto auto auto auto;
     margin: 0.2em 0 0.2em 0;
 }
 
@@ -230,6 +230,10 @@
     background-color: red;
 }
 
+.pushbutton-hc-red:hover {
+    background-color: red;
+}
+
 .pushbutton-default {
     color: black;
     border: 0.1em solid black;
@@ -253,19 +257,6 @@
 }
 .pushbutton-delete:hover {
     background-color: #e00000;
-}
-
-.pushbutton-show-job {
-    border: 0.1em solid black;
-    padding: 0.2em;
-    margin-left: auto;
-    transition: background-color 0.25s;
-}
-.pushbutton-show-job:hover {
-    background-color: #e0e0e0;
-    border: 0.1em solid black;
-    padding: 0.2em;
-    margin-left: auto;
 }
 
 .section {

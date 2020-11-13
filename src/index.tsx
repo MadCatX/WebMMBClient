@@ -42,12 +42,17 @@ export class Main extends React.Component<Props, State> {
             activeJob: undefined,
         };
 
-        this.onJobSelected = this.onJobSelected.bind(this);
+        this.onSelectJob = this.onSelectJob.bind(this);
+        this.onDeleteJob = this.onDeleteJob.bind(this);
         this.onJobStarted = this.onJobStarted.bind(this);
         this.onTabChanged = this.onTabChanged.bind(this);
     }
 
-    private onJobSelected(info?: Api.JobInfo, commands?: JsonCommands) {
+    private onDeleteJob(id: string) {
+        
+    }
+
+    private onSelectJob(info?: Api.JobInfo, commands?: JsonCommands) {
         const aj = (() => {
             if (info !== undefined && commands !== undefined)
                 return { info, commands };
@@ -76,7 +81,10 @@ export class Main extends React.Component<Props, State> {
     private renderTab(id: Tabs) {
         switch (id) {
         case 'job-list':
-            return (<JobList onJobSelected={this.onJobSelected} />);
+            return (
+                <JobList
+                    onSelectJob={this.onSelectJob}
+                    onDeleteJob={this.onDeleteJob} />);
         case 'job-control':
             return (
                 <VisualJobRunner
