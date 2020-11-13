@@ -1,3 +1,11 @@
+/**
+ * Copyright (c) 2020 WebMMB contributors, licensed under MIT, See LICENSE file for details.
+ *
+ * @author Michal Malý (michal.maly@ibt.cas.cz)
+ * @author Samuel C. Flores (samuelfloresc@gmail.com)
+ * @author Jiří Černý (jiri.cerny@ibt.cas.cz)
+ */
+
 export class DoubleHelix {
     constructor(readonly chainOne: string, readonly firstResidueNoOne: number, readonly lastResidueNoOne: number,
                 readonly chainTwo: string, readonly firstResidueNoTwo: number, readonly lastResidueNoTwo: number) {
