@@ -1,0 +1,44 @@
+import * as React from 'react';
+import * as Api from '../mmb/api';
+import { PushButton } from './common/push-button';
+
+export class JobItem extends React.Component<JobItem.Props> {
+    private renderJobStatus(s: Api.JobStatus) {
+        switch (s) {
+        case 'running':
+            return (<span className='centered-text ok-message'>Running</span>);
+        case 'finished':
+            return (<span className='centered-text job-done-message'>Finished</span>);
+        case 'failed':
+            return (<span className='centered-text error-message'>Failed</span>);
+        default:
+            return (<span className='centered-text error-message'>Unknown</span>);
+        }
+    }
+
+    render() {
+        return (
+            <div className='job-item'>
+                <span className='centered-text job-item-name'>{this.props.name}</span>
+                {this.renderJobStatus(this.props.status)}
+                <PushButton
+                    className='pushbutton-show-job'
+                    value='Show >>'
+                    onClick={() => this.props.onClick(this.props.id)} />
+            </div>
+        );
+    }
+}
+
+export namespace JobItem {
+    export interface OnClicked {
+        (id: string): void;
+    }
+
+    export interface Props {
+        id: string;
+        name: string;
+        status: Api.JobStatus;
+        onClick: OnClicked;
+    }
+}

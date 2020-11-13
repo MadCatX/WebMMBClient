@@ -1,0 +1,341 @@
+#external-resources {
+    display: none;
+}
+
+#molecule-input {
+    width: 48vw;
+}
+
+#viewer {
+    position: relative;
+    width: 100%;
+    height: 90vh;
+    margin-bottom: 2em;
+}
+
+.bold {
+    font-weight: bold;
+}
+
+.centered-text {
+    margin-top: auto;
+    margin-bottom: auto;
+}
+
+.centered-horizontal {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.error-message {
+    color: #ff0000;
+}
+
+.form-field-input-above {
+    width: 90%;
+}
+
+.form-field-input-left {
+    margin: auto auto auto 0.6em;
+}
+
+.inlined {
+    display: inline-block;
+}
+
+.job-controls-btns {
+    display: flex;
+    margin: 0 -0.2em;
+    width: 100%;
+}
+
+.job-item {
+    display: grid;
+    grid-template-columns: auto auto auto;
+    margin: 0.2em 0 0.2em 0;
+}
+
+.job-item-name {
+    font-weight: bold;
+}
+
+.job-items-container {
+    margin-top: 1em;
+    margin-bottom: 1em;
+}
+
+.job-status {
+    display: grid;
+    grid-template-columns: 6em auto;
+}
+
+.labeled-field {
+    margin: 0.1em 0.4em 0.1em 0;
+}
+
+.labeled-field-concise {
+    margin-bottom: 0.4em;
+}
+
+.linkbutton-text {
+    color: black;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.login-form-container {
+    margin: auto;
+    width: 33%;
+}
+
+.login-form-caption {
+    background-color: #e0e0e0;
+    font-size: 16pt;
+    padding: 0.4em;
+}
+
+.login-form-input {
+    margin-top: 0.2em;
+    margin-bottom: 0.2em;
+}
+
+.logout-container {
+    background-color: #e0e0e0;
+    position: absolute;
+    right: 0;
+    top: 0;
+}
+
+.main-block {
+    display: grid;
+    grid-template-columns: 50% 50%;
+}
+
+.main-navbar {
+    background-color: #e0e0e0;
+    display: flex;
+    margin-top: 0.2em;
+    margin-bottom: 0.2em;
+}
+
+.mmb-controls {
+    margin-left: 0.4em;
+}
+
+.mol-in-cp-input {
+    display: grid;
+    grid-template-columns: 10em 10em 10em 20em auto;
+}
+
+.mol-in-cp-added {
+    display: grid;
+    grid-template-columns: 10em 10em 10em 20em auto;
+    margin-top: 0.6em;
+}
+
+.mol-in-dh-input {
+    display: grid;
+    grid-template-columns: 7em 7em 7em 7em 7em 7em auto;
+}
+
+.mol-in-dh-added {
+    display: grid;
+    grid-template-columns: 7em 7em 7em 7em 7em 7em auto;
+    margin-top: 0.6em;
+}
+
+.mol-in-bi-input {
+    display: grid;
+    grid-template-columns: 5em 5em 8em 5em 5em 8em 8em auto;
+}
+
+.mol-in-bi-added {
+    display: grid;
+    grid-template-columns: 5em 5em 8em 5em 5em 8em 8em auto;
+    margin-top: 0.6em;
+}
+
+.mol-in-ntcs-input {
+    display: grid;
+    grid-template-columns: 7em 7em 7em 7em auto;
+}
+
+.mol-in-ntcs-added {
+    display: grid;
+    grid-template-columns: 7em 7em 7em 7em auto;
+    margin-top: 0.6em;
+}
+
+.pushbutton-text {
+    margin-top: auto;
+    margin-bottom: auto;
+    font-weight: bold;
+}
+
+.pushbutton-add {
+    background-color: #007f00;
+    border: 0.1em solid black;
+    color: white;
+    height: 3em;
+    margin-left: auto;
+    width: 3em;
+    text-align: center;
+    transition: background-color 0.25s;
+}
+.pushbutton-add:hover {
+    background-color: #005e00;
+}
+
+.pushbutton-chained {
+    color: black;
+    border: 0.1em solid black;
+    display: inline-block;
+    margin: 0.2em;
+    text-align: center;
+    transition: background-color 0.25s;
+}
+.pushbutton-chained:hover {
+    background-color: #e0e0e0;
+}
+
+.pushbutton-logout {
+    color: black;
+    border: 0.1em solid black;
+    display: inline-block;
+    margin: 0.2em;
+    padding-left: 0.2em;
+    padding-right: 0.2em;
+    text-align: center;
+    transition: background-color 0.25s;
+}
+.pushbutton-logout:hover {
+    background-color: #e00000;
+}
+
+.pushbutton-flex, .pushbutton-start, .pushbutton-stop {
+    color: black;
+    border: 0.1em solid black;
+    margin: 0 0.2em;
+    flex-grow: 1;
+    text-align: center;
+    transition: background-color 0.25s;
+}
+.pushbutton-flex:hover {
+    background-color: #e0e0e0;
+}
+.pushbutton-start:hover {
+    background-color: yellowgreen;
+}
+.pushbutton-stop:hover {
+    background-color: red;
+}
+
+.pushbutton-default {
+    color: black;
+    border: 0.1em solid black;
+    margin: 0.2em;
+    text-align: center;
+    transition: background-color 0.25s;
+}
+.pushbutton-default:hover {
+    background-color: #e0e0e0;
+}
+
+.pushbutton-delete {
+    background-color: red;
+    border: 0.1em solid black;
+    color: black;
+    height: 80%;
+    margin: auto 0 auto auto;
+    width: 3em;
+    text-align: center;
+    transition: background-color 0.25s;
+}
+.pushbutton-delete:hover {
+    background-color: #e00000;
+}
+
+.pushbutton-show-job {
+    border: 0.1em solid black;
+    padding: 0.2em;
+    margin-left: auto;
+    transition: background-color 0.25s;
+}
+.pushbutton-show-job:hover {
+    background-color: #e0e0e0;
+    border: 0.1em solid black;
+    padding: 0.2em;
+    margin-left: auto;
+}
+
+.section {
+    display: block;
+    margin-top: 1em;
+    margin-bottom: 1em;
+    padding: 1em;
+    border: 0.1em solid grey;
+}
+
+.section-caption {
+    margin-bottom: 0.2em;
+    font-size: 14pt;
+    font-weight: bold;
+}
+
+.tabbutton-active {
+    background-color: #c0c0c0;
+    color: black;
+    display: inline-block;
+    padding: 0.2em;
+    text-align: center;
+    transition: background-color 0.25s;
+}
+
+.tabbutton-inactive {
+    background-color: #e0e0e0;
+    color: black;
+    display: inline-block;
+    padding: 0.2em;
+    text-align: center;
+    transition: background-color 0.25s;
+}
+.tabbutton-inactive:hover {
+    background-color: #e0e0e0;
+}
+
+.tabbutton-line-active {
+    color: black;
+    margin: auto auto 0 auto;
+    width: 90%;
+}
+
+.tabbutton-line-inactive {
+    color: black;
+    margin: auto auto 0 auto;
+    opacity: 0;
+    transition: opacity 0.25s;
+}
+.tabbutton-line-inactive-highlighted {
+    color: black;
+    margin: auto auto 0 auto;
+    opacity: 1;
+    transition: opacity 0.25s;
+}
+
+.tabs-bar {
+    display: flex;
+}
+
+.top-panel {
+    position: relative;
+    width: 100%;
+}
+
+.viewer-container {
+    margin-right: 0.4em;
+}
+
+.viewer-controls {
+    display: flex;
+    width: 100%
+}

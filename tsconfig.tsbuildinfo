@@ -1,0 +1,679 @@
+{
+  "program": {
+    "fileInfos": {
+      "./node_modules/typescript/lib/lib.es5.d.ts": {
+        "version": "c9a1f03d6ba0fe3c871eb0dd81622e78fbb61ade70878b34d48a341a690c59e9",
+        "signature": "c9a1f03d6ba0fe3c871eb0dd81622e78fbb61ade70878b34d48a341a690c59e9",
+        "affectsGlobalScope": true
+      },
+      "./node_modules/typescript/lib/lib.es2015.d.ts": {
+        "version": "dc47c4fa66b9b9890cf076304de2a9c5201e94b740cffdf09f87296d877d71f6",
+        "signature": "dc47c4fa66b9b9890cf076304de2a9c5201e94b740cffdf09f87296d877d71f6",
+        "affectsGlobalScope": false
+      },
+      "./node_modules/typescript/lib/lib.es2016.d.ts": {
+        "version": "7a387c58583dfca701b6c85e0adaf43fb17d590fb16d5b2dc0a2fbd89f35c467",
+        "signature": "7a387c58583dfca701b6c85e0adaf43fb17d590fb16d5b2dc0a2fbd89f35c467",
+        "affectsGlobalScope": false
+      },
+      "./node_modules/typescript/lib/lib.dom.d.ts": {
+        "version": "38130cdd16bd2318b9362f9d60dd9670f7e38708bb6131cf11fc78a41b2c34a0",
+        "signature": "38130cdd16bd2318b9362f9d60dd9670f7e38708bb6131cf11fc78a41b2c34a0",
+        "affectsGlobalScope": true
+      },
+      "./node_modules/typescript/lib/lib.es2015.core.d.ts": {
+        "version": "46ee15e9fefa913333b61eaf6b18885900b139867d89832a515059b62cf16a17",
+        "signature": "46ee15e9fefa913333b61eaf6b18885900b139867d89832a515059b62cf16a17",
+        "affectsGlobalScope": true
+      },
+      "./node_modules/typescript/lib/lib.es2015.collection.d.ts": {
+        "version": "43fb1d932e4966a39a41b464a12a81899d9ae5f2c829063f5571b6b87e6d2f9c",
+        "signature": "43fb1d932e4966a39a41b464a12a81899d9ae5f2c829063f5571b6b87e6d2f9c",
+        "affectsGlobalScope": true
+      },
+      "./node_modules/typescript/lib/lib.es2015.generator.d.ts": {
+        "version": "cdccba9a388c2ee3fd6ad4018c640a471a6c060e96f1232062223063b0a5ac6a",
+        "signature": "cdccba9a388c2ee3fd6ad4018c640a471a6c060e96f1232062223063b0a5ac6a",
+        "affectsGlobalScope": true
+      },
+      "./node_modules/typescript/lib/lib.es2015.iterable.d.ts": {
+        "version": "42f5e41e5893da663dbf0394268f54f1da4b43dc0ddd2ea4bf471fe5361d6faf",
+        "signature": "42f5e41e5893da663dbf0394268f54f1da4b43dc0ddd2ea4bf471fe5361d6faf",
+        "affectsGlobalScope": true
+      },
+      "./node_modules/typescript/lib/lib.es2015.promise.d.ts": {
+        "version": "0b7a905675e6cb4211c128f0a3aa47d414b275180a299a9aad5d3ec298abbfc4",
+        "signature": "0b7a905675e6cb4211c128f0a3aa47d414b275180a299a9aad5d3ec298abbfc4",
+        "affectsGlobalScope": true
+      },
+      "./node_modules/typescript/lib/lib.es2015.proxy.d.ts": {
+        "version": "dfff68b3c34338f6b307a25d4566de15eed7973b0dc5d69f9fde2bcac1c25315",
+        "signature": "dfff68b3c34338f6b307a25d4566de15eed7973b0dc5d69f9fde2bcac1c25315",
+        "affectsGlobalScope": true
+      },
+      "./node_modules/typescript/lib/lib.es2015.reflect.d.ts": {
+        "version": "cb609802a8698aa28b9c56331d4b53f590ca3c1c3a255350304ae3d06017779d",
+        "signature": "cb609802a8698aa28b9c56331d4b53f590ca3c1c3a255350304ae3d06017779d",
+        "affectsGlobalScope": true
+      },
+      "./node_modules/typescript/lib/lib.es2015.symbol.d.ts": {
+        "version": "3013574108c36fd3aaca79764002b3717da09725a36a6fc02eac386593110f93",
+        "signature": "3013574108c36fd3aaca79764002b3717da09725a36a6fc02eac386593110f93",
+        "affectsGlobalScope": true
+      },
+      "./node_modules/typescript/lib/lib.es2015.symbol.wellknown.d.ts": {
+        "version": "4670208dd7da9d6c774ab1b75c1527a810388c7989c4905de6aaea8561cb9dce",
+        "signature": "4670208dd7da9d6c774ab1b75c1527a810388c7989c4905de6aaea8561cb9dce",
+        "affectsGlobalScope": true
+      },
+      "./node_modules/typescript/lib/lib.es2016.array.include.d.ts": {
+        "version": "3be5a1453daa63e031d266bf342f3943603873d890ab8b9ada95e22389389006",
+        "signature": "3be5a1453daa63e031d266bf342f3943603873d890ab8b9ada95e22389389006",
+        "affectsGlobalScope": true
+      },
+      "./node_modules/@types/react/global.d.ts": {
+        "version": "ecf78e637f710f340ec08d5d92b3f31b134a46a4fcf2e758690d8c46ce62cba6",
+        "signature": "ecf78e637f710f340ec08d5d92b3f31b134a46a4fcf2e758690d8c46ce62cba6",
+        "affectsGlobalScope": true
+      },
+      "./node_modules/csstype/index.d.ts": {
+        "version": "b3a4ee9791cdd4f5029b3ffe60b9cae1ac308a4238b0444f40a5222e4ecc5cc1",
+        "signature": "b3a4ee9791cdd4f5029b3ffe60b9cae1ac308a4238b0444f40a5222e4ecc5cc1",
+        "affectsGlobalScope": false
+      },
+      "./node_modules/@types/prop-types/index.d.ts": {
+        "version": "a7e32dcb90bf0c1b7a1e4ac89b0f7747cbcba25e7beddc1ebf17be1e161842ad",
+        "signature": "a7e32dcb90bf0c1b7a1e4ac89b0f7747cbcba25e7beddc1ebf17be1e161842ad",
+        "affectsGlobalScope": false
+      },
+      "./node_modules/@types/react/index.d.ts": {
+        "version": "0290ce481d9430774f1d41e757d087e9324b497e1ee0a9e908cf57a9f8bc6e0d",
+        "signature": "0290ce481d9430774f1d41e757d087e9324b497e1ee0a9e908cf57a9f8bc6e0d",
+        "affectsGlobalScope": true
+      },
+      "./node_modules/@types/react-dom/index.d.ts": {
+        "version": "8483a29c17f7feb768a1f4333cf12ccf1e7341bd89dadcf407e012d5315228d0",
+        "signature": "8483a29c17f7feb768a1f4333cf12ccf1e7341bd89dadcf407e012d5315228d0",
+        "affectsGlobalScope": false
+      },
+      "./src/ui/common/error-box.tsx": {
+        "version": "691035bfbd387166425ec6e33e475be070ab9dd3c9b7966d5fe7328e80cdfb0d",
+        "signature": "6efd923c419401d2f0ca542b941bc83c9c42dabc4edac386a81662d15b7507d2",
+        "affectsGlobalScope": false
+      },
+      "./src/ui/common/form.tsx": {
+        "version": "956435ca4049ad4e206cf0e31ab626770bbca0f70e0b448ff3b499981cb096ae",
+        "signature": "ae9d5eacaa8e2304ab1155deff72815caa7e8bf75b3991f4cf3d1518c3923282",
+        "affectsGlobalScope": false
+      },
+      "./src/ui/form-context-manager.tsx": {
+        "version": "3ca16101d2cd4d468a2b0d7415cc0ffcb9ed6f4178058fd027e1f8e5b02faadb",
+        "signature": "4a92160d4ec2ca449d6e335b45a58bafc277ff756bbd0bcf1c674fb0eaa0d891",
+        "affectsGlobalScope": false
+      },
+      "./src/ui/common/push-button.tsx": {
+        "version": "535028425443820104c0a8a6b6c1af6b83fa0f88bc8814c00717b31d057b749a",
+        "signature": "6b812deb395f235ace28156a0a813c9be42832adb34132069424af2f5cf7b05e",
+        "affectsGlobalScope": false
+      },
+      "./src/ui/common/table-with-deletable-rows.tsx": {
+        "version": "797075779f9711cbb6dcb97212b7aba941d3a7bd2762ee17ab12a03dd0d2c2a9",
+        "signature": "465833e4a3f2a805831a18a61ab5da0a2aa307587c3db79f616d90116fd42ca2",
+        "affectsGlobalScope": false
+      },
+      "./src/model/edge-interaction.ts": {
+        "version": "ef7e29fd788089bca79c4ac74e166b9647a959dfb92f56e6e8e1b1d59270838b",
+        "signature": "393f2e80296afa1c5ed296f3b25621290be6ddebe51f41606ab6ba002348f631",
+        "affectsGlobalScope": false
+      },
+      "./src/model/orientation.ts": {
+        "version": "14c0ba6892aa6150ae37d79f009569f1b4238361be14d1c0ac3604c656822337",
+        "signature": "8c85215e2b11c67b175b62200d0e4ad7acb297ec89c8022ce04ece3f64253a8e",
+        "affectsGlobalScope": false
+      },
+      "./src/model/base-interaction.ts": {
+        "version": "5fb495ba860c1dc2963f7c9cd0aa0faa2dc16b171a57c94b2cd1830524da3fa8",
+        "signature": "57d4dbe5d635e528f0623bc904fbbf88641dcf0375082ca1546b92f3fc249989",
+        "affectsGlobalScope": false
+      },
+      "./src/model/compound.ts": {
+        "version": "9029a946c5d83e10605bdbcc9b3afc76bc243f6a0a3420a46276e56b4c70cb2d",
+        "signature": "768b3cfaf602911b9c75aa34e32d3782557f4ba849b724637673218a5a6300e3",
+        "affectsGlobalScope": false
+      },
+      "./src/model/double-helix.ts": {
+        "version": "4e9f60b52bf7012d261250945d080015331aac439c92a1f07bbc5c6b89cfc191",
+        "signature": "1f0ebf7cba9da32ae3558f20845939f1637d5e6f230078ad97b4986e8a1e318f",
+        "affectsGlobalScope": false
+      },
+      "./src/model/ntc.ts": {
+        "version": "6452de2e36ff6d4a72a5b258371985d66148164c1f0e5695b41d5a3f6f047282",
+        "signature": "25287c6891acd4cf928a9dd0133034d32015082dc383a3f87708cb4c86f8ccc0",
+        "affectsGlobalScope": false
+      },
+      "./src/model/ntc-conformation.ts": {
+        "version": "cdf42226073c2ef2f81946e6a75ef3440218f0686203edc0fc5bbd4da06ace41",
+        "signature": "f1a6285df6161227c1251dc29d22eed7d4457dcc9adb106ab8018dadd5b27ae9",
+        "affectsGlobalScope": false
+      },
+      "./src/ui/form-data/molecule-input.ts": {
+        "version": "2583ede40b09f54318d0b3a29c4b5e3e24608dd1f3bb6a3f09dea2bc47d217d0",
+        "signature": "af204da5f25b9fd3f7145e6e2f02b2c71442a1531d4b7b6ea2204bff3433adf9",
+        "affectsGlobalScope": false
+      },
+      "./src/ui/common/form-field.tsx": {
+        "version": "c5ad13c53319d0e3af615aacd45c45e50c5ecbf0ae59908234b7beb36a697340",
+        "signature": "bd7c6184d45b303ad60f79b2177097c13d6494b0930e9da867353b316ec68ba4",
+        "affectsGlobalScope": false
+      },
+      "./src/ui/util.ts": {
+        "version": "d6882c3ebdc84ec69d377a8cdcbc55019deea242faf8c7d2bde06d19687cfa3e",
+        "signature": "eddea32efb14454945cdff32e2b202c06853eb512c319ff085aab7a72e50bab1",
+        "affectsGlobalScope": false
+      },
+      "./src/ui/common/combo-box.tsx": {
+        "version": "067db1174ab2363505143eea34e32f083b64d0ae6db8def8f8b9cde88801c320",
+        "signature": "5b7fdd7960a0adf9128d46195a278634e877378b4df84f0a49287014a82425f8",
+        "affectsGlobalScope": false
+      },
+      "./src/ui/molecule-input-util.ts": {
+        "version": "61b13bb42a830676674aae56cfbbea80a9511f5cf18f15bfe78658ad2459fc35",
+        "signature": "cfa2e71eb75aa7af9dacfc3436eedef0cf61bc857d850532a6b92d5e39c80e74",
+        "affectsGlobalScope": false
+      },
+      "./src/ui/common/form-block.tsx": {
+        "version": "c1a960c711c27812c6194fcc995d7692be886e0aed949c97d2fb2dff7c246eec",
+        "signature": "b29e22dd40480f4283bd7fd13003fc5b5aa280edd284bfb5b1e32286d9ef6775",
+        "affectsGlobalScope": false
+      },
+      "./src/ui/common/line-edit.tsx": {
+        "version": "bb2713bf738dad0899768e0bbe5713fa17167932c50bb73a2385f920936b400c",
+        "signature": "5b98a2a1dc8f383ab9026f6ec463b53ee1f18525c087af8f0f9c5954a3feaf07",
+        "affectsGlobalScope": false
+      },
+      "./src/ui/common/text-area.tsx": {
+        "version": "59c132ea3828dc5bafb94d7a0e6e9ca27c869f54deedace94be40f877c736689",
+        "signature": "3115d416907c33c8325c9dc3450183d8d788f12272a2d3179640fa995f063d1d",
+        "affectsGlobalScope": false
+      },
+      "./src/ui/common/labeled-field.tsx": {
+        "version": "3a70bdd92e130e77724b86c38df8e3ddceb17e9ee654088989d5abe36ca4e92d",
+        "signature": "8c812f723d6df0d4bea5326466a443faf252a216e07c86356d3688c5b96be5b9",
+        "affectsGlobalScope": false
+      },
+      "./src/ui/base-interactions-input.tsx": {
+        "version": "dbbb8d8007714e7fe479c054aa0b287253aec8ce2eab9663b09c79c58e6c7590",
+        "signature": "6e6adf523fa160392b436fadec0d5b42bec5cd442c5ef8f790ee0ba445dffc61",
+        "affectsGlobalScope": false
+      },
+      "./src/ui/compounds-input.tsx": {
+        "version": "fc75e44f633acbfec747ffbab86a7cee8727fb0d647767aea8a874f0cde5fed3",
+        "signature": "1ebffde29df8a3aff8e75a9b7199b7f70bd0f71db957d553d3558068ca65d6e1",
+        "affectsGlobalScope": false
+      },
+      "./src/ui/double-helices-input.tsx": {
+        "version": "bdef880562272439ce0f876467ecd190b69a1b332646ee48abe41b3431bf2c67",
+        "signature": "27d2f29fff383686fc056282089345a98deff6eddac8e590993aa39c7d1ee60f",
+        "affectsGlobalScope": false
+      },
+      "./src/model/global-config.ts": {
+        "version": "5a28b0f2a80693e4aa7491a9d1d143526dc51f660ea25d1d8783b9caaa79e3a9",
+        "signature": "6da15798bccf73ece7bdaec4da3016618fb72ade049d6c53464543b092f5fb28",
+        "affectsGlobalScope": false
+      },
+      "./src/model/reporting.ts": {
+        "version": "074f9b6af2a98a7b6678b9ca5a86b8cdecebf68fbb5cd74b21371de0b639ffa2",
+        "signature": "bd093ca09c2d4771ade36abd394ebddff7845c40f61688898009fd264c08f696",
+        "affectsGlobalScope": false
+      },
+      "./src/ui/global-parameters-input.tsx": {
+        "version": "126b5a34dee6fe81da2a827e423f944b9bde64c000098cbdb6524e1c6c4f89d0",
+        "signature": "3612f8c2bf193eaae95225a06bdfadceb2b59f8ac95e42b6cc10937183644d6c",
+        "affectsGlobalScope": false
+      },
+      "./src/ui/ntcs-input.tsx": {
+        "version": "116950d0420bf477782421365a0cad113e7179a4b6b593005276d2629f318a6c",
+        "signature": "a5c72ed891f4f254a4e7ecf5ebe40c66ced7aff23d0e87231c53da623680ad8b",
+        "affectsGlobalScope": false
+      },
+      "./src/ui/mmb-commands.tsx": {
+        "version": "d00a53477df3f6b8b616dda3bb3bba4ec6c464578e3ecc97670291f72dec9902",
+        "signature": "14983cf07213941a66e503605c199ee849ef10ec5d86d4041d2634ab95b2b5f3",
+        "affectsGlobalScope": false
+      },
+      "./src/model/md-parameters.ts": {
+        "version": "9652488d4b6a5bf60ae5626731f6117dc8779bdb48d5257bd814cf966b923154",
+        "signature": "a6f084ef69dbba8c09fbcc213c35acb5441233e79bda5d85c5a35ed03a3c65f4",
+        "affectsGlobalScope": false
+      },
+      "./src/model/stages-span.ts": {
+        "version": "92b840c9a57c27ff36d0b75e57221b0859f49c99c5be1e4da076f495c003ef14",
+        "signature": "b0461ce308cc9021b48b41823fc5071019d4a194a38272bd5403ed89ef1dc1be",
+        "affectsGlobalScope": false
+      },
+      "./src/mmb/commands-writer.ts": {
+        "version": "c35df5de45c7bead9a475d1b783574bef985aed4832591d61e7cc0bab2abd9c8",
+        "signature": "349bc09cc7744a50233c0555ad470297f42790ad940a9060dc20d92e9a5ff80d",
+        "affectsGlobalScope": false
+      },
+      "./src/ui/molecule-input-form.tsx": {
+        "version": "3a4a34964e37d3bab5ed82126a1532c03a4f7c710454a06f1d6d3395f8a18ab2",
+        "signature": "a299eccba1778a59d44be4bc2def9e31705c50ce29ffd85f3d5e55289d818baa",
+        "affectsGlobalScope": false
+      },
+      "./src/index.tsx": {
+        "version": "37de97e5b6b869ea5fe7bf637c0a4cf112ae264f017464d5738b31ce4a041d36",
+        "signature": "f667f6b1d66ba55f0dcd27f5ff050063fecfe289bad00e8c5d48344a775c1439",
+        "affectsGlobalScope": false
+      },
+      "./src/ui/button.tsx": {
+        "version": "b47a7b3204da31c7e4f0bf46b5df9456e738da5c72bf4ad6a35025621733d3b8",
+        "signature": "6f9666f07c31ac2987368392324ee2043bb1454aff06c8b15bf137c940c6d620",
+        "affectsGlobalScope": false
+      },
+      "./src/ui/common/submit-button.tsx": {
+        "version": "7762557c191a9bb8db2878029fd2dd3412e4a5811757810d8d26d3005c9200d0",
+        "signature": "dcf926971993a2f7f55696e31d1352a9b7f9256dccca0de29e8d4d7061fa3208",
+        "affectsGlobalScope": false
+      },
+      "./node_modules/@types/color-name/index.d.ts": {
+        "version": "f0cb4b3ab88193e3e51e9e2622e4c375955003f1f81239d72c5b7a95415dad3e",
+        "signature": "f0cb4b3ab88193e3e51e9e2622e4c375955003f1f81239d72c5b7a95415dad3e",
+        "affectsGlobalScope": false
+      },
+      "./node_modules/@types/json-schema/index.d.ts": {
+        "version": "b2be568d8ce95fcb26eebd04c035d94825655fdf689bf67d799f5ff8cbbb1024",
+        "signature": "b2be568d8ce95fcb26eebd04c035d94825655fdf689bf67d799f5ff8cbbb1024",
+        "affectsGlobalScope": false
+      }
+    },
+    "options": {
+      "declaration": true,
+      "declarationMap": true,
+      "incremental": true,
+      "lib": [
+        "lib.es2015.d.ts",
+        "lib.es2016.d.ts",
+        "lib.dom.d.ts"
+      ],
+      "module": 1,
+      "target": 3,
+      "jsx": 2,
+      "alwaysStrict": true,
+      "noImplicitThis": true,
+      "strict": true,
+      "strictNullChecks": true,
+      "strictFunctionTypes": true,
+      "noUnusedLocals": true,
+      "esModuleInterop": true,
+      "moduleResolution": 2,
+      "outDir": "./lib",
+      "rootDir": "./src",
+      "configFilePath": "./tsconfig.json"
+    },
+    "referencedMap": {
+      "./node_modules/@types/react-dom/index.d.ts": [
+        "./node_modules/@types/react/index.d.ts"
+      ],
+      "./node_modules/@types/react/index.d.ts": [
+        "./node_modules/@types/prop-types/index.d.ts",
+        "./node_modules/@types/react/global.d.ts",
+        "./node_modules/csstype/index.d.ts"
+      ],
+      "./src/index.tsx": [
+        "./node_modules/@types/react-dom/index.d.ts",
+        "./node_modules/@types/react/index.d.ts",
+        "./src/ui/molecule-input-form.tsx"
+      ],
+      "./src/mmb/commands-writer.ts": [
+        "./src/model/base-interaction.ts",
+        "./src/model/compound.ts",
+        "./src/model/double-helix.ts",
+        "./src/model/global-config.ts",
+        "./src/model/md-parameters.ts",
+        "./src/model/ntc-conformation.ts",
+        "./src/model/reporting.ts",
+        "./src/model/stages-span.ts"
+      ],
+      "./src/model/base-interaction.ts": [
+        "./src/model/edge-interaction.ts",
+        "./src/model/orientation.ts"
+      ],
+      "./src/model/ntc-conformation.ts": [
+        "./src/model/ntc.ts"
+      ],
+      "./src/ui/base-interactions-input.tsx": [
+        "./node_modules/@types/react/index.d.ts",
+        "./src/model/base-interaction.ts",
+        "./src/model/compound.ts",
+        "./src/model/edge-interaction.ts",
+        "./src/model/orientation.ts",
+        "./src/ui/common/combo-box.tsx",
+        "./src/ui/common/error-box.tsx",
+        "./src/ui/common/form-block.tsx",
+        "./src/ui/common/labeled-field.tsx",
+        "./src/ui/common/push-button.tsx",
+        "./src/ui/form-data/molecule-input.ts",
+        "./src/ui/molecule-input-util.ts"
+      ],
+      "./src/ui/button.tsx": [
+        "./node_modules/@types/react/index.d.ts"
+      ],
+      "./src/ui/common/combo-box.tsx": [
+        "./node_modules/@types/react/index.d.ts",
+        "./src/ui/common/form-field.tsx",
+        "./src/ui/common/form.tsx",
+        "./src/ui/form-context-manager.tsx",
+        "./src/ui/util.ts"
+      ],
+      "./src/ui/common/error-box.tsx": [
+        "./node_modules/@types/react/index.d.ts"
+      ],
+      "./src/ui/common/form-block.tsx": [
+        "./node_modules/@types/react/index.d.ts"
+      ],
+      "./src/ui/common/form-field.tsx": [
+        "./node_modules/@types/react/index.d.ts"
+      ],
+      "./src/ui/common/form.tsx": [
+        "./node_modules/@types/react/index.d.ts"
+      ],
+      "./src/ui/common/labeled-field.tsx": [
+        "./node_modules/@types/react/index.d.ts",
+        "./src/ui/common/combo-box.tsx",
+        "./src/ui/common/form-field.tsx",
+        "./src/ui/common/form.tsx",
+        "./src/ui/common/line-edit.tsx",
+        "./src/ui/common/text-area.tsx"
+      ],
+      "./src/ui/common/line-edit.tsx": [
+        "./node_modules/@types/react/index.d.ts",
+        "./src/ui/common/form-field.tsx",
+        "./src/ui/common/form.tsx",
+        "./src/ui/form-context-manager.tsx",
+        "./src/ui/util.ts"
+      ],
+      "./src/ui/common/push-button.tsx": [
+        "./node_modules/@types/react/index.d.ts"
+      ],
+      "./src/ui/common/submit-button.tsx": [
+        "./node_modules/@types/react/index.d.ts"
+      ],
+      "./src/ui/common/table-with-deletable-rows.tsx": [
+        "./node_modules/@types/react/index.d.ts",
+        "./src/ui/common/form.tsx",
+        "./src/ui/common/push-button.tsx",
+        "./src/ui/form-context-manager.tsx"
+      ],
+      "./src/ui/common/text-area.tsx": [
+        "./node_modules/@types/react/index.d.ts",
+        "./src/ui/common/form-field.tsx",
+        "./src/ui/common/form.tsx",
+        "./src/ui/form-context-manager.tsx"
+      ],
+      "./src/ui/compounds-input.tsx": [
+        "./node_modules/@types/react/index.d.ts",
+        "./src/model/compound.ts",
+        "./src/ui/common/error-box.tsx",
+        "./src/ui/common/form-block.tsx",
+        "./src/ui/common/labeled-field.tsx",
+        "./src/ui/common/push-button.tsx",
+        "./src/ui/form-data/molecule-input.ts"
+      ],
+      "./src/ui/double-helices-input.tsx": [
+        "./node_modules/@types/react/index.d.ts",
+        "./src/model/compound.ts",
+        "./src/model/double-helix.ts",
+        "./src/ui/common/combo-box.tsx",
+        "./src/ui/common/error-box.tsx",
+        "./src/ui/common/form-block.tsx",
+        "./src/ui/common/labeled-field.tsx",
+        "./src/ui/common/push-button.tsx",
+        "./src/ui/form-data/molecule-input.ts",
+        "./src/ui/molecule-input-util.ts"
+      ],
+      "./src/ui/form-context-manager.tsx": [
+        "./node_modules/@types/react/index.d.ts",
+        "./src/ui/common/form.tsx"
+      ],
+      "./src/ui/form-data/molecule-input.ts": [
+        "./src/model/base-interaction.ts",
+        "./src/model/compound.ts",
+        "./src/model/double-helix.ts",
+        "./src/model/ntc-conformation.ts",
+        "./src/ui/common/form.tsx",
+        "./src/ui/common/table-with-deletable-rows.tsx",
+        "./src/ui/form-context-manager.tsx"
+      ],
+      "./src/ui/global-parameters-input.tsx": [
+        "./node_modules/@types/react/index.d.ts",
+        "./src/model/global-config.ts",
+        "./src/model/reporting.ts",
+        "./src/ui/common/form-block.tsx",
+        "./src/ui/common/labeled-field.tsx",
+        "./src/ui/form-data/molecule-input.ts"
+      ],
+      "./src/ui/mmb-commands.tsx": [
+        "./node_modules/@types/react/index.d.ts"
+      ],
+      "./src/ui/molecule-input-form.tsx": [
+        "./node_modules/@types/react/index.d.ts",
+        "./src/mmb/commands-writer.ts",
+        "./src/model/base-interaction.ts",
+        "./src/model/compound.ts",
+        "./src/model/double-helix.ts",
+        "./src/model/global-config.ts",
+        "./src/model/ntc-conformation.ts",
+        "./src/model/reporting.ts",
+        "./src/ui/base-interactions-input.tsx",
+        "./src/ui/common/error-box.tsx",
+        "./src/ui/common/form.tsx",
+        "./src/ui/common/push-button.tsx",
+        "./src/ui/compounds-input.tsx",
+        "./src/ui/double-helices-input.tsx",
+        "./src/ui/form-context-manager.tsx",
+        "./src/ui/form-data/molecule-input.ts",
+        "./src/ui/global-parameters-input.tsx",
+        "./src/ui/mmb-commands.tsx",
+        "./src/ui/ntcs-input.tsx"
+      ],
+      "./src/ui/molecule-input-util.ts": [
+        "./src/model/compound.ts",
+        "./src/model/ntc.ts",
+        "./src/ui/common/combo-box.tsx",
+        "./src/ui/form-data/molecule-input.ts"
+      ],
+      "./src/ui/ntcs-input.tsx": [
+        "./node_modules/@types/react/index.d.ts",
+        "./src/model/compound.ts",
+        "./src/model/ntc-conformation.ts",
+        "./src/model/ntc.ts",
+        "./src/ui/common/combo-box.tsx",
+        "./src/ui/common/error-box.tsx",
+        "./src/ui/common/form-block.tsx",
+        "./src/ui/common/labeled-field.tsx",
+        "./src/ui/common/push-button.tsx",
+        "./src/ui/form-data/molecule-input.ts",
+        "./src/ui/molecule-input-util.ts"
+      ]
+    },
+    "exportedModulesMap": {
+      "./node_modules/@types/react-dom/index.d.ts": [
+        "./node_modules/@types/react/index.d.ts"
+      ],
+      "./node_modules/@types/react/index.d.ts": [
+        "./node_modules/@types/prop-types/index.d.ts",
+        "./node_modules/@types/react/global.d.ts",
+        "./node_modules/csstype/index.d.ts"
+      ],
+      "./src/mmb/commands-writer.ts": [
+        "./src/model/base-interaction.ts",
+        "./src/model/compound.ts",
+        "./src/model/double-helix.ts",
+        "./src/model/global-config.ts",
+        "./src/model/md-parameters.ts",
+        "./src/model/ntc-conformation.ts",
+        "./src/model/reporting.ts",
+        "./src/model/stages-span.ts"
+      ],
+      "./src/model/base-interaction.ts": [
+        "./src/model/edge-interaction.ts",
+        "./src/model/orientation.ts"
+      ],
+      "./src/model/ntc-conformation.ts": [
+        "./src/model/ntc.ts"
+      ],
+      "./src/ui/base-interactions-input.tsx": [
+        "./node_modules/@types/react/index.d.ts",
+        "./src/ui/common/form-block.tsx",
+        "./src/ui/common/form.tsx",
+        "./src/ui/form-data/molecule-input.ts"
+      ],
+      "./src/ui/button.tsx": [
+        "./node_modules/@types/react/index.d.ts"
+      ],
+      "./src/ui/common/combo-box.tsx": [
+        "./node_modules/@types/react/index.d.ts",
+        "./src/ui/common/form-field.tsx",
+        "./src/ui/common/form.tsx"
+      ],
+      "./src/ui/common/error-box.tsx": [
+        "./node_modules/@types/react/index.d.ts"
+      ],
+      "./src/ui/common/form-block.tsx": [
+        "./node_modules/@types/react/index.d.ts"
+      ],
+      "./src/ui/common/form-field.tsx": [
+        "./node_modules/@types/react/index.d.ts"
+      ],
+      "./src/ui/common/form.tsx": [
+        "./node_modules/@types/react/index.d.ts"
+      ],
+      "./src/ui/common/labeled-field.tsx": [
+        "./src/ui/common/combo-box.tsx",
+        "./src/ui/common/form-field.tsx",
+        "./src/ui/common/form.tsx",
+        "./src/ui/common/line-edit.tsx",
+        "./src/ui/common/text-area.tsx"
+      ],
+      "./src/ui/common/line-edit.tsx": [
+        "./src/ui/common/form-field.tsx"
+      ],
+      "./src/ui/common/push-button.tsx": [
+        "./node_modules/@types/react/index.d.ts"
+      ],
+      "./src/ui/common/submit-button.tsx": [
+        "./node_modules/@types/react/index.d.ts"
+      ],
+      "./src/ui/common/table-with-deletable-rows.tsx": [
+        "./node_modules/@types/react/index.d.ts",
+        "./src/ui/common/form.tsx"
+      ],
+      "./src/ui/common/text-area.tsx": [
+        "./src/ui/common/form-field.tsx"
+      ],
+      "./src/ui/compounds-input.tsx": [
+        "./src/ui/common/form-block.tsx"
+      ],
+      "./src/ui/double-helices-input.tsx": [
+        "./node_modules/@types/react/index.d.ts",
+        "./src/ui/common/form-block.tsx",
+        "./src/ui/common/form.tsx",
+        "./src/ui/form-data/molecule-input.ts"
+      ],
+      "./src/ui/form-context-manager.tsx": [
+        "./node_modules/@types/react/index.d.ts",
+        "./src/ui/common/form.tsx"
+      ],
+      "./src/ui/form-data/molecule-input.ts": [
+        "./node_modules/@types/react/index.d.ts",
+        "./src/model/base-interaction.ts",
+        "./src/model/compound.ts",
+        "./src/model/double-helix.ts",
+        "./src/model/ntc-conformation.ts",
+        "./src/ui/common/form.tsx",
+        "./src/ui/common/table-with-deletable-rows.tsx"
+      ],
+      "./src/ui/global-parameters-input.tsx": [
+        "./node_modules/@types/react/index.d.ts",
+        "./src/ui/common/form-block.tsx",
+        "./src/ui/common/form.tsx",
+        "./src/ui/form-data/molecule-input.ts"
+      ],
+      "./src/ui/mmb-commands.tsx": [
+        "./node_modules/@types/react/index.d.ts"
+      ],
+      "./src/ui/molecule-input-util.ts": [
+        "./src/model/compound.ts",
+        "./src/ui/common/combo-box.tsx",
+        "./src/ui/form-data/molecule-input.ts"
+      ],
+      "./src/ui/ntcs-input.tsx": [
+        "./node_modules/@types/react/index.d.ts",
+        "./src/ui/common/form-block.tsx",
+        "./src/ui/common/form.tsx",
+        "./src/ui/form-data/molecule-input.ts"
+      ]
+    },
+    "semanticDiagnosticsPerFile": [
+      "./node_modules/@types/color-name/index.d.ts",
+      "./node_modules/@types/json-schema/index.d.ts",
+      "./node_modules/@types/prop-types/index.d.ts",
+      "./node_modules/@types/react-dom/index.d.ts",
+      "./node_modules/@types/react/global.d.ts",
+      "./node_modules/@types/react/index.d.ts",
+      "./node_modules/csstype/index.d.ts",
+      "./node_modules/typescript/lib/lib.dom.d.ts",
+      "./node_modules/typescript/lib/lib.es2015.collection.d.ts",
+      "./node_modules/typescript/lib/lib.es2015.core.d.ts",
+      "./node_modules/typescript/lib/lib.es2015.d.ts",
+      "./node_modules/typescript/lib/lib.es2015.generator.d.ts",
+      "./node_modules/typescript/lib/lib.es2015.iterable.d.ts",
+      "./node_modules/typescript/lib/lib.es2015.promise.d.ts",
+      "./node_modules/typescript/lib/lib.es2015.proxy.d.ts",
+      "./node_modules/typescript/lib/lib.es2015.reflect.d.ts",
+      "./node_modules/typescript/lib/lib.es2015.symbol.d.ts",
+      "./node_modules/typescript/lib/lib.es2015.symbol.wellknown.d.ts",
+      "./node_modules/typescript/lib/lib.es2016.array.include.d.ts",
+      "./node_modules/typescript/lib/lib.es2016.d.ts",
+      "./node_modules/typescript/lib/lib.es5.d.ts",
+      "./src/index.tsx",
+      "./src/mmb/commands-writer.ts",
+      "./src/model/base-interaction.ts",
+      "./src/model/compound.ts",
+      "./src/model/double-helix.ts",
+      "./src/model/edge-interaction.ts",
+      "./src/model/global-config.ts",
+      "./src/model/md-parameters.ts",
+      "./src/model/ntc-conformation.ts",
+      "./src/model/ntc.ts",
+      "./src/model/orientation.ts",
+      "./src/model/reporting.ts",
+      "./src/model/stages-span.ts",
+      "./src/ui/base-interactions-input.tsx",
+      "./src/ui/button.tsx",
+      "./src/ui/common/combo-box.tsx",
+      "./src/ui/common/error-box.tsx",
+      "./src/ui/common/form-block.tsx",
+      "./src/ui/common/form-field.tsx",
+      "./src/ui/common/form.tsx",
+      "./src/ui/common/labeled-field.tsx",
+      "./src/ui/common/line-edit.tsx",
+      "./src/ui/common/push-button.tsx",
+      "./src/ui/common/submit-button.tsx",
+      "./src/ui/common/table-with-deletable-rows.tsx",
+      "./src/ui/common/text-area.tsx",
+      "./src/ui/compounds-input.tsx",
+      "./src/ui/double-helices-input.tsx",
+      "./src/ui/form-context-manager.tsx",
+      "./src/ui/form-data/molecule-input.ts",
+      "./src/ui/global-parameters-input.tsx",
+      "./src/ui/mmb-commands.tsx",
+      "./src/ui/molecule-input-form.tsx",
+      "./src/ui/molecule-input-util.ts",
+      "./src/ui/ntcs-input.tsx",
+      "./src/ui/util.ts"
+    ]
+  },
+  "version": "4.0.2"
+}
