@@ -209,7 +209,7 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
         if (this.state.jobId === undefined)
             return undefined;
 
-        return `/structure/${this.state.jobId}`;
+        return `/structure/${this.props.username}/${this.state.jobId}`;
     }
 
     render() {
@@ -254,6 +254,7 @@ export namespace VisualJobRunner {
 
     export interface Props {
         onJobStarted: OnJobStarted;
+        username: string;
         info?: Api.JobInfo;
         commands?: JsonCommands;
     }

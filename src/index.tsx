@@ -15,6 +15,9 @@ import { VisualJobRunner } from './ui/visual-job-runner';
 import { ExternalResourcesLoader } from './external-resources-loader';
 import * as Api from './mmb/api';
 import { JsonCommands } from './mmb/commands';
+import { Response } from './mmb/response';
+import { ResponseDeserializers } from './mmb/response-deserializers';
+import { SessionQuery } from './mmb/session-query';
 
 type Tabs = 'job-list' | 'job-control';
 
@@ -24,6 +27,7 @@ type ActiveJob = {
 }
 
 interface State {
+    username?: string;
     activeTab: Tabs;
     activeJob?: ActiveJob;
 }
@@ -33,11 +37,25 @@ interface Props {
 
 const NavTabsBar = TabsBar<Tabs>();
 
+async function getSessionInfo() {
+    const resp  = await SessionQuery.info();
+    if (resp.status !== 200)
+        throw new Error(`Failed to get session info, ${resp.status} ${resp.statusText}`);
+
+    const json = await resp.json();
+    const r = Response.parse<Api.SessionInfo>(json, ResponseDeserializers.toSessionInfo);
+
+    if (Response.isOk(r))
+        return r.data.username;
+    throw new Error('Failed to get session info, invalid response');
+}
+
 export class Main extends React.Component<Props, State> {
     constructor(props: Props) {
         super(props);
 
         this.state = {
+            username: undefined,
             activeTab: 'job-list',
             activeJob: undefined,
         };
@@ -80,6 +98,10 @@ export class Main extends React.Component<Props, State> {
 
     private onTabChanged(id: Tabs) {
         console.log(id);
+
+        if (id === 'job-control' && this.state.username === undefined)
+            return;
+
         this.setState({ ...this.state, activeTab: id });
     }
 
@@ -91,13 +113,27 @@ export class Main extends React.Component<Props, State> {
                     onSelectJob={this.onSelectJob}
                     jobDeleted={this.onJobDeleted} />);
         case 'job-control':
+            if (this.state.username === undefined)
+                throw new Error('No username');
+
             return (
                 <VisualJobRunner
+                    username={this.state.username}
                     onJobStarted={this.onJobStarted}
                     info={this.state.activeJob?.info}
                     commands={this.state.activeJob?.commands} />
             );
         }
+    }
+
+    componentDidMount() {
+        getSessionInfo().then(username => {
+            console.log('Requesting session info');
+            this.setState({
+                ...this.state,
+                username,
+            });
+        }).catch(e => console.error(e.toString()));
     }
 
     render() {
@@ -113,7 +149,7 @@ export class Main extends React.Component<Props, State> {
                         activeTab={this.state.activeTab}
                         changeTab={this.onTabChanged}
                         className='main-navbar' />
-                    <Logout />
+                    <Logout username={this.state.username} />
                 </div>
                 <div className='main-block'>
                     {this.renderTab(this.state.activeTab)}
