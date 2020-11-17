@@ -17,7 +17,7 @@ import { NtCConformation } from '../model/ntc-conformation';
 import { Orientation } from '../model/orientation';
 import { Reporting } from '../model/reporting';
 import { StagesSpan } from '../model/stages-span';
-import { JsonCommands } from './commands';
+import { DefaultMdParamsKey, JsonCommands } from './commands';
 
 export namespace JsonCommandsDeserializer {
     function getChain(tok: string) {
@@ -167,7 +167,7 @@ export namespace JsonCommandsDeserializer {
     }
 
     export function toMdParams(commands: JsonCommands) {
-        const defMd = Object(commands).hasOwnProperty('setDefaultMDParams');
+        const defMd = Object(commands).hasOwnProperty(DefaultMdParamsKey);
 
         return new MdParameters(defMd);
     }

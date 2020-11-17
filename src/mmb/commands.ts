@@ -6,7 +6,9 @@
  * @author Jiří Černý (jiri.cerny@ibt.cas.cz)
  */
 
-import { assignAll, isArr, isObj, isStr } from '../util/json';
+import { AnyObject, assignAll, isArr, isObj, isStr } from '../util/json';
+
+export const DefaultMdParamsKey = 'setDefaultMDParameters';
 
 const JsonCommands = {
     baseInteractionScaleFactor: [] as string[],
@@ -39,5 +41,9 @@ export function jsonCommandsFromJson(obj: unknown): JsonCommands {
         }
     }
 
-    return assignAll({}, obj, JsonCommands);
+    let cmds = assignAll({}, obj, JsonCommands) as AnyObject;
+    if (obj.hasOwnProperty(DefaultMdParamsKey))
+        cmds[DefaultMdParamsKey] = [] as string[];
+
+    return cmds as JsonCommands;
 }
