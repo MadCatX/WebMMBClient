@@ -40,6 +40,10 @@ export function isArr(obj: unknown): obj is Array<unknown> {
     return Array.isArray(obj);
 }
 
+export function isBool(obj: unknown): obj is boolean {
+    return typeof obj === 'boolean';
+}
+
 export function isInt(obj: unknown): obj is number {
     if (typeof obj === 'number')
         return Number.isInteger(obj);

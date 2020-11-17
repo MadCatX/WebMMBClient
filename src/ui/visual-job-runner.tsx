@@ -22,7 +22,7 @@ import { JsonCommandsDeserializer } from '../mmb/commands-deserializer';
 interface State {
     jobId?: string;
     jobName?: string;
-    jobStatus: Api.JobStatus;
+    jobState: Api.JobState;
     jobStep: Api.JobStep;
     jobTotalSteps: Api.JobTotalSteps;
     jobLastCompletedStage: number,
@@ -38,7 +38,7 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
         this.state = {
             jobId: props.info?.id,
             jobName: props.info?.name,
-            jobStatus: props.info?.status ?? 'none',
+            jobState: props.info?.state ?? 'NotStarted',
             jobStep: props.info?.step ?? 'none',
             jobTotalSteps: props.info?.total_steps ?? 'none',
             jobLastCompletedStage: props.info?.last_completed_stage ?? 0,
@@ -75,7 +75,7 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
                 ...this.state,
                 jobId: data.id,
                 jobName: data.name,
-                jobStatus: data.status,
+                jobState: data.state,
                 jobStep: data.step,
                 jobTotalSteps: data.total_steps,
                 jobLastCompletedStage: data.last_completed_stage,
@@ -140,7 +140,7 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
         if (this.mmbInputFormRef.current === null)
             return;
 
-        if (this.state.jobStatus === 'running') {
+        if (this.state.jobState === 'Running') {
             this.setState({
                 ...this.state,
                 jobError: 'Job is already running',
@@ -169,7 +169,7 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
             }).catch(e => {
                 this.setState({
                     ...this.state,
-                    jobStatus: 'failed',
+                    jobState: 'Failed',
                     jobStep: 'none',
                     jobTotalSteps: 'none',
                     jobError: e.message,
@@ -219,7 +219,7 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
                     <Viewer
                         structureUrl={this.structureUrl()}
                         structureName={this.state.jobName}
-                        stage={this.state.jobLastCompletedStage > 0 ? this.state.jobLastCompletedStage : 1} />
+                        stage={this.state.jobLastCompletedStage + 1} />
                 </div>
                 <div id='mmb-controls'>
                     <JobControls
@@ -227,7 +227,7 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
                         handleStatus={this.queryJobStatus}
                         handleStop={this.stopJob} />
                     <JobStatus
-                        status={this.state.jobStatus}
+                        state={this.state.jobState}
                         step={this.state.jobStep}
                         totalSteps={this.state.jobTotalSteps}
                         error={this.state.jobError} />

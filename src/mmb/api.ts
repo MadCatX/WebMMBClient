@@ -22,8 +22,7 @@ type AuthRequestType =
     'LogIn' |
     'LogOut';
 
-export const JobStatusIdentifiers = [ 'none', 'running', 'finished', 'failed' ];
-export type JobStatus = typeof JobStatusIdentifiers[number];
+export type JobState = 'NotStarted' | 'Running' | 'Finished' | 'Failed';
 export type JobStep = number | 'preparing' | 'none';
 export type JobTotalSteps = number | 'none';
 
@@ -77,10 +76,15 @@ export type Empty = typeof Empty;
 export type JobInfo = {
     id: string,
     name: string,
-    status: JobStatus,
+    state: JobState,
     step: JobStep,
     total_steps: JobTotalSteps,
     last_completed_stage: number,
+}
+
+export type JobListItem = {
+    ok: boolean,
+    info: JobInfo,
 }
 
 export type SessionInfo = {

@@ -11,13 +11,15 @@ import * as Api from '../mmb/api';
 import { PushButton } from './common/push-button';
 
 export class JobItem extends React.Component<JobItem.Props> {
-    private renderJobStatus(s: Api.JobStatus) {
+    private renderJobStatus(s: Api.JobState) {
         switch (s) {
-        case 'running':
+        case 'NotStarted':
+            return (<span className='centered-text'>Not started</span>);
+        case 'Running':
             return (<span className='centered-text ok-message'>Running</span>);
-        case 'finished':
+        case 'Finished':
             return (<span className='centered-text job-done-message'>Finished</span>);
-        case 'failed':
+        case 'Failed':
             return (<span className='centered-text error-message'>Failed</span>);
         default:
             return (<span className='centered-text error-message'>Unknown</span>);
@@ -28,7 +30,7 @@ export class JobItem extends React.Component<JobItem.Props> {
         return (
             <div className='job-item'>
                 <span className='centered-text job-item-name'>{this.props.name}</span>
-                {this.renderJobStatus(this.props.status)}
+                {this.renderJobStatus(this.props.state)}
                 <PushButton
                     className='pushbutton-chained pushbutton-hc-default'
                     value='Show >>'
@@ -50,7 +52,7 @@ export namespace JobItem {
     export interface Props {
         id: string;
         name: string;
-        status: Api.JobStatus;
+        state: Api.JobState;
         onSelect: ClickHandler;
         onDelete: ClickHandler;
     }

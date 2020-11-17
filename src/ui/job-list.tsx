@@ -15,9 +15,43 @@ import { JobQuery } from '../mmb/job-query';
 import { Response } from '../mmb/response';
 import { ResponseDeserializers } from '../mmb/response-deserializers';
 
+interface JobEntry {
+    ok: boolean,
+    id: string,
+    name: string,
+    state: Api.JobState,
+    step: Api.JobStep,
+    total_steps: Api.JobTotalSteps,
+    last_completed_stage: number,
+}
+
 interface State {
-    jobs: Api.JobInfo[];
+    jobs: JobEntry[];
     error: string;
+}
+
+function jobListItemToEntry(item: Api.JobListItem): JobEntry {
+    if (item.ok) {
+        return {
+            ok: true,
+            id: item.info.id,
+            name: item.info.name,
+            state: item.info.state,
+            step: item.info.step,
+            total_steps: item.info.total_steps,
+            last_completed_stage: item.info.last_completed_stage,
+        };
+    } else {
+        return {
+            ok: false,
+            id: '',
+            name: '',
+            state: 'NotStarted',
+            step: 0,
+            total_steps: 0,
+            last_completed_stage: 0,
+        };
+    }
 }
 
 export class JobList extends React.Component<JobList.Props, State> {
@@ -116,7 +150,7 @@ export class JobList extends React.Component<JobList.Props, State> {
         JobQuery.list().then(resp => {
             if (resp.status === 200) {
                 resp.json().then(json => {
-                    const r = Response.parse<Api.JobInfo[]>(json, ResponseDeserializers.toJobList);
+                    const r = Response.parse<Api.JobListItem[]>(json, ResponseDeserializers.toJobList);
 
                     if (Response.isError(r)) {
                         this.setState({
@@ -127,7 +161,7 @@ export class JobList extends React.Component<JobList.Props, State> {
                     } else if (Response.isOk(r)) {
                         this.setState({
                             ...this.state,
-                            jobs: r.data,
+                            jobs: r.data.map((item) => jobListItemToEntry(item)),
                             error: '',
                         });
                     }
@@ -164,7 +198,7 @@ export class JobList extends React.Component<JobList.Props, State> {
                         key={`job-item-${n}`}
                         id={e.id}
                         name={e.name}
-                        status={e.status}
+                        state={e.state}
                         onSelect={() => this.onSelectJobClicked(e.id)}
                         onDelete={() => this.onDeleteJobClicked(e.id)} />
                 )
