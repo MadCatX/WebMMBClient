@@ -70,6 +70,6 @@ export namespace Viewer {
     export interface Props {
         structureUrl?: string;
         structureName?: string;
-        stage?: number;
+        stage: number | 'last';
     }
 }

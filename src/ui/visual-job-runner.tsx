@@ -219,7 +219,7 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
                     <Viewer
                         structureUrl={this.structureUrl()}
                         structureName={this.state.jobName}
-                        stage={this.state.jobLastCompletedStage + 1} />
+                        stage={'last'} />
                 </div>
                 <div id='mmb-controls'>
                     <JobControls
