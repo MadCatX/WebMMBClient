@@ -35,7 +35,7 @@ export type ApiRequest<T> = {
 
 export type AuthRequest = {
     auth_type: AuthRequestType,
-    username: string,
+    session_id: string,
 }
 
 export type SimpleJobRqData = {
@@ -88,5 +88,5 @@ export type JobListItem = {
 }
 
 export type SessionInfo = {
-    username: string,
+    id: string,
 }

@@ -23,7 +23,7 @@ const JobListItemObj: Api.JobListItem = {
     ok: false,
     info: JobInfoObj,
 };
-const SessionInfoObj: Api.SessionInfo = { username: '' };
+const SessionInfoObj: Api.SessionInfo = { id: '' };
 
 function isJobState(v: string): v is Api.JobState {
     return v === 'NotStarted' ||
@@ -106,9 +106,9 @@ export namespace ResponseDeserializers {
         checkProps(obj, SessionInfoObj);
 
         const tObj = obj as Api.SessionInfo;
-        checkType(tObj, 'username', isStr);
+        checkType(tObj, 'id', isStr);
 
-        return { username: tObj.username };
+        return { id: tObj.id };
     }
 
 }

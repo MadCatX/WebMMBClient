@@ -28,19 +28,10 @@ export class Login extends Form<LfUtil.ErrorKeys, LfUtil.ValueKeys, LfUtil.Value
     }
 
     private logIn() {
-        const username = this.getScalar<string>(this.state, 'login-username', '');
+        const session_id = this.getScalar<string>(this.state, 'login-session-id', '');
 
         const ne = this.emptyErrors();
-        if (username.length < 1) {
-            ne.set('login-errors', ['Please enter username']);
-            this.setState({
-                ...this.state,
-                errors: ne,
-            });
-            return;
-        }
-
-        AuthQuery.logIn(username).then(resp => {
+        AuthQuery.logIn(session_id).then(resp => {
             if (resp.ok === true && resp.redirected) {
                 window.location.href = resp.url;
             } else {
@@ -78,12 +69,12 @@ export class Login extends Form<LfUtil.ErrorKeys, LfUtil.ValueKeys, LfUtil.Value
                 <div className='login-form-container'>
                     <div className='login-form-caption'>WebMMB alpha</div>
                     <StrLabeledField
-                        {...GLabeledField.tags('login-username', this.props.id, ['centered-horizontal', 'login-form-input'])}
+                        {...GLabeledField.tags('login-session-id', this.props.id, ['centered-horizontal', 'login-form-input'])}
                         formId={this.props.id}
-                        label='Username'
+                        label='Session ID'
                         position='left'
                         inputType='line-edit'
-                        hint='Username'
+                        hint='Session ID'
                         options={[]} />
                     <ErrorBox
                         errors={this.getErrors(this.state, 'login-errors') ?? new Array<string>()} />

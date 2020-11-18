@@ -10,13 +10,13 @@ import { AuthRequest } from './api';
 import { Request } from './request';
 
 export namespace AuthQuery {
-    export function logIn(username: string) {
-        const req: AuthRequest = { auth_type: 'LogIn', username };
+    export function logIn(session_id: string) {
+        const req: AuthRequest = { auth_type: 'LogIn', session_id };
         return Request.auth(req);
     }
 
     export function logOut() {
-        const req: AuthRequest = { auth_type: 'LogOut', username: '' };
+        const req: AuthRequest = { auth_type: 'LogOut', session_id: '' };
         return Request.auth(req);
     }
 }

@@ -27,7 +27,7 @@ type ActiveJob = {
 }
 
 interface State {
-    username?: string;
+    session_id?: string;
     activeTab: Tabs;
     activeJob?: ActiveJob;
 }
@@ -46,7 +46,7 @@ async function getSessionInfo() {
     const r = Response.parse<Api.SessionInfo>(json, ResponseDeserializers.toSessionInfo);
 
     if (Response.isOk(r))
-        return r.data.username;
+        return r.data.id;
     throw new Error('Failed to get session info, invalid response');
 }
 
@@ -55,7 +55,7 @@ export class Main extends React.Component<Props, State> {
         super(props);
 
         this.state = {
-            username: undefined,
+            session_id: undefined,
             activeTab: 'job-list',
             activeJob: undefined,
         };
@@ -99,7 +99,7 @@ export class Main extends React.Component<Props, State> {
     private onTabChanged(id: Tabs) {
         console.log(id);
 
-        if (id === 'job-control' && this.state.username === undefined)
+        if (id === 'job-control' && this.state.session_id === undefined)
             return;
 
         this.setState({ ...this.state, activeTab: id });
@@ -113,12 +113,12 @@ export class Main extends React.Component<Props, State> {
                     onSelectJob={this.onSelectJob}
                     jobDeleted={this.onJobDeleted} />);
         case 'job-control':
-            if (this.state.username === undefined)
+            if (this.state.session_id === undefined)
                 throw new Error('No username');
 
             return (
                 <VisualJobRunner
-                    username={this.state.username}
+                    username={this.state.session_id}
                     onJobStarted={this.onJobStarted}
                     info={this.state.activeJob?.info}
                     commands={this.state.activeJob?.commands} />
@@ -127,11 +127,11 @@ export class Main extends React.Component<Props, State> {
     }
 
     componentDidMount() {
-        getSessionInfo().then(username => {
+        getSessionInfo().then(session_id => {
             console.log('Requesting session info');
             this.setState({
                 ...this.state,
-                username,
+                session_id,
             });
         }).catch(e => console.error(e.toString()));
     }
@@ -149,7 +149,7 @@ export class Main extends React.Component<Props, State> {
                         activeTab={this.state.activeTab}
                         changeTab={this.onTabChanged}
                         className='main-navbar' />
-                    <Logout username={this.state.username} />
+                    <Logout username={this.state.session_id} />
                 </div>
                 <div className='main-block'>
                     {this.renderTab(this.state.activeTab)}

@@ -29,7 +29,7 @@ export class Logout extends React.Component<Logout.Props> {
     render() {
         return (
             <div className='logout-container'>
-                <div className='inlined'>User: {this.props.username ?? ''}</div>
+                <div className='inlined'>ID: {this.props.username ?? ''}</div>
                 <PushButton
                     className='pushbutton-chained pushbutton-hc-red'
                     value='Log out'
