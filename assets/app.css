@@ -31,12 +31,26 @@
     color: #ff0000;
 }
 
+.fading-text-invisible {
+    opacity: 0;
+    transition: opacity 1.0s;
+}
+
+.fading-text-visible {
+    opacity: 1;
+    transition: opacity 0.1s;
+}
+
 .form-field-input-above {
     width: 90%;
 }
 
 .form-field-input-left {
     margin: auto auto auto 0.6em;
+}
+
+.green {
+    color: green;
 }
 
 .inlined {
