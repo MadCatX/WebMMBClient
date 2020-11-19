@@ -30,23 +30,27 @@ export class Login extends Form<LfUtil.ErrorKeys, LfUtil.ValueKeys, LfUtil.Value
     private logIn() {
         const session_id = this.getScalar<string>(this.state, 'login-session-id', '');
 
-        const ne = this.emptyErrors();
         AuthQuery.logIn(session_id).then(resp => {
             if (resp.ok === true && resp.redirected) {
                 window.location.href = resp.url;
             } else {
-                ne.set('login-errors', [`Authentication failure: ${resp.statusText}`]);
-                this.setState({
-                    ...this.state,
-                    errors: ne,
+                resp.text().then(text => {
+                    this.setAuthError(text);
+                }).catch(e => {
+                    this.setAuthError(e.toString());
                 });
             }
         }).catch(e => {
-            ne.set('login-errors', [`Authentication failure: ${e.toString()}`]);
-            this.setState({
-                ...this.state,
-                errors: ne,
-            });
+            this.setAuthError(e.toString());
+        });
+    }
+
+    private setAuthError(error: string) {
+        const ne = this.emptyErrors();
+        ne.set('login-errors', [`Authentication failure: ${error}`]);
+        this.setState({
+            ...this.state,
+            errors: ne,
         });
     }
 
