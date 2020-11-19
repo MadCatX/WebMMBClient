@@ -119,8 +119,8 @@
 }
 
 .login-form-input {
-    margin-top: 0.2em;
-    margin-bottom: 0.2em;
+    padding-top: 0.2em;
+    padding-bottom: 0.2em;
 }
 
 .logout-container {
