@@ -12,7 +12,20 @@ import { PushButton } from './common/push-button';
 
 declare let WebMmbViewer: any;
 
-export class Viewer extends React.Component<Viewer.Props> {
+interface State {
+    autoRefreshEnabled: boolean;
+    autoRefreshInterval: number | null;
+}
+
+export class Viewer extends React.Component<Viewer.Props, State> {
+    constructor(props: Viewer.Props) {
+        super(props);
+
+        this.state = {
+            autoRefreshEnabled: this.props.defaultAutoRefreshEnabled,
+            autoRefreshInterval: this.props.defaultAutoRefreshInterval,
+        };
+    }
     private async initAndLoad() {
         await WebMmbViewer.init(document.getElementById('viewer'));
         this.load();
@@ -61,15 +74,58 @@ export class Viewer extends React.Component<Viewer.Props> {
                         url={this.url() ?? ''}
                         downloadAs={`${this.props.structureName}.pdb`} />
                 </div>
+                <div className='padded'>
+                    <span className='padded'>Refresh rate (sec):</span>
+                    <input
+                        type='text'
+                        onChange={
+                            (e) => {
+                                const val = (() => {
+                                    const v = e.currentTarget.value;
+                                    if (v.length === 0)
+                                        return null;
+                                    const i = parseInt(v);
+                                    if (i <= 0)
+                                        throw new Error('Invalid interval value');
+                                    return i;
+                                })();
+                                this.setState({...this.state, autoRefreshInterval: val});
+                                if (val !== null)
+                                    this.props.autoRefreshChanged(this.state.autoRefreshEnabled, val);
+                            }
+                        }
+                        value={this.state.autoRefreshInterval === null ? '' : this.state.autoRefreshInterval}
+                        className='padded' />
+                    <span className='padded'>Auto:</span>
+                    <input
+                        type='checkbox'
+                        onChange={
+                            (e) => {
+                                const chk = e.currentTarget.checked;
+                                this.setState({...this.state, autoRefreshEnabled: chk});
+                                if (this.state.autoRefreshInterval !== null)
+                                    this.props.autoRefreshChanged(chk, this.state.autoRefreshInterval);
+                            }
+                        }
+                        checked={this.state.autoRefreshEnabled}
+                        className='padded' />
+                </div>
             </div>
         );
     }
 }
 
 export namespace Viewer {
+    export interface AutoRefreshChanged {
+        (enabled: boolean, interval: number): void;
+    }
+
     export interface Props {
         structureUrl?: string;
         structureName?: string;
         stage: number | 'last';
+        autoRefreshChanged: AutoRefreshChanged;
+        defaultAutoRefreshEnabled: boolean;
+        defaultAutoRefreshInterval: number;
     }
 }

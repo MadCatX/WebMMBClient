@@ -19,6 +19,9 @@ import { Response } from '../mmb/response';
 import { ResponseDeserializers } from '../mmb/response-deserializers';
 import { JsonCommandsDeserializer } from '../mmb/commands-deserializer';
 
+const DefaultAutoRefreshEnabled = true;
+const DefaultAutoRefreshInterval = 10;
+
 interface State {
     jobId?: string;
     jobName?: string;
@@ -27,7 +30,9 @@ interface State {
     jobTotalSteps: Api.JobTotalSteps;
     jobLastCompletedStage: number,
     jobError: string;
-    refresherId: number;
+    autoRefreshEnabled: boolean;
+    autoRefreshInterval: number;
+    autoRefresherId: number | null;
 }
 
 export class VisualJobRunner extends React.Component<VisualJobRunner.Props, State> {
@@ -44,9 +49,12 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
             jobTotalSteps: props.info?.total_steps ?? 'none',
             jobLastCompletedStage: props.info?.last_completed_stage ?? 0,
             jobError: '',
-            refresherId: 0,
+            autoRefreshEnabled: true,
+            autoRefreshInterval: 10,
+            autoRefresherId: null,
         };
 
+        this.onAutoRefreshChanged = this.onAutoRefreshChanged.bind(this);
         this.queryJobStatus = this.queryJobStatus.bind(this);
         this.refreshJob = this.refreshJob.bind(this);
         this.startJob = this.startJob.bind(this);
@@ -74,8 +82,8 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
             this.handleErrorResponse(resp, r);
         } else if (Response.isOk(r)) {
             const data = r.data;
-            if (data.state !== 'Running')
-                clearInterval(this.state.refresherId);
+            if (data.state !== 'Running' && this.state.autoRefresherId !== null)
+                clearInterval(this.state.autoRefresherId);
             this.setState({
                 ...this.state,
                 jobId: data.id,
@@ -116,6 +124,18 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
         map.set('mol-in-job-name', name);
 
         return map;
+    }
+
+    private onAutoRefreshChanged(enabled: boolean, interval: number) {
+        if (interval > 0) {
+            this.setState({
+                ...this.state,
+                autoRefreshEnabled: enabled,
+                autoRefreshInterval: interval,
+            });
+
+            this.setupAutoRefresh(enabled, interval, this.state.jobState);
+        }
     }
 
     private queryJobStatus() {
@@ -170,8 +190,7 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
                         this.handleJobInfo(resp, r);
 
                         if (Response.isOk(r)) {
-                            const id = setInterval(this.refreshJob, 2000);
-                            this.setState(({...this.state, refresherId: id}));
+                            this.setupAutoRefresh(this.state.autoRefreshEnabled, this.state.autoRefreshInterval, 'Running');
                             this.props.onJobStarted(r.data, commands);
                         }
                     } catch (e) {
@@ -196,11 +215,26 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
         }
     }
 
+    private setupAutoRefresh(enabled: boolean, interval: number, state: Api.JobState) {
+        if (this.state.autoRefresherId !== null)
+            clearInterval(this.state.autoRefresherId);
+
+        if (enabled && state === 'Running') {
+            const id = setInterval(this.refreshJob, interval * 1000);
+            this.setState({...this.state, autoRefresherId: id});
+        } else {
+            this.setState({...this.state, autoRefresherId: null});
+        }
+    }
+
     private stopJob() {
         if (this.state.jobId === undefined)
             return;
 
-        clearInterval(this.state.refresherId);
+        if (this.state.autoRefresherId !== null) {
+            clearInterval(this.state.autoRefresherId);
+            this.setState({...this.state, autoRefresherId: null});
+        }
 
         JobQuery.stop(this.state.jobId).then(resp => {
             resp.json().then(json => {
@@ -233,7 +267,10 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
                     <Viewer
                         structureUrl={this.structureUrl()}
                         structureName={this.state.jobName}
-                        stage={'last'} />
+                        stage={'last'}
+                        autoRefreshChanged={this.onAutoRefreshChanged}
+                        defaultAutoRefreshEnabled={DefaultAutoRefreshEnabled}
+                        defaultAutoRefreshInterval={DefaultAutoRefreshInterval} />
                 </div>
                 <div id='mmb-controls'>
                     <JobControls

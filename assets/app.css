@@ -180,6 +180,10 @@
     margin-top: 0.6em;
 }
 
+.padded {
+    padding: 0.2em 0.2em;
+}
+
 .pushbutton-text {
     margin-top: auto;
     margin-bottom: auto;
