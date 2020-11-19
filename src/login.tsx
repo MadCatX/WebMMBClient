@@ -91,5 +91,5 @@ ReactDOM.render(
     <Login
         id='login-form'
         initialValues={new Map<LfUtil.ValueKeys, LfUtil.Values>()} />,
-    document.getElementById('app')
+    document.getElementById('app-login')
 );
