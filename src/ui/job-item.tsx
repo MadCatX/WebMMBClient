@@ -14,7 +14,7 @@ export class JobItem extends React.Component<JobItem.Props> {
     private renderJobStatus(s: Api.JobState) {
         switch (s) {
         case 'NotStarted':
-            return (<span className='centered-text'>Not started</span>);
+            return (<span>Not started</span>);
         case 'Running':
             return (<span className='centered-text ok-message'>Running</span>);
         case 'Finished':

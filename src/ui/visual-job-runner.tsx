@@ -27,6 +27,7 @@ interface State {
     jobTotalSteps: Api.JobTotalSteps;
     jobLastCompletedStage: number,
     jobError: string;
+    refresherId: number;
 }
 
 export class VisualJobRunner extends React.Component<VisualJobRunner.Props, State> {
@@ -43,9 +44,11 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
             jobTotalSteps: props.info?.total_steps ?? 'none',
             jobLastCompletedStage: props.info?.last_completed_stage ?? 0,
             jobError: '',
+            refresherId: 0,
         };
 
         this.queryJobStatus = this.queryJobStatus.bind(this);
+        this.refreshJob = this.refreshJob.bind(this);
         this.startJob = this.startJob.bind(this);
         this.stopJob = this.stopJob.bind(this);
 
@@ -71,6 +74,8 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
             this.handleErrorResponse(resp, r);
         } else if (Response.isOk(r)) {
             const data = r.data;
+            if (data.state !== 'Running')
+                clearInterval(this.state.refresherId);
             this.setState({
                 ...this.state,
                 jobId: data.id,
@@ -136,6 +141,10 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
         });
     }
 
+    private refreshJob() {
+        this.queryJobStatus();
+    }
+
     private startJob() {
         if (this.mmbInputFormRef.current === null)
             return;
@@ -160,8 +169,11 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
                         const r = Response.parse<Api.JobInfo>(json, ResponseDeserializers.toJobInfo);
                         this.handleJobInfo(resp, r);
 
-                        if (Response.isOk(r))
+                        if (Response.isOk(r)) {
+                            const id = setInterval(this.refreshJob, 2000);
+                            this.setState(({...this.state, refresherId: id}));
                             this.props.onJobStarted(r.data, commands);
+                        }
                     } catch (e) {
                         this.handleError(e);
                     }
@@ -187,6 +199,8 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
     private stopJob() {
         if (this.state.jobId === undefined)
             return;
+
+        clearInterval(this.state.refresherId);
 
         JobQuery.stop(this.state.jobId).then(resp => {
             resp.json().then(json => {

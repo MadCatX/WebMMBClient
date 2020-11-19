@@ -65,7 +65,7 @@
 
 .job-item {
     display: grid;
-    grid-template-columns: auto auto auto auto;
+    grid-template-columns: auto 6em 6em 6em;
     margin: 0.2em 0 0.2em 0;
 }
 
