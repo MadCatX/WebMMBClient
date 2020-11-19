@@ -74,12 +74,13 @@ export class Login extends Form<LfUtil.ErrorKeys, LfUtil.ValueKeys, LfUtil.Value
                         label='Session ID'
                         position='left'
                         inputType='line-edit'
-                        hint='Session ID'
+                        hint='Enter session ID to restore session'
                         options={[]} />
                     <ErrorBox
                         errors={this.getErrors(this.state, 'login-errors') ?? new Array<string>()} />
                     <PushButton
-                        value='Log in'
+                        value='Enter'
+                        className='pushbutton-default pushbutton-hc-green'
                         onClick={() => this.logIn()} />
                 </div>
             </Ctx.Provider>
