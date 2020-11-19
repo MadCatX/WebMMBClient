@@ -95,6 +95,7 @@
     color: black;
     font-weight: bold;
     text-decoration: none;
+    vertical-align: middle;
 }
 
 .login-form-container {
@@ -117,7 +118,8 @@
     background-color: #e0e0e0;
     position: absolute;
     right: 0;
-    top: 0;
+    top: 50%;
+    transform: translateY(-50%);
 }
 
 .main-block {
@@ -128,6 +130,7 @@
 .main-navbar {
     background-color: #e0e0e0;
     display: flex;
+    height: 2em;
     margin-top: 0.2em;
     margin-bottom: 0.2em;
 }
@@ -182,12 +185,6 @@
 
 .padded {
     padding: 0.2em 0.2em;
-}
-
-.pushbutton-text {
-    margin-top: auto;
-    margin-bottom: auto;
-    font-weight: bold;
 }
 
 .pushbutton-add {
@@ -254,6 +251,11 @@
     background-color: red;
 }
 
+.pushbutton-text {
+    font-weight: bold;
+    vertical-align: middle;
+}
+
 .section {
     display: block;
     margin-top: 1em;
@@ -289,23 +291,33 @@
     background-color: #e0e0e0;
 }
 
-.tabbutton-line-active {
+.tabbutton-text-active {
     color: black;
-    margin: auto auto 0 auto;
-    width: 90%;
+    display: inline-block;
+    font-weight: bold;
+    text-decoration: underline;
+    text-decoration-color: black;
+    vertical-align: middle;
 }
 
-.tabbutton-line-inactive {
+.tabbutton-text-inactive-highlighted {
     color: black;
-    margin: auto auto 0 auto;
-    opacity: 0;
-    transition: opacity 0.25s;
+    display: inline-block;
+    font-weight: bold;
+    text-decoration: underline;
+    text-decoration-color: black;
+    transition: 0.25s;
+    vertical-align: middle;
 }
-.tabbutton-line-inactive-highlighted {
+
+.tabbutton-text-inactive {
     color: black;
-    margin: auto auto 0 auto;
-    opacity: 1;
-    transition: opacity 0.25s;
+    display: inline-block;
+    font-weight: bold;
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    transition: 0.25s;
+    vertical-align: middle;
 }
 
 .tabs-bar {

@@ -29,11 +29,11 @@ export class TabButton extends AbstractPushButton<TabButton.Props, State> {
         });
     }
 
-    private lineClass() {
+    private textClass() {
         if (this.props.isActive === false) {
-            return this.state.isHighlighted ? 'tabbutton-line-inactive-highlighted' : 'tabbutton-line-inactive';
+            return this.state.isHighlighted ? 'tabbutton-text-inactive-highlighted' : 'tabbutton-text-inactive';
         }
-        return 'tabbutton-line-active';
+        return 'tabbutton-text-active';
     }
 
     renderButton() {
@@ -44,8 +44,7 @@ export class TabButton extends AbstractPushButton<TabButton.Props, State> {
                 onClick={this.props.onClick}
                 onMouseEnter={() => this.highlighted(true)}
                 onMouseLeave={() => this.highlighted(false)}>
-                <div className='pushbutton-text'>{this.props.value}</div>
-                <hr className={this.lineClass()} />
+                <div className={this.textClass()}>{this.props.value}</div>
             </div>
         );
     }
