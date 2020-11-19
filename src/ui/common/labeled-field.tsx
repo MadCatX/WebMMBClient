@@ -30,7 +30,6 @@ export class GLabeledField<KE, KV extends string, T, U extends FormUtil.V<T>> ex
         case 'text-area':
             return (<this.TextArea {...this.props} className={cname} />);
         }
-        return (<span></span>);
     }
 
     render() {
