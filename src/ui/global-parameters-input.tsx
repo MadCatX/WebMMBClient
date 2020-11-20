@@ -73,7 +73,7 @@ class GlobalParametersInputInner extends FormBlock<GlobalParametersInputInner.Pr
                     <CheckBox
                         {...GLabeledField.tags('mol-in-gp-def-md-params', this.props.formId, ['labeled-field-concise'])}
                         formId={this.props.formId}
-                        label='Use default molecular dynamics'
+                        label='Turn on electrostatic and Lennard-Jones forces'
                         tooltip='setDefaultMDParameters'
                         position='left'
                         inputType='check-box'
