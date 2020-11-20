@@ -273,10 +273,6 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
                         defaultAutoRefreshInterval={DefaultAutoRefreshInterval} />
                 </div>
                 <div id='mmb-controls'>
-                    <JobControls
-                        handleStart={this.startJob}
-                        handleStatus={this.queryJobStatus}
-                        handleStop={this.stopJob} />
                     <JobStatus
                         state={this.state.jobState}
                         step={this.state.jobStep}
@@ -287,6 +283,10 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
                         id='molecule-input'
                         jobName={this.props.info?.name}
                         initialValues={this.makeInitialValues(this.props.commands, this.props.info?.name)} />
+                    <JobControls
+                        handleStart={this.startJob}
+                        handleStatus={this.queryJobStatus}
+                        handleStop={this.stopJob} />
                 </div>
             </>
         );
