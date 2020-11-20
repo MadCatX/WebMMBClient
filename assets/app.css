@@ -333,6 +333,39 @@
     display: flex;
 }
 
+.tooltip-container {
+    display: inline-block;
+    position: relative;
+}
+
+.tooltip-container .tooltip-left {
+    background-color: #e0e0e0;
+    opacity: 0;
+    padding: 0.2em;
+    position: absolute;
+    top: -0.1em;
+    right: calc(100% + 0.4em);
+    transition: opacity 0.25s;
+    visibility: hidden;
+    z-index: 1;
+}
+
+.tooltip-container .tooltip-left::after {
+    border-style: solid;
+    border-color: transparent transparent transparent #e0e0e0;
+    border-width: 0.4em;
+    content: " ";
+    margin-top: -0.4em;
+    position: absolute;
+    left: 100%;
+    top: 50%;
+}
+.tooltip-container:hover .tooltip-left {
+    opacity: 1;
+    transition: opacity 0.25s;
+    visibility: visible;
+}
+
 .top-panel {
     position: relative;
     width: 100%;

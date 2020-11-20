@@ -32,13 +32,23 @@ export class GLabeledField<KE, KV extends string, T, U extends FormUtil.V<T>> ex
         }
     }
 
+    private makeTooltip() {
+        if (this.props.tooltip === undefined)
+            return undefined;
+
+        return (
+            <div className='tooltip-left'>{this.props.tooltip}</div>
+        );
+    }
+
     render() {
         switch (this.props.position) {
         case 'above':
             return (
                 <div className={this.props.className}>
-                    <div>
-                        <label className="form-field-label" htmlFor={`${this.props.id}`}>{this.props.label}</label>
+                    <div className='tooltip-container'>
+                        {this.makeTooltip()}
+                        <label className='form-field-label' htmlFor={`${this.props.id}`}>{this.props.label}</label>
                     </div>
                     <div>
                         {this.inputField(this.props.position)}
@@ -47,11 +57,10 @@ export class GLabeledField<KE, KV extends string, T, U extends FormUtil.V<T>> ex
             );
         case 'left':
             return (
-                <div className={this.props.className}>
-                    <div>
-                        <label className="form-field-label" htmlFor={`${this.props.id}`}>{this.props.label}</label>
-                        {this.inputField(this.props.position)}
-                    </div>
+                <div className={`${this.props.className} tooltip-container`}>
+                    {this.makeTooltip()}
+                    <label className='form-field-label' htmlFor={`${this.props.id}`}>{this.props.label}</label>
+                    {this.inputField(this.props.position)}
                 </div>
             );
         }
@@ -71,6 +80,7 @@ export namespace GLabeledField {
         position: LabelPosition;
         inputType: InputType;
         className?: string;
+        tooltip?: string;
     }
 
     export function tags<KV extends string>(base: KV, suffix: string, cn?: string[]) {

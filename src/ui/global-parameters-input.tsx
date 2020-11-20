@@ -42,6 +42,7 @@ class GlobalParametersInputInner extends FormBlock<GlobalParametersInputInner.Pr
                         {...GLabeledField.tags('mol-in-gp-bisf', this.props.formId, ['labeled-field-concise'])}
                         formId={this.props.formId}
                         label='Interaction scale factor'
+                        tooltip='baseInteractionScaleFactor'
                         position='above'
                         inputType='line-edit'
                         options={[]} />
@@ -49,6 +50,7 @@ class GlobalParametersInputInner extends FormBlock<GlobalParametersInputInner.Pr
                         {...GLabeledField.tags('mol-in-gp-reporting-interval', this.props.formId, ['labeled-field-concise'])}
                         formId={this.props.formId}
                         label='Reporting interval'
+                        tooltip='reportingInterval'
                         position='above'
                         inputType='line-edit'
                         options={[]} />
@@ -56,6 +58,7 @@ class GlobalParametersInputInner extends FormBlock<GlobalParametersInputInner.Pr
                         {...GLabeledField.tags('mol-in-gp-num-reports', this.props.formId, ['labeled-field-concise'])} 
                         formId={this.props.formId}
                         label='Number of reports'
+                        tooltip='numReportingIntervals'
                         position='above'
                         inputType='line-edit'
                         options={[]} />
@@ -63,6 +66,7 @@ class GlobalParametersInputInner extends FormBlock<GlobalParametersInputInner.Pr
                         {...GLabeledField.tags('mol-in-gp-temperature', this.props.formId, ['labeled-field-concise'])} 
                         formId={this.props.formId}
                         label='Temperature'
+                        tooltip='temperature'
                         position='above'
                         inputType='line-edit'
                         options={[]} />
@@ -70,6 +74,7 @@ class GlobalParametersInputInner extends FormBlock<GlobalParametersInputInner.Pr
                         {...GLabeledField.tags('mol-in-gp-def-md-params', this.props.formId, ['labeled-field-concise'])}
                         formId={this.props.formId}
                         label='Use default molecular dynamics'
+                        tooltip='setDefaultMDParameters'
                         position='left'
                         inputType='check-box'
                         options={[]} />
