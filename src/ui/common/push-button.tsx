@@ -12,13 +12,25 @@ export abstract class AbstractPushButton<P extends AbstractPushButton.Props, S> 
     }
 }
 
+function Noop() {}
 export class PushButton extends AbstractPushButton<PushButton.Props, {}> {
+    static defaultProps = {
+        enabled: true,
+    }
+
+    private clsName() {
+        if (this.props.enabled)
+            return this.props.className ?? 'pushbutton-default pushbutton-clr-default pushbutton-hclr-default';
+        else
+            return this.props.classNameDisabled ?? 'pushbutton-default pushbutton-clr-default-disabled';
+    }
+
     renderButton() {
         return (
             <div
                 id={this.props.id}
-                className={this.props.className ?? 'pushbutton-default pushbutton-hc-default'}
-                onClick={this.props.onClick}>
+                className={this.clsName()}
+                onClick={this.props.enabled ? this.props.onClick : Noop}>
                 <div className='pushbutton-text'>{this.props.value}</div>
             </div>
         );
@@ -44,5 +56,7 @@ export namespace PushButton {
 
     export interface Props extends AbstractPushButton.Props {
         onClick: OnClick;
+        enabled: boolean;
+        classNameDisabled?: string;
     }
 }

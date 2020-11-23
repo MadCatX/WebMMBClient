@@ -51,7 +51,8 @@ export class TabButton extends AbstractPushButton<TabButton.Props, State> {
 }
 
 export namespace TabButton {
-    export interface Props extends PushButton.Props {
+    export interface Props extends AbstractPushButton.Props {
         isActive: boolean;
+        onClick: PushButton.OnClick;
     }
 }

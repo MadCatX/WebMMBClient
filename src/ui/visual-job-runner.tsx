@@ -286,7 +286,8 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
                     <JobControls
                         handleStart={this.startJob}
                         handleStatus={this.queryJobStatus}
-                        handleStop={this.stopJob} />
+                        handleStop={this.stopJob}
+                        jobState={this.state.jobState} />
                 </div>
             </>
         );

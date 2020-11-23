@@ -224,7 +224,6 @@
     border: 0.1em solid black;
     margin: 0.2em;
     text-align: center;
-    transition: background-color 0.25s;
 }
 
 .pushbutton-delete {
@@ -242,21 +241,29 @@
 }
 
 .pushbutton-flex {
-    color: black;
     border: 0.1em solid black;
     margin: 0 0.2em;
     flex-grow: 1;
     text-align: center;
-    transition: background-color 0.25s;
 }
 
-.pushbutton-hc-default:hover {
+.pushbutton-clr-default {
+    transition: background-color 0.25s;
+    color: black;
+}
+
+.pushbutton-clr-default-disabled {
+    background-color: #e0e0e0;
+    color: black;
+}
+
+.pushbutton-hclr-default:hover {
     background-color: #e0e0e0;
 }
-.pushbutton-hc-green:hover {
+.pushbutton-hclr-green:hover {
     background-color: yellowgreen;
 }
-.pushbutton-hc-red:hover {
+.pushbutton-hclr-red:hover {
     background-color: red;
 }
 
