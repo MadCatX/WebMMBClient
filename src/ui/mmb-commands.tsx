@@ -7,6 +7,7 @@
  */
 
 import * as React from 'react';
+import { ErrorBox } from './common/error-box';
 
 export class MmbCommands extends React.Component<MmbCommands.Props> {
     render() {
@@ -16,6 +17,7 @@ export class MmbCommands extends React.Component<MmbCommands.Props> {
                 <pre className="verbatim">
                     {this.props.commands.map((line) => `${line}\n`)}
                 </pre>
+                <ErrorBox errors={this.props.errors } />
             </div>
         )
     }
@@ -24,5 +26,6 @@ export class MmbCommands extends React.Component<MmbCommands.Props> {
 export namespace MmbCommands {
     export interface Props {
         commands: string[];
+        errors: string[];
     }
 }

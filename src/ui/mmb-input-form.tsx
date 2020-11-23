@@ -9,15 +9,12 @@
 import * as React from 'react';
 import { FormContextManager as FCM } from './form-context-manager';
 import { MmbInputUtil as MmbUtil } from './mmb-input-form-util';
-import { ErrorBox } from './common/error-box';
 import { Form } from './common/form';
 import { BaseInteractionsInput } from './base-interactions-input';
 import { CompoundsInput } from './compounds-input';
 import { DoubleHelicesInput } from './double-helices-input';
 import { GlobalParametersInput } from './global-parameters-input';
 import { NtCsInput } from './ntcs-input';
-import { MmbCommands } from './mmb-commands';
-import { PushButton } from './common/push-button';
 import { CommandsSerializer, JsonCommandsSerializer, TextCommandsSerializer } from '../mmb/commands-serializer';
 import { GlobalConfig } from '../model/global-config';
 import { Reporting } from '../model/reporting';
@@ -27,6 +24,7 @@ import { DoubleHelix } from '../model/double-helix';
 import { NtCConformation } from '../model/ntc-conformation';
 import { MdParameters } from '../model/md-parameters';
 import { JobNameInput } from './job-name-input';
+import {MmbCommands} from './mmb-commands';
 
 export class MmbInputForm extends Form<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, MmbUtil.ValueTypes, MmbUtil.Props> {
     constructor(props: MmbUtil.Props) {
@@ -60,21 +58,21 @@ export class MmbInputForm extends Form<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, Mmb
         return { name, commands };
     }
 
-    private commandsToText() {
+    private makeMmbCommands() {
         try {
-            const params = this.makeParams(1);
-            const cmds = TextCommandsSerializer.serialize(params);
+            const cmds = TextCommandsSerializer.serialize(this.makeParams(1));
 
-            const nv = this.emptyValues();
-            nv.set('mol-in-commands', cmds);
-
-            this.setState({
-                ...this.state,
-                values: new Map([...this.state.values, ...nv]),
-                errors: new Map([...this.state.errors, ...this.emptyErrors()]),
-            });
+            return (
+                <MmbCommands
+                    commands={cmds}
+                    errors={new Array<string>()} />
+            );
         } catch (e) {
-            console.log(e);
+            return (
+                <MmbCommands
+                    commands={new Array<string>()}
+                    errors={e} />
+            );
         }
     }
 
@@ -83,7 +81,6 @@ export class MmbInputForm extends Form<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, Mmb
     }
 
     private makeParams(stage: number): CommandsSerializer.Parameters {
-        const ne = this.emptyErrors();
         const errors: string[] = [];
 
         const bisf = parseInt(this.getScalar(this.state, 'mol-in-gp-bisf', ''));
@@ -102,10 +99,7 @@ export class MmbInputForm extends Form<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, Mmb
             errors.push('Temperature must be a number');
 
         if (errors.length > 0) {
-            ne.set('mol-in-commands-errors', errors);
-            this.setState({...this.state, errors: new Map([...this.state.errors, ...ne])});
-
-            throw new Error('Form has errors');
+            throw errors;
         }
 
         const global = new GlobalConfig(bisf, false, temp);
@@ -148,16 +142,7 @@ export class MmbInputForm extends Form<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, Mmb
                     <BaseInteractionsInput formId={this.props.id} />
                     <NtCsInput formId={this.props.id} />
                     <GlobalParametersInput formId={this.props.id} />
-                    <PushButton
-                        value='Generate commands'
-                        onClick={e => {
-                            e.preventDefault();
-                            this.commandsToText();
-                        }} />
-                    <ErrorBox
-                        errors={this.getErrors(this.state, 'mol-in-commands-errors')} />
-                    <MmbCommands
-                        commands={this.getArray<string[]>(this.state, 'mol-in-commands')} />
+                    {this.makeMmbCommands()}
                 </form>
             </Ctx.Provider>
         );

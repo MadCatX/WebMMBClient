@@ -16,14 +16,13 @@ import { NtC } from '../model/ntc';
 import { NtCConformation } from '../model/ntc-conformation';
 
 export namespace MmbInputUtil {
-    export type ErrorKeys = 'mol-in-cp-errors' | 'mol-in-dh-errors' | 'mol-in-bi-errors' | 'mol-in-ntcs-errors' | 'mol-in-commands-errors' | 'mol-in-no-name';
+    export type ErrorKeys = 'mol-in-cp-errors' | 'mol-in-dh-errors' | 'mol-in-bi-errors' | 'mol-in-ntcs-errors' | 'mol-in-no-name';
     export type ValueKeys = 'mol-in-cp-chain-id' | 'mol-in-cp-first-res-no' | 'mol-in-cp-sequence' | 'mol-in-cp-compound-type' |
         'mol-in-cp-added' |
         'mol-in-dh-chain-one' | 'mol-in-dh-first-res-no-one' | 'mol-in-dh-last-res-no-one' | 'mol-in-dh-chain-two' | 'mol-in-dh-first-res-no-two' | 'mol-in-dh-added' |
         'mol-in-bi-chain-one' | 'mol-in-bi-res-no-one' | 'mol-in-bi-edge-one' | 'mol-in-bi-chain-two' | 'mol-in-bi-res-no-two' | 'mol-in-bi-edge-two' | 'mol-in-bi-orientation' | 'mol-in-bi-added' |
         'mol-in-ntcs-chain' | 'mol-in-ntcs-first-res-no' | 'mol-in-ntcs-last-res-no' | 'mol-in-ntcs-ntc' | 'mol-in-ntcs-added' |
         'mol-in-gp-reporting-interval' | 'mol-in-gp-num-reports' | 'mol-in-gp-temperature' | 'mol-in-gp-bisf' | 'mol-in-gp-def-md-params' |
-        'mol-in-commands' |
         'mol-in-job-name';
     export type ValueTypes = BaseInteraction[] | Compound[] | DoubleHelix[] | NtCConformation[] | string[];
     export type V<T> = FormUtil.V<T>;
