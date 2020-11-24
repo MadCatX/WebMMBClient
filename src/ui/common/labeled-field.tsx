@@ -3,6 +3,7 @@ import { FormUtil } from './form';
 import { FormField } from './form-field';
 import { CheckBox, GCheckBox } from './check-box';
 import { ComboBox, GComboBox } from './combo-box';
+import { TooltippedField } from './tooltipped-field';
 import { LineEdit, GLineEdit } from './line-edit';
 import { TextArea, GTextArea } from './text-area';
 
@@ -16,6 +17,13 @@ export class GLabeledField<KE, KV extends string, T, U extends FormUtil.V<T>> ex
     private ComboBox = ComboBox<KE, KV, T, U>();
     private LineEdit = LineEdit<KE, KV, T>();
     private TextArea = TextArea<KE, KV, T>();
+
+    constructor(props: GLabeledField.Props<KV, T, U>) {
+        super(props);
+
+        this.renderField = this.renderField.bind(this);
+        this.renderLabel = this.renderLabel.bind(this);
+    }
 
     private inputField(pos: GLabeledField.LabelPosition) {
         const cname = (pos === 'above') ? 'form-field-input-above' : 'form-field-input-left';
@@ -32,13 +40,17 @@ export class GLabeledField<KE, KV extends string, T, U extends FormUtil.V<T>> ex
         }
     }
 
-    private makeTooltip() {
-        if (this.props.tooltip === undefined)
-            return undefined;
-
+    private renderField() {
         return (
-            <div className='tooltip-left'>{this.props.tooltip}</div>
+            <>
+                <label className='form-field-label' htmlFor={`${this.props.id}`}>{this.props.label}</label>
+                {this.inputField(this.props.position)}
+            </>
         );
+    }
+
+    private renderLabel() {
+        return (<label className='form-field-label' htmlFor={`${this.props.id}`}>{this.props.label}</label>);
     }
 
     render() {
@@ -46,10 +58,10 @@ export class GLabeledField<KE, KV extends string, T, U extends FormUtil.V<T>> ex
         case 'above':
             return (
                 <div className={this.props.className}>
-                    <div className='tooltip-container'>
-                        {this.makeTooltip()}
-                        <label className='form-field-label' htmlFor={`${this.props.id}`}>{this.props.label}</label>
-                    </div>
+                    <TooltippedField
+                        position='left'
+                        text={this.props.tooltip}
+                        renderContent={this.renderLabel} />
                     <div>
                         {this.inputField(this.props.position)}
                     </div>
@@ -57,11 +69,10 @@ export class GLabeledField<KE, KV extends string, T, U extends FormUtil.V<T>> ex
             );
         case 'left':
             return (
-                <div className={`${this.props.className} tooltip-container`}>
-                    {this.makeTooltip()}
-                    <label className='form-field-label' htmlFor={`${this.props.id}`}>{this.props.label}</label>
-                    {this.inputField(this.props.position)}
-                </div>
+                <TooltippedField
+                    position='left'
+                    text={this.props.tooltip}
+                    renderContent={this.renderField} />
             );
         }
     }

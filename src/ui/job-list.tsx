@@ -193,15 +193,23 @@ export class JobList extends React.Component<JobList.Props, State> {
             return (<div className='error-message'>{this.state.error}</div>);
         } else {
             return (
-                this.state.jobs.map((e, n) =>
-                    <JobItem
-                        key={`job-item-${n}`}
-                        id={e.id}
-                        name={e.name}
-                        state={e.state}
-                        onSelect={() => this.onSelectJobClicked(e.id)}
-                        onDelete={() => this.onDeleteJobClicked(e.id)} />
-                )
+                <>
+                    <div className='job-item'>
+                        <div className='bold'>Name</div>
+                        <div className='bold'>State</div>
+                        <div></div>
+                        <div></div>
+                    </div>
+                    {this.state.jobs.map((e, n) =>
+                        <JobItem
+                            key={`job-item-${n}`}
+                            id={e.id}
+                            name={e.name}
+                            state={e.state}
+                            onSelect={() => this.onSelectJobClicked(e.id)}
+                            onDelete={() => this.onDeleteJobClicked(e.id)} />
+                        )}
+                </>
             );
         }
     }
