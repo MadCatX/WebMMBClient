@@ -15,6 +15,7 @@ type ApiRequestType =
     'DeleteJob'   |
     'JobStatus'   |
     'ListJobs'    |
+    'MmbOutput'   |
     'JobCommands' |
     'SessionInfo';
 

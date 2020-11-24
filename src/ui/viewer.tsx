@@ -7,6 +7,7 @@
  */
 
 import * as React from 'react';
+import { ErrorBox } from './common/error-box';
 import { LinkButton } from './common/link-button';
 import { PushButton } from './common/push-button';
 import { TooltippedField } from './common/tooltipped-field';
@@ -26,6 +27,8 @@ export class Viewer extends React.Component<Viewer.Props, State> {
             autoRefreshEnabled: this.props.defaultAutoRefreshEnabled,
             autoRefreshInterval: this.props.defaultAutoRefreshInterval,
         };
+
+        this.renderMmbOutput = this.renderMmbOutput.bind(this);
     }
     private async initAndLoad() {
         await WebMmbViewer.init(document.getElementById('viewer'));
@@ -36,6 +39,25 @@ export class Viewer extends React.Component<Viewer.Props, State> {
         const url = this.url();
         if (url !== undefined)
             WebMmbViewer.load(url, 'pdb');
+    }
+
+    private renderMmbOutput() {
+        const output = this.props.mmbOutput;
+
+        if (output.text === undefined && output.errors === undefined)
+            return undefined;
+
+        return (
+            <div className='section'>
+                <div className='section-caption'>MMB Output</div>
+                {(() => {
+                if (output.errors !== undefined)
+                    return (<ErrorBox errors={output.errors} />);
+                if (output.text !== undefined)
+                    return (<pre className='mmb-output' id='mmb-output-item'>{output.text}</pre>);
+                })()}
+            </div>
+        );
     }
 
     private switchRepresentation(repr: 'ball-and-stick' | 'cartoon') {
@@ -54,6 +76,10 @@ export class Viewer extends React.Component<Viewer.Props, State> {
 
     componentDidUpdate() {
         this.load();
+
+        const mmbOutput = document.getElementById('mmb-output-item');
+        if (mmbOutput !== null)
+            mmbOutput.scrollTo(0, mmbOutput.scrollHeight);
     }
 
     render() {
@@ -118,6 +144,7 @@ export class Viewer extends React.Component<Viewer.Props, State> {
                         checked={this.state.autoRefreshEnabled}
                         className='padded' />
                 </div>
+                {this.renderMmbOutput()}
             </div>
         );
     }
@@ -128,6 +155,11 @@ export namespace Viewer {
         (enabled: boolean, interval: number): void;
     }
 
+    export interface MmbOutput {
+        text?: string;
+        errors?: string[];
+    }
+
     export interface Props {
         structureUrl?: string;
         structureName?: string;
@@ -135,5 +167,6 @@ export namespace Viewer {
         autoRefreshChanged: AutoRefreshChanged;
         defaultAutoRefreshEnabled: boolean;
         defaultAutoRefreshInterval: number;
+        mmbOutput: MmbOutput;
     }
 }

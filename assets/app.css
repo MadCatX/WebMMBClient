@@ -147,6 +147,11 @@
     margin-left: 0.4em;
 }
 
+.mmb-output {
+    height: 30em;
+    overflow: scroll;
+}
+
 .mol-in-cp-input {
     display: grid;
     grid-template-columns: 10em 10em 10em 20em auto;

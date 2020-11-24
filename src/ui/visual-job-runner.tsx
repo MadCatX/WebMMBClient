@@ -33,6 +33,7 @@ interface State {
     autoRefreshEnabled: boolean;
     autoRefreshInterval: number;
     autoRefresherId: number | null;
+    mmbOutput: Viewer.MmbOutput;
 }
 
 export class VisualJobRunner extends React.Component<VisualJobRunner.Props, State> {
@@ -52,6 +53,7 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
             autoRefreshEnabled: true,
             autoRefreshInterval: 10,
             autoRefresherId: null,
+            mmbOutput: { text: undefined, errors: undefined },
         };
 
         this.onAutoRefreshChanged = this.onAutoRefreshChanged.bind(this);
@@ -63,10 +65,18 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
         this.mmbInputFormRef = React.createRef();
     }
 
-    private handleError(e: Error) {
+    private handleJobInfoError(e: Error) {
         this.setState({
             ...this.state,
-            jobError: `${e.toString()}`,
+            jobError: e.toString(),
+        });
+    }
+
+    private handleMmbOutputError(e: Error) {
+        const out = { text: undefined, errors: [e.toString()] };
+        this.setState({
+            ...this.state,
+            mmbOutput: out
         });
     }
 
@@ -93,6 +103,18 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
                 jobTotalSteps: data.total_steps,
                 jobLastCompletedStage: data.last_completed_stage,
                 jobError: '',
+            });
+        }
+    }
+
+    private handleMmbOutput(resp: Response, r: Response.Payload<string>) {
+        if (Response.isError(r))
+            this.handleMmbOutputError(new Error(`${resp.status} ${r.message}`))
+        else if (Response.isOk(r)) {
+            const out = { text: r.data, errors: undefined };
+            this.setState({
+                ...this.state,
+                mmbOutput: out,
             });
         }
     }
@@ -148,16 +170,31 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
                     const r = Response.parse<Api.JobInfo>(json, ResponseDeserializers.toJobInfo);
                     this.handleJobInfo(resp, r);
                 } catch (e) {
-                    this.handleError(e);
+                    this.handleJobInfoError(e)
                 }
             }).catch(e => {
-                this.handleError(e);
+                this.handleJobInfoError(e);
             });
         }).catch(e => {
             this.setState({
                 ...this.state,
                 jobError: e.message,
             });
+        });
+
+        JobQuery.mmbOutput(this.state.jobId).then(resp => {
+            resp.json().then(json => {
+                try {
+                    const r = Response.parse<string>(json, ResponseDeserializers.toMmbOutput);
+                    this.handleMmbOutput(resp, r);
+                } catch (e) {
+                    this.handleMmbOutputError(e);
+                }
+            }).catch(e => {
+                this.handleMmbOutputError(e);
+            });
+        }).catch(e => {
+            this.handleMmbOutputError(new Error(e.message));
         });
     }
 
@@ -194,7 +231,7 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
                             this.props.onJobStarted(r.data, commands);
                         }
                     } catch (e) {
-                        this.handleError(e);
+                        this.handleJobInfoError(e);
                     }
                 });
             }).catch(e => {
@@ -208,10 +245,7 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
             });
             console.log(commands);
         } catch (e) {
-            this.setState({
-                ...this.state,
-                jobError: e.message,
-            });
+            this.handleJobInfoError(new Error(e.message));
         }
     }
 
@@ -242,14 +276,11 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
                     const r = Response.parse<Api.JobInfo>(json, ResponseDeserializers.toJobInfo);
                     this.handleJobInfo(resp, r);
                 } catch (e) {
-                    this.handleError(e);
+                    this.handleJobInfoError(e);
                 }
             });
         }).catch(e => {
-            this.setState({
-                ...this.state,
-                jobError: e.message,
-            });
+            this.handleJobInfoError(new Error(e.message));
         });
     }
 
@@ -270,7 +301,8 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
                         stage={'last'}
                         autoRefreshChanged={this.onAutoRefreshChanged}
                         defaultAutoRefreshEnabled={DefaultAutoRefreshEnabled}
-                        defaultAutoRefreshInterval={DefaultAutoRefreshInterval} />
+                        defaultAutoRefreshInterval={DefaultAutoRefreshInterval}
+                        mmbOutput={this.state.mmbOutput} />
                 </div>
                 <div id='mmb-controls'>
                     <JobStatus

@@ -35,6 +35,14 @@ export namespace JobQuery {
         return Request.api(req);
     }
 
+    export function mmbOutput(id: string) {
+        const req: Api.ApiRequest<Api.SimpleJobRqData> = {
+            req_type: 'MmbOutput',
+            data: { id },
+        };
+        return Request.api(req);
+    }
+
     export function resume(id: string, commands: JsonCommands) {
         const req: Api.ApiRequest<Api.ResumeJobRqData> = {
             req_type: 'ResumeJob',

@@ -99,6 +99,12 @@ export namespace ResponseDeserializers {
         return list;
     }
 
+    export function toMmbOutput(obj: unknown): string {
+        if (!isStr(obj))
+            throw new Error('Input variable is not a string');
+        return obj as string;
+    }
+
     export function toSessionInfo(obj: unknown): Api.SessionInfo {
         if (!isObj(obj))
             throw new Error(NOT_AN_OBJ);
