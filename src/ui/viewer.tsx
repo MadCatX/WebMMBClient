@@ -9,6 +9,7 @@
 import * as React from 'react';
 import { LinkButton } from './common/link-button';
 import { PushButton } from './common/push-button';
+import { TooltippedField } from './common/tooltipped-field';
 
 declare let WebMmbViewer: any;
 
@@ -76,11 +77,14 @@ export class Viewer extends React.Component<Viewer.Props, State> {
                         downloadAs={`${this.props.structureName}.pdb`} />
                 </div>
                 <div className='padded'>
-                    <span className='padded'>Refresh rate (sec):</span>
+                    <TooltippedField
+                        position='above'
+                        text='Query the server for job status automatically every N seconds'
+                        renderContent={() => (<span className='padded'>Refresh rate (sec):</span>)} />
                     <input
                         type='text'
                         onChange={
-                            (e) => {
+                            e => {
                                 const val = (() => {
                                     const v = e.currentTarget.value;
                                     if (v.length === 0)
@@ -97,11 +101,14 @@ export class Viewer extends React.Component<Viewer.Props, State> {
                         }
                         value={this.state.autoRefreshInterval === null ? '' : this.state.autoRefreshInterval}
                         className='padded' />
-                    <span className='padded'>Auto:</span>
+                    <TooltippedField
+                        position='above'
+                        text='Enable/disable automatic refresh'
+                        renderContent={() => (<span className='padded'>Auto:</span>)} />
                     <input
                         type='checkbox'
                         onChange={
-                            (e) => {
+                            e => {
                                 const chk = e.currentTarget.checked;
                                 this.setState({...this.state, autoRefreshEnabled: chk});
                                 if (this.state.autoRefreshInterval !== null)

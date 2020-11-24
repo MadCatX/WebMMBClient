@@ -339,6 +339,37 @@
     display: inline-block;
     position: relative;
 }
+.tooltip-container:hover {
+    opacity: 1;
+    transition: opacity 0.25s;
+    visibility: visible;
+}
+
+.tooltip-container .tooltip-above {
+    background-color: #e0e0e0;
+    opacity: 0;
+    padding: 0.2em;
+    position: absolute;
+    bottom: 100%;
+    transition: opacity 0.25s;
+    visibility: hidden;
+    z-index: 1;
+}
+
+.tooltip-container .tooltip-above::after {
+    border-style: solid;
+    border-color: #e0e0e0 transparent transparent transparent;
+    border-width: 0.4em;
+    content: " ";
+    position: absolute;
+    left: 0.4em;
+    top: 100%;
+}
+.tooltip-container:hover .tooltip-above {
+    opacity: 1;
+    transition: opacity 0.25s;
+    visibility: visible;
+}
 
 .tooltip-container .tooltip-left {
     background-color: #e0e0e0;
@@ -360,7 +391,7 @@
     margin-top: -0.4em;
     position: absolute;
     left: 100%;
-    top: 50%;
+    top: 0.9em;
 }
 .tooltip-container:hover .tooltip-left {
     opacity: 1;

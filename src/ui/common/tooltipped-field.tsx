@@ -20,7 +20,7 @@ export class TooltippedField extends React.Component<TooltippedField.Props> {
             return undefined;
 
         const cls = `tooltip-${this.props.position}`;
-        return (<div className={cls}>{this.props.text}</div>);
+        return (<span className={cls}>{this.props.text}</span>);
     }
 
     render() {
