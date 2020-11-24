@@ -46,6 +46,7 @@ export namespace AbstractPushButton {
         value: string;
         id?: string;
         className?: string
+        classNameDisabled?: string;
     }
 }
 
@@ -57,6 +58,5 @@ export namespace PushButton {
     export interface Props extends AbstractPushButton.Props {
         onClick: OnClick;
         enabled: boolean;
-        classNameDisabled?: string;
     }
 }

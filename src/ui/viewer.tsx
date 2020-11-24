@@ -70,8 +70,9 @@ export class Viewer extends React.Component<Viewer.Props, State> {
                         onClick={() => this.switchRepresentation('cartoon')} />
                     <LinkButton
                         className='pushbutton-flex pushbutton-clr-default pushbutton-hclr-default'
+                        classNameDisabled='pushbutton-flex pushbutton-clr-default-disabled'
                         value='Download'
-                        url={this.url() ?? ''}
+                        url={this.url()}
                         downloadAs={`${this.props.structureName}.pdb`} />
                 </div>
                 <div className='padded'>
