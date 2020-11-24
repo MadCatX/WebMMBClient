@@ -3,9 +3,9 @@ import { FormUtil } from './form';
 import { FormField } from './form-field';
 import { CheckBox, GCheckBox } from './check-box';
 import { ComboBox, GComboBox } from './combo-box';
-import { TooltippedField } from './tooltipped-field';
 import { LineEdit, GLineEdit } from './line-edit';
 import { TextArea, GTextArea } from './text-area';
+import { TooltippedField } from './tooltipped-field';
 
 export class GLabeledField<KE, KV extends string, T, U extends FormUtil.V<T>> extends FormField<KE, KV, T, GLabeledField.Props<KV, T, U>> {
     /*static defaultProps = {
@@ -21,7 +21,6 @@ export class GLabeledField<KE, KV extends string, T, U extends FormUtil.V<T>> ex
     constructor(props: GLabeledField.Props<KV, T, U>) {
         super(props);
 
-        this.renderField = this.renderField.bind(this);
         this.renderLabel = this.renderLabel.bind(this);
     }
 
@@ -38,15 +37,6 @@ export class GLabeledField<KE, KV extends string, T, U extends FormUtil.V<T>> ex
         case 'text-area':
             return (<this.TextArea {...this.props} className={cname} />);
         }
-    }
-
-    private renderField() {
-        return (
-            <>
-                <label className='form-field-label' htmlFor={`${this.props.id}`}>{this.props.label}</label>
-                {this.inputField(this.props.position)}
-            </>
-        );
     }
 
     private renderLabel() {
@@ -69,10 +59,13 @@ export class GLabeledField<KE, KV extends string, T, U extends FormUtil.V<T>> ex
             );
         case 'left':
             return (
-                <TooltippedField
-                    position='left'
-                    text={this.props.tooltip}
-                    renderContent={this.renderField} />
+                <>
+                    <TooltippedField
+                        position='left'
+                        text={this.props.tooltip}
+                        renderContent={this.renderLabel} />
+                    {this.inputField(this.props.position)}
+                </>
             );
         }
     }
