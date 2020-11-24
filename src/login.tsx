@@ -84,7 +84,7 @@ export class Login extends Form<LfUtil.ErrorKeys, LfUtil.ValueKeys, LfUtil.Value
                         errors={this.getErrors(this.state, 'login-errors') ?? new Array<string>()} />
                     <PushButton
                         value='Enter'
-                        className='pushbutton-default pushbutton-hc-green'
+                        className='pushbutton-default pushbutton-clr-default pushbutton-hclr-green'
                         onClick={() => this.logIn()} />
                 </div>
             </Ctx.Provider>

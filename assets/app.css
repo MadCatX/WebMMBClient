@@ -100,7 +100,6 @@
     color: black;
     font-weight: bold;
     text-decoration: none;
-    vertical-align: middle;
 }
 
 .login-form-container {
@@ -211,16 +210,13 @@
 }
 
 .pushbutton-chained {
-    color: black;
     border: 0.1em solid black;
     display: inline-block;
     margin: 0.2em;
     text-align: center;
-    transition: background-color 0.25s;
 }
 
 .pushbutton-default {
-    color: black;
     border: 0.1em solid black;
     margin: 0.2em;
     text-align: center;
@@ -269,7 +265,6 @@
 
 .pushbutton-text {
     font-weight: bold;
-    vertical-align: middle;
 }
 
 .section {

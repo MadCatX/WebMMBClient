@@ -52,7 +52,7 @@ export class Logout extends React.Component<Logout.Props, State> {
                 <div className={cpyCls}>Copied!&nbsp;</div>
                 <div className='inlined' onClick={this.copyIdToClipboard}>ID: {this.props.username ?? ''}</div>
                 <PushButton
-                    className='pushbutton-chained pushbutton-hc-red'
+                    className='pushbutton-chained pushbutton-clr-default pushbutton-hclr-red'
                     value='Log out'
                     onClick={() => this.logOut()} />
             </div>
