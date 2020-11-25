@@ -14,6 +14,7 @@ import * as Api from '../mmb/api';
 import { JobQuery } from '../mmb/job-query';
 import { Response } from '../mmb/response';
 import { ResponseDeserializers } from '../mmb/response-deserializers';
+import { Net } from '../util/net';
 
 interface JobEntry {
     ok: boolean,
@@ -55,6 +56,10 @@ function jobListItemToEntry(item: Api.JobListItem): JobEntry {
 }
 
 export class JobList extends React.Component<JobList.Props, State> {
+    private deleteJobAborter: AbortController | null = null;
+    private listJobsAborter: AbortController | null = null;
+    private selectJobAborter: AbortController | null = null;
+
     constructor(props: JobList.Props) {
         super(props);
 
@@ -72,8 +77,15 @@ export class JobList extends React.Component<JobList.Props, State> {
     }
 
     private onDeleteJobClicked(id: string) {
-        JobQuery.del(id).then(resp => {
+        Net.abortFetch(this.deleteJobAborter);
+
+        const { promise, aborter } = JobQuery.del(id);
+        this.deleteJobAborter = aborter;
+        promise.then(resp => {
             resp.json().then(json => {
+                if (Net.isFetchAborted(aborter))
+                    return;
+
                 const r = Response.parse<Api.Empty>(json, ResponseDeserializers.toEmpty);
 
                 if (Response.isError(r)) {
@@ -92,6 +104,8 @@ export class JobList extends React.Component<JobList.Props, State> {
                 });
             });
         }).catch(e => {
+            if (Net.isAbortError(e))
+                return;
             this.setState({
                 ...this.state,
                 error: e.toString(),
@@ -109,9 +123,16 @@ export class JobList extends React.Component<JobList.Props, State> {
         if (job === undefined)
             throw new Error(`Job ${id} does not exist`);
 
-        JobQuery.commands(id).then(resp => {
+        Net.abortFetch(this.selectJobAborter);
+
+        const { promise, aborter } = JobQuery.commands(id);
+        this.selectJobAborter = aborter;
+        promise.then(resp => {
             if (resp.status === 200) {
                 resp.json().then(json => {
+                    if (Net.isFetchAborted(aborter))
+                        return;
+
                     const r = Response.parse<JsonCommands>(json, jsonCommandsFromJson);
 
                     if (Response.isError(r)) {
@@ -139,6 +160,8 @@ export class JobList extends React.Component<JobList.Props, State> {
                 });
             }
         }).catch(e => {
+            if (Net.isAbortError(e))
+                return;
             this.setState({
                 ...this.state,
                 error: e.toString(),
@@ -147,9 +170,16 @@ export class JobList extends React.Component<JobList.Props, State> {
     }
 
     private refresh() {
-        JobQuery.list().then(resp => {
+        Net.abortFetch(this.listJobsAborter);
+
+        const { promise, aborter } = JobQuery.list();
+        this.listJobsAborter = aborter;
+        promise.then(resp => {
             if (resp.status === 200) {
                 resp.json().then(json => {
+                    if (Net.isFetchAborted(aborter))
+                        return;
+
                     const r = Response.parse<Api.JobListItem[]>(json, ResponseDeserializers.toJobList);
 
                     if (Response.isError(r)) {
@@ -180,6 +210,8 @@ export class JobList extends React.Component<JobList.Props, State> {
                 });
             }
         }).catch(e => {
+            if (Net.isAbortError(e))
+                return;
             this.setState({
                 ...this.state,
                 jobs: [],
@@ -212,6 +244,12 @@ export class JobList extends React.Component<JobList.Props, State> {
                 </>
             );
         }
+    }
+
+    componentWillUnmount() {
+        Net.abortFetch(this.deleteJobAborter);
+        Net.abortFetch(this.listJobsAborter);
+        Net.abortFetch(this.selectJobAborter);
     }
 
     render() {

@@ -18,6 +18,7 @@ import { JsonCommands } from './mmb/commands';
 import { Response } from './mmb/response';
 import { ResponseDeserializers } from './mmb/response-deserializers';
 import { SessionQuery } from './mmb/session-query';
+import { Net } from './util/net';
 
 type Tabs = 'job-list' | 'job-control';
 
@@ -37,20 +38,9 @@ interface Props {
 
 const NavTabsBar = TabsBar<Tabs>();
 
-async function getSessionInfo() {
-    const resp  = await SessionQuery.info();
-    if (resp.status !== 200)
-        throw new Error(`Failed to get session info, ${resp.status} ${resp.statusText}`);
-
-    const json = await resp.json();
-    const r = Response.parse<Api.SessionInfo>(json, ResponseDeserializers.toSessionInfo);
-
-    if (Response.isOk(r))
-        return r.data.id;
-    throw new Error('Failed to get session info, invalid response');
-}
-
 export class Main extends React.Component<Props, State> {
+    private sessionInfoAborter: AbortController | null = null;
+
     constructor(props: Props) {
         super(props);
 
@@ -127,13 +117,41 @@ export class Main extends React.Component<Props, State> {
     }
 
     componentDidMount() {
-        getSessionInfo().then(session_id => {
+        Net.abortFetch(this.sessionInfoAborter);
+
+        const { promise, aborter } = SessionQuery.info();
+        this.sessionInfoAborter = aborter;
+
+        promise.then(resp => {
             console.log('Requesting session info');
-            this.setState({
-                ...this.state,
-                session_id,
-            });
-        }).catch(e => console.error(e.toString()));
+
+            if (resp.status !== 200)
+                throw new Error(`Failed to get session info, ${resp.status} ${resp.statusText}`);
+
+            resp.json().then(json => {
+                if (Net.isFetchAborted(aborter))
+                    return;
+
+                const r = Response.parse<Api.SessionInfo>(json, ResponseDeserializers.toSessionInfo);
+
+                if (Response.isError(r)) {
+                    console.error(r.message);
+                } else if (Response.isOk(r)) {
+                    this.setState({
+                        ...this.state,
+                        session_id: r.data.id,
+                    });
+                }
+            }).catch(e => console.error(e.toString));
+        }).catch(e => {
+            if (Net.isAbortError(e))
+                return;
+            console.error(e.toString())
+        });
+    }
+
+    componentWillUnmount() {
+        Net.abortFetch(this.sessionInfoAborter);
     }
 
     render() {

@@ -9,8 +9,14 @@
 import { ApiRequest, AuthRequest } from './api';
 
 export namespace Request {
-    export function api<T>(req: ApiRequest<T>) {
-        return fetch(
+    export interface Pending {
+        promise: Promise<Response>;
+        aborter: AbortController;
+    }
+
+    export function api<T>(req: ApiRequest<T>): Pending {
+        const aborter = new AbortController();
+        const promise = fetch(
             '/api',
             {
                 method: 'POST',
@@ -20,12 +26,16 @@ export namespace Request {
                 },
                 redirect: 'error',
                 body: JSON.stringify(req),
+                signal: aborter.signal,
             },
         );
+
+        return { promise, aborter };
     }
 
-    export function auth(req: AuthRequest) {
-        return fetch(
+    export function auth(req: AuthRequest): Pending {
+        const aborter = new AbortController();
+        const promise = fetch(
             '/auth',
             {
                 method: 'POST',
@@ -35,7 +45,10 @@ export namespace Request {
                 },
                 redirect: 'follow',
                 body: JSON.stringify(req),
+                signal: aborter.signal,
             },
         );
+
+        return { promise, aborter };
     }
 }

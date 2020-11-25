@@ -15,10 +15,13 @@ import { LoginFormUtil as LfUtil } from './ui/login-form-util';
 import { FormContextManager as FCM } from './ui/form-context-manager';
 import { PushButton } from './ui/common/push-button';
 import { ErrorBox } from './ui/common/error-box';
+import { Net } from './util/net';
 
 const StrLabeledField = LabeledField<LfUtil.ErrorKeys, LfUtil.ValueKeys, LfUtil.Values, string>();
 
 export class Login extends Form<LfUtil.ErrorKeys, LfUtil.ValueKeys, LfUtil.ValueTypes, LfUtil.Props> {
+    private aborter: AbortController | null = null;
+
     constructor(props: LfUtil.Props) {
         super(props);
 
@@ -30,7 +33,11 @@ export class Login extends Form<LfUtil.ErrorKeys, LfUtil.ValueKeys, LfUtil.Value
     private logIn() {
         const session_id = this.getScalar<string>(this.state, 'login-session-id', '');
 
-        AuthQuery.logIn(session_id).then(resp => {
+        Net.abortFetch(this.aborter);
+
+        const { promise, aborter } = AuthQuery.logIn(session_id);
+        this.aborter = aborter;
+        promise.then(resp => {
             if (resp.ok === true && resp.redirected) {
                 window.location.href = resp.url;
             } else {
@@ -41,6 +48,8 @@ export class Login extends Form<LfUtil.ErrorKeys, LfUtil.ValueKeys, LfUtil.Value
                 });
             }
         }).catch(e => {
+            if (Net.isAbortError(e))
+                return;
             this.setAuthError(e.toString());
         });
     }
@@ -55,6 +64,7 @@ export class Login extends Form<LfUtil.ErrorKeys, LfUtil.ValueKeys, LfUtil.Value
     }
 
     componentWillUnmount() {
+        Net.abortFetch(this.aborter);
         FCM.unregisterContext(this.props.id);
     }
 
