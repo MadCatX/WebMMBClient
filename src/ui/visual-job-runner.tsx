@@ -339,6 +339,11 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
         return `/structure/${this.props.username}/${this.state.jobId}`;
     }
 
+    componentDidMount() {
+        if (this.state.jobId !== undefined)
+            this.queryJobStatus();
+    }
+
     componentDidUpdate(_prevProps: VisualJobRunner.Props, prevState: State) {
         if (prevState.jobState === 'Running' && this.state.jobState !== 'Running')
             this.setupAutoRefresh(false, this.state.autoRefreshInterval, this.state.jobState)
