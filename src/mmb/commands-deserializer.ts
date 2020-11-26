@@ -18,6 +18,7 @@ import { Orientation } from '../model/orientation';
 import { Reporting } from '../model/reporting';
 import { StagesSpan } from '../model/stages-span';
 import { DefaultMdParamsKey, JsonCommands } from './commands';
+import { Num } from '../util/num';
 
 export namespace JsonCommandsDeserializer {
     function getChain(tok: string) {
@@ -45,7 +46,7 @@ export namespace JsonCommandsDeserializer {
     }
 
     function getResNo(tok: string) {
-        const n = parseInt(tok);
+        const n = Num.parseIntStrict(tok);
         if (isNaN(n))
             throw new Error('Invalid residue no');
         return n;
@@ -61,7 +62,7 @@ export namespace JsonCommandsDeserializer {
     }
 
     function getSingleInt(toks: string[], pos = 0) {
-        const n = parseInt(toks[pos]);
+        const n = Num.parseIntStrict(toks[pos]);
         if (isNaN(n))
             throw new Error(`Invalid value ${toks[pos]}`);
         return n;
