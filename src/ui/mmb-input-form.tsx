@@ -71,7 +71,7 @@ export class MmbInputForm extends Form<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, Mmb
             return (
                 <MmbCommands
                     commands={new Array<string>()}
-                    errors={e} />
+                    errors={[e.toString()]} />
             );
         }
     }

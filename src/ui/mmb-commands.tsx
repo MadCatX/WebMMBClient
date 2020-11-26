@@ -17,9 +17,9 @@ export class MmbCommands extends React.Component<MmbCommands.Props> {
                 <pre className="verbatim">
                     {this.props.commands.map((line) => `${line}\n`)}
                 </pre>
-                <ErrorBox errors={this.props.errors } />
+                <ErrorBox errors={this.props.errors} />
             </div>
-        )
+        );
     }
 }
 
