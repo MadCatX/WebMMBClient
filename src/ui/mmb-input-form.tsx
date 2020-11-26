@@ -84,7 +84,7 @@ export class MmbInputForm extends Form<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, Mmb
         const errors: string[] = [];
 
         const bisf = parseInt(this.getScalar(this.state, 'mol-in-gp-bisf', ''));
-        const repInt = parseInt(this.getScalar(this.state, 'mol-in-gp-reporting-interval', ''));
+        const repInt = parseFloat(this.getScalar(this.state, 'mol-in-gp-reporting-interval', ''));
         const numReps = parseInt(this.getScalar(this.state, 'mol-in-gp-num-reports', ''));
         const temp = parseInt(this.getScalar(this.state, 'mol-in-gp-temperature', ''));
         const useDefMd = this.getScalar(this.state, 'mol-in-gp-def-md-params', false);
