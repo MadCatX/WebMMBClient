@@ -68,8 +68,13 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
         this.mmbInputFormRef = React.createRef();
     }
 
-    private jobInfoErrorBlock(e: Error) {
-        return { jobError: e.toString() };
+    private jobInfoErrorBlock(e: Error, step?: Api.JobStep, totalSteps?: Api.JobTotalSteps) {
+        let obj = { jobState: 'Failed' as Api.JobState, jobError: e.toString() };
+        if (step !== undefined)
+            obj = Object.assign({ jobStep: step }, obj);
+        if (totalSteps !== undefined)
+            obj = Object.assign({ jobTotalSteps: totalSteps }, obj);
+        return obj;
     }
 
     private jobInfoOkBlock(data: Api.JobInfo) {
@@ -252,7 +257,9 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
 
                     const r = Response.parse<Api.JobInfo>(json, ResponseDeserializers.toJobInfo);
 
-                    if (Response.isOk(r)) {
+                    if (Response.isError(r))
+                        throw new Error(r.message);
+                    else if (Response.isOk(r)) {
                         this.setupAutoRefresh(this.state.autoRefreshEnabled, this.state.autoRefreshInterval, 'Running');
                         this.setState({
                             ...this.state,
@@ -260,14 +267,16 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
                         });
                         this.props.onJobStarted(r.data, commands);
                     }
+                }).catch(e => {
+                    this.setState({
+                        ...this.state,
+                        ...this.jobInfoErrorBlock(e, 'none', 'none'),
+                    });
                 });
             }).catch(e => {
                 this.setState({
                     ...this.state,
-                    jobState: 'Failed',
-                    jobStep: 'none',
-                    jobTotalSteps: 'none',
-                    jobError: e.message,
+                    ...this.jobInfoErrorBlock(e, 'none', 'none'),
                 });
             });
             console.log(commands);
