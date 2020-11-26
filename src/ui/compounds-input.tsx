@@ -9,6 +9,7 @@
 import * as React from 'react';
 import { FormContextManager as FCM } from './form-context-manager';
 import { MmbInputUtil as MmbUtil, MMBFU } from './mmb-input-form-util';
+import { UiUtil } from './util';
 import { ErrorBox } from './common/error-box';
 import { FormBlock } from './common/form-block';
 import { LabeledField, GLabeledField } from './common/labeled-field';
@@ -31,7 +32,7 @@ class CompoundsInputInner extends FormBlock<CompoundsInputInner.Props> {
 
     private addSequence(data: MmbUtil.ContextData) {
         const chain = MMBFU.getScalar(data, 'mol-in-cp-chain-id', '');
-        const firstResidueNo = parseInt(MMBFU.getScalar(data, 'mol-in-cp-first-res-no', ''));
+        const firstResidueNo = UiUtil.parseIntStrict(MMBFU.getScalar(data, 'mol-in-cp-first-res-no', ''));
         const type = MMBFU.getScalar<Compound.Type>(data, 'mol-in-cp-compound-type', 'RNA');
 
         const errors: string[] = [];
