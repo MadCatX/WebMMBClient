@@ -61,6 +61,13 @@ export namespace JsonCommandsDeserializer {
         throw new Error(`Invalid boolean value ${v}`);
     }
 
+    function getSingleFloat(toks: string[], pos = 0) {
+        const n = Num.parseFloatStrict(toks[pos]);
+        if (isNaN(n))
+            throw new Error(`Invalid value ${toks[pos]}`);
+        return n;
+    }
+
     function getSingleInt(toks: string[], pos = 0) {
         const n = Num.parseIntStrict(toks[pos]);
         if (isNaN(n))
@@ -201,7 +208,7 @@ export namespace JsonCommandsDeserializer {
 
     export function toReporting(commands: JsonCommands) {
         const count = getSingleInt(commands.numReportingIntervals);
-        const interval = getSingleInt(commands.reportingInterval);
+        const interval = getSingleFloat(commands.reportingInterval);
 
         return new Reporting(interval, count);
     }
