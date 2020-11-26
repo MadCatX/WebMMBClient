@@ -12,6 +12,7 @@ import { JobStatus } from './job-status';
 import { MmbInputForm } from './mmb-input-form';
 import { MmbInputUtil as MmbUtil } from './mmb-input-form-util';
 import { Viewer } from './viewer';
+import { ErrorBox } from './common/error-box';
 import * as Api from '../mmb/api';
 import { JsonCommands } from '../mmb/commands';
 import { JobQuery } from '../mmb/job-query';
@@ -59,6 +60,7 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
             mmbOutput: { text: undefined, errors: undefined },
         };
 
+        this.makeMmbInputForm = this.makeMmbInputForm.bind(this);
         this.onAutoRefreshChanged = this.onAutoRefreshChanged.bind(this);
         this.queryJobStatus = this.queryJobStatus.bind(this);
         this.refreshJob = this.refreshJob.bind(this);
@@ -116,6 +118,24 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
         map.set('mol-in-job-name', name);
 
         return map;
+    }
+
+    private makeMmbInputForm() {
+        try {
+            const initVals = this.makeInitialValues(this.props.commands, this.props.info?.name);
+            return (
+                <MmbInputForm
+                    ref={this.mmbInputFormRef}
+                    id='molecule-input'
+                    jobName={this.props.info?.name}
+                    initialValues={initVals} />
+            );
+        } catch (e) {
+            return (
+                <ErrorBox
+                    errors={[`Invalid job parameters: ${e.toString()}`]} />
+            );
+        }
     }
 
     private mmbOutputErrorBlock(e: Error) {
@@ -383,11 +403,7 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
                         step={this.state.jobStep}
                         totalSteps={this.state.jobTotalSteps}
                         error={this.state.jobError} />
-                    <MmbInputForm
-                        ref={this.mmbInputFormRef}
-                        id='molecule-input'
-                        jobName={this.props.info?.name}
-                        initialValues={this.makeInitialValues(this.props.commands, this.props.info?.name)} />
+                    {this.makeMmbInputForm()}
                     <JobControls
                         handleStart={this.startJob}
                         handleStatus={this.queryJobStatus}
