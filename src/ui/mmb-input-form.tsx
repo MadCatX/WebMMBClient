@@ -25,7 +25,7 @@ import { NtCConformation } from '../model/ntc-conformation';
 import { MdParameters } from '../model/md-parameters';
 import { JobNameInput } from './job-name-input';
 import {MmbCommands} from './mmb-commands';
-import { UiUtil } from './util';
+import { Num } from '../util/num';
 
 export class MmbInputForm extends Form<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, MmbUtil.ValueTypes, MmbUtil.Props> {
     constructor(props: MmbUtil.Props) {
@@ -84,10 +84,10 @@ export class MmbInputForm extends Form<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, Mmb
     private makeParams(stage: number): CommandsSerializer.Parameters {
         const errors: string[] = [];
 
-        const bisf = UiUtil.parseIntStrict(this.getScalar(this.state, 'mol-in-gp-bisf', ''));
-        const repInt = UiUtil.parseFloatStrict(this.getScalar(this.state, 'mol-in-gp-reporting-interval', ''));
-        const numReps = UiUtil.parseIntStrict(this.getScalar(this.state, 'mol-in-gp-num-reports', ''));
-        const temp = UiUtil.parseIntStrict(this.getScalar(this.state, 'mol-in-gp-temperature', ''));
+        const bisf = Num.parseIntStrict(this.getScalar(this.state, 'mol-in-gp-bisf', ''));
+        const repInt = Num.parseFloatStrict(this.getScalar(this.state, 'mol-in-gp-reporting-interval', ''));
+        const numReps = Num.parseIntStrict(this.getScalar(this.state, 'mol-in-gp-num-reports', ''));
+        const temp = Num.parseIntStrict(this.getScalar(this.state, 'mol-in-gp-temperature', ''));
         const useDefMd = this.getScalar(this.state, 'mol-in-gp-def-md-params', false);
 
         if (isNaN(bisf))
