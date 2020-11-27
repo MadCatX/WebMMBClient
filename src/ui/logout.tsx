@@ -9,6 +9,7 @@
 import * as React from 'react';
 import { PushButton } from './common/push-button';
 import { AuthQuery } from '../mmb/auth-query';
+import {TooltippedField} from './common/tooltipped-field';
 
 interface State {
     copiedNote: boolean;
@@ -50,7 +51,12 @@ export class Logout extends React.Component<Logout.Props, State> {
         return (
             <div className='logout-container'>
                 <div className={cpyCls}>Copied!&nbsp;</div>
-                <div className='inlined' onClick={this.copyIdToClipboard}>Session ID: {this.props.username ?? ''}</div>
+                <TooltippedField
+                    position='below'
+                    text='Click on the ID to copy it to clipboard'
+                    renderContent={
+                        () => (<div className='inlined' onClick={this.copyIdToClipboard}>Session ID: {this.props.username ?? ''}</div>)
+                    } />
                 <PushButton
                     className='pushbutton-chained pushbutton-clr-default pushbutton-hclr-red'
                     value='Log out'
