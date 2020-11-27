@@ -19,7 +19,7 @@ export class TooltippedField extends React.Component<TooltippedField.Props> {
         if (this.props.text === undefined)
             return undefined;
 
-        const cls = `tooltip-${this.props.position}`;
+        const cls = `tooltip-common tooltip-${this.props.position}`;
         return (<span className={cls}>{this.props.text}</span>);
     }
 

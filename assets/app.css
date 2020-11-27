@@ -350,15 +350,18 @@
     visibility: visible;
 }
 
-.tooltip-container .tooltip-above {
+.tooltip-container .tooltip-common {
     background-color: #e0e0e0;
     opacity: 0;
     padding: 0.2em;
     position: absolute;
-    bottom: 100%;
     transition: opacity 0.25s;
     visibility: hidden;
     z-index: 1;
+}
+
+.tooltip-container .tooltip-above {
+    bottom: 100%;
 }
 
 .tooltip-container .tooltip-above::after {
@@ -377,15 +380,9 @@
 }
 
 .tooltip-container .tooltip-left {
-    background-color: #e0e0e0;
-    opacity: 0;
-    padding: 0.2em;
     position: absolute;
     top: -0.1em;
     right: calc(100% + 0.4em);
-    transition: opacity 0.25s;
-    visibility: hidden;
-    z-index: 1;
 }
 
 .tooltip-container .tooltip-left::after {
