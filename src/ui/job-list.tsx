@@ -16,14 +16,8 @@ import { Response } from '../mmb/response';
 import { ResponseDeserializers } from '../mmb/response-deserializers';
 import { Net } from '../util/net';
 
-interface JobEntry {
+interface JobEntry extends Api.JobInfo {
     ok: boolean,
-    id: string,
-    name: string,
-    state: Api.JobState,
-    step: Api.JobStep,
-    total_steps: Api.JobTotalSteps,
-    last_completed_stage: number,
 }
 
 interface State {
@@ -40,6 +34,7 @@ function jobListItemToEntry(item: Api.JobListItem): JobEntry {
             state: item.info.state,
             step: item.info.step,
             total_steps: item.info.total_steps,
+            last_available_stage: item.info.last_available_stage,
             last_completed_stage: item.info.last_completed_stage,
         };
     } else {
@@ -50,6 +45,7 @@ function jobListItemToEntry(item: Api.JobListItem): JobEntry {
             state: 'NotStarted',
             step: 0,
             total_steps: 0,
+            last_available_stage: 0,
             last_completed_stage: 0,
         };
     }

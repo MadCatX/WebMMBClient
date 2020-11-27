@@ -54,14 +54,14 @@ export class MmbInputForm extends Form<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, Mmb
             });
         }
 
-        const commands =  JsonCommandsSerializer.serialize(this.makeParams(lastCompletedStage + 1));
+        const commands =  JsonCommandsSerializer.serialize(this.makeParams(2));
 
         return { name, commands };
     }
 
     private makeMmbCommands() {
         try {
-            const cmds = TextCommandsSerializer.serialize(this.makeParams(1));
+            const cmds = TextCommandsSerializer.serialize(this.makeParams(2));
 
             return (
                 <MmbCommands

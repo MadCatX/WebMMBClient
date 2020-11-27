@@ -80,6 +80,7 @@ export type JobInfo = {
     state: JobState,
     step: JobStep,
     total_steps: JobTotalSteps,
+    last_available_stage: number,
     last_completed_stage: number,
 }
 

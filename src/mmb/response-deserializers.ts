@@ -17,6 +17,7 @@ const JobInfoObj: Api.JobInfo = {
     state: 'NotStarted',
     step: 'none',
     total_steps: 0,
+    last_available_stage: 0,
     last_completed_stage: 0,
 };
 const JobListItemObj: Api.JobListItem = {
@@ -58,6 +59,7 @@ export namespace ResponseDeserializers {
         checkType(tObj, 'state', isJobState);
         checkType(tObj, 'step', isJobStep);
         checkType(tObj, 'total_steps', isInt);
+        checkType(tObj, 'last_available_stage', isInt);
         checkType(tObj, 'last_completed_stage', isInt);
 
         return {
@@ -66,6 +68,7 @@ export namespace ResponseDeserializers {
             state: tObj.state,
             step: tObj.step,
             total_steps: tObj.total_steps,
+            last_available_stage: tObj.last_available_stage,
             last_completed_stage: tObj.last_completed_stage,
         };
     }
