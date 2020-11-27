@@ -50,7 +50,7 @@ export class Logout extends React.Component<Logout.Props, State> {
         return (
             <div className='logout-container'>
                 <div className={cpyCls}>Copied!&nbsp;</div>
-                <div className='inlined' onClick={this.copyIdToClipboard}>ID: {this.props.username ?? ''}</div>
+                <div className='inlined' onClick={this.copyIdToClipboard}>Session ID: {this.props.username ?? ''}</div>
                 <PushButton
                     className='pushbutton-chained pushbutton-clr-default pushbutton-hclr-red'
                     value='Log out'
