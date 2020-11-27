@@ -377,7 +377,7 @@
 }
 
 .tooltip-container .tooltip-above {
-    bottom: 100%;
+    bottom: calc(100% + 0.4em);
 }
 
 .tooltip-container .tooltip-above::after {
@@ -386,7 +386,7 @@
 }
 
 .tooltip-container .tooltip-below {
-    top: 100%;
+    top: calc(100% + 0.4em);
 }
 
 .tooltip-container .tooltip-below::after {
@@ -395,15 +395,12 @@
 }
 
 .tooltip-container .tooltip-left {
-    position: absolute;
-    top: -0.1em;
-    right: calc(100% + 0.4em);
+    right: calc(100% + 0.8em);
 }
 
 .tooltip-container .tooltip-left::after {
-    margin-top: -0.4em;
+    top: 0.4em;
     left: calc(100% - 0.4em);
-    top: 0.9em;
 }
 
 .tooltip-inner {
