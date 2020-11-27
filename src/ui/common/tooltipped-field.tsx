@@ -34,7 +34,7 @@ export class TooltippedField extends React.Component<TooltippedField.Props> {
 }
 
 export namespace TooltippedField {
-    export type Position = 'above' | 'left'
+    export type Position = 'above' | 'below' | 'left'
 
     export interface ContentRenderer {
         (): React.ReactFragment;

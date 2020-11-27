@@ -359,6 +359,11 @@
     visibility: hidden;
     z-index: 1;
 }
+.tooltip-container:hover .tooltip-common {
+    opacity: 1;
+    transition: opacity 0.25s;
+    visibility: visible;
+}
 
 .tooltip-container .tooltip-above {
     bottom: 100%;
@@ -372,11 +377,6 @@
     position: absolute;
     left: 0.4em;
     top: 100%;
-}
-.tooltip-container:hover .tooltip-above {
-    opacity: 1;
-    transition: opacity 0.25s;
-    visibility: visible;
 }
 
 .tooltip-container .tooltip-left {
@@ -394,11 +394,6 @@
     position: absolute;
     left: 100%;
     top: 0.9em;
-}
-.tooltip-container:hover .tooltip-left {
-    opacity: 1;
-    transition: opacity 0.25s;
-    visibility: visible;
 }
 
 .top-panel {
