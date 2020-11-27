@@ -13,6 +13,7 @@ const ElementTag = 'external-resources';
 function loadScript(src: string, id: string) {
     const s: HTMLScriptElement = document.createElement('script');
     s.async = false;
+    s.defer = false;
     s.id = id;
     s.src = src;
 
