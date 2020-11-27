@@ -34,14 +34,16 @@ export class GTableWithDeletableRows<KE, KV, T, U extends T & Array<any>> extend
                             {values.map((v, index) => {
                                 return (
                                     <>
-                                        {this.props.columns.map((col) => {
+                                        {this.props.columns.map((col, n) => {
+                                            const key = `col-item-${index}-${n}`
                                             if (col.stringify !== undefined)
-                                                return (<div className='column-item'>{col.stringify(v[col.k])}</div>);
+                                                return (<div className='column-item' key={key}>{col.stringify(v[col.k])}</div>);
                                             else
-                                                return (<div className='column-item'>{v[col.k]}</div>);
+                                                return (<div className='column-item' key={key}>{v[col.k]}</div>);
                                         })}
                                         <PushButton
                                             className='pushbutton-delete'
+                                            key={`delbtn-${index}`}
                                             value='-'
                                             onClick={(e) => {
                                                 e.preventDefault();
