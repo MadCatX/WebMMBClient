@@ -166,7 +166,7 @@ export namespace JsonCommandsDeserializer {
     export function toGlobal(commands: JsonCommands) {
         const bisf = getSingleInt(commands.baseInteractionScaleFactor);
         const mt = getSingleBool(commands.useMultithreadedComputation);
-        const temp = getSingleInt(commands.temperature);
+        const temp = getSingleFloat(commands.temperature);
 
         if (bisf < 0)
             throw new Error('Invalid baseInteractionScaleFactor value');

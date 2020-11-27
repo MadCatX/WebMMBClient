@@ -87,7 +87,7 @@ export class MmbInputForm extends Form<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, Mmb
         const bisf = Num.parseIntStrict(this.getScalar(this.state, 'mol-in-gp-bisf', ''));
         const repInt = Num.parseFloatStrict(this.getScalar(this.state, 'mol-in-gp-reporting-interval', ''));
         const numReps = Num.parseIntStrict(this.getScalar(this.state, 'mol-in-gp-num-reports', ''));
-        const temp = Num.parseIntStrict(this.getScalar(this.state, 'mol-in-gp-temperature', ''));
+        const temp = Num.parseFloatStrict(this.getScalar(this.state, 'mol-in-gp-temperature', ''));
         const useDefMd = this.getScalar(this.state, 'mol-in-gp-def-md-params', false);
 
         if (isNaN(bisf))
