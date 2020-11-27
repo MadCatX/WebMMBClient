@@ -7,10 +7,6 @@
     display: none;
 }
 
-#molecule-input {
-    width: 48vw;
-}
-
 #viewer {
     position: relative;
     width: 100%;
@@ -132,7 +128,7 @@
 
 .main-block {
     display: grid;
-    grid-template-columns: 50% 50%;
+    grid-template-columns: 40% 60%;
 }
 
 .main-navbar {
@@ -154,12 +150,12 @@
 
 .mol-in-cp-input {
     display: grid;
-    grid-template-columns: 10em 10em 10em 20em auto;
+    grid-template-columns: 8.8em 8.8em 5em 20em auto;
 }
 
 .mol-in-cp-added {
     display: grid;
-    grid-template-columns: 10em 10em 10em 20em auto;
+    grid-template-columns: 8.8em 8.8em 5em 20em auto;
     margin-top: 0.6em;
 }
 
@@ -176,12 +172,12 @@
 
 .mol-in-bi-input {
     display: grid;
-    grid-template-columns: 5em 5em 8em 5em 5em 8em 8em auto;
+    grid-template-columns: 6em 6em 8em 6em 6em 8em 7em auto;
 }
 
 .mol-in-bi-added {
     display: grid;
-    grid-template-columns: 5em 5em 8em 5em 5em 8em 8em auto;
+    grid-template-columns: 6em 6em 8em 6em 6em 8em 7em auto;
     margin-top: 0.6em;
 }
 
