@@ -282,54 +282,49 @@
     font-weight: bold;
 }
 
-.tabbutton-active {
-    background-color: #c0c0c0;
+.tabbutton-common {
     color: black;
-    display: inline-block;
-    padding: 0.2em;
+    display: table;
+    height: 100%;
     text-align: center;
     transition: background-color 0.25s;
 }
 
+.tabbutton-active {
+    background-color: #c0c0c0;
+}
+
 .tabbutton-inactive {
     background-color: #e0e0e0;
-    color: black;
-    display: inline-block;
-    padding: 0.2em;
-    text-align: center;
-    transition: background-color 0.25s;
 }
 .tabbutton-inactive:hover {
     background-color: #e0e0e0;
 }
 
-.tabbutton-text-active {
+.tabbutton-text-common {
     color: black;
-    display: inline-block;
+    display: table-cell;
     font-weight: bold;
+    height: 100%;
+    padding: 0 0.2em 0 0.2em;
+    vertical-align: middle;
+}
+
+.tabbutton-text-active {
     text-decoration: underline;
     text-decoration-color: black;
-    vertical-align: middle;
 }
 
 .tabbutton-text-inactive-highlighted {
-    color: black;
-    display: inline-block;
-    font-weight: bold;
     text-decoration: underline;
     text-decoration-color: black;
     transition: 0.25s;
-    vertical-align: middle;
 }
 
 .tabbutton-text-inactive {
-    color: black;
-    display: inline-block;
-    font-weight: bold;
     text-decoration: underline;
     text-decoration-color: transparent;
     transition: 0.25s;
-    vertical-align: middle;
 }
 
 .tabs-bar {

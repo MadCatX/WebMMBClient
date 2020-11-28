@@ -30,17 +30,16 @@ export class TabButton extends AbstractPushButton<TabButton.Props, State> {
     }
 
     private textClass() {
-        if (this.props.isActive === false) {
-            return this.state.isHighlighted ? 'tabbutton-text-inactive-highlighted' : 'tabbutton-text-inactive';
-        }
-        return 'tabbutton-text-active';
+        return 'tabbutton-text-common ' +
+            (this.props.isActive === false ? (this.state.isHighlighted ? 'tabbutton-text-inactive-highlighted' : 'tabbutton-text-inactive')
+                                           : 'tabbutton-text-active');
     }
 
     renderButton() {
         return (
             <div
                 id={this.props.id}
-                className={this.props.isActive ? 'tabbutton-active' : 'tabbutton-inactive'}
+                className={`tabbutton-common ${this.props.isActive ? 'tabbutton-active' : 'tabbutton-inactive'}`}
                 onClick={this.props.onClick}
                 onMouseEnter={() => this.highlighted(true)}
                 onMouseLeave={() => this.highlighted(false)}>
