@@ -221,7 +221,7 @@ class DoubleHelicesInputInner extends FormBlock<DoubleHelicesInputInner.Props> {
                         <div>{lastResNoTwo}</div>
                     </div>
                     <PushButton
-                        className='pushbutton-add'
+                        className='pushbutton-common pushbutton-add'
                         value="+"
                         onClick={(e) => {
                             e.preventDefault();

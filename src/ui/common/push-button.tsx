@@ -20,9 +20,9 @@ export class PushButton extends AbstractPushButton<PushButton.Props, {}> {
 
     private clsName() {
         if (this.props.enabled)
-            return this.props.className ?? 'pushbutton-default pushbutton-clr-default pushbutton-hclr-default';
+            return this.props.className ?? 'pushbutton-common pushbutton-default pushbutton-clr-default pushbutton-hclr-default';
         else
-            return this.props.classNameDisabled ?? 'pushbutton-default pushbutton-clr-default-disabled';
+            return this.props.classNameDisabled ?? 'pushbutton-common pushbutton-default pushbutton-clr-default-disabled';
     }
 
     renderButton() {

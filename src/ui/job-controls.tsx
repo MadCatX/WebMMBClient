@@ -16,8 +16,8 @@ export class JobControls extends React.Component<JobControls.Props, JobControls.
             <div>
                 <div className='job-controls-btns'>
                     <PushButton
-                        className='pushbutton-flex pushbutton-clr-default pushbutton-hclr-green'
-                        classNameDisabled='pushbutton-flex pushbutton-clr-default-disabled'
+                        className='pushbutton-common pushbutton-flex pushbutton-clr-default pushbutton-hclr-green'
+                        classNameDisabled='pushbutton-common pushbutton-flex pushbutton-clr-default-disabled'
                         value='Start'
                         enabled={this.props.jobState !== 'Running'}
                         onClick={e => {
@@ -25,8 +25,8 @@ export class JobControls extends React.Component<JobControls.Props, JobControls.
                             this.props.handleStart();
                         }} />
                     <PushButton
-                        className='pushbutton-flex pushbutton-clr-default pushbutton-hclr-default'
-                        classNameDisabled='pushbutton-flex pushbutton-clr-default-disabled'
+                        className='pushbutton-common pushbutton-flex pushbutton-clr-default pushbutton-hclr-default'
+                        classNameDisabled='pushbutton-common pushbutton-flex pushbutton-clr-default-disabled'
                         value='Status'
                         enabled={this.props.jobState !== 'NotStarted'}
                         onClick={e => {
@@ -34,8 +34,8 @@ export class JobControls extends React.Component<JobControls.Props, JobControls.
                             this.props.handleStatus();
                         }} />
                     <PushButton
-                        className='pushbutton-flex pushbutton-clr-default pushbutton-hclr-red'
-                        classNameDisabled='pushbutton-flex pushbutton-clr-default-disabled'
+                        className='pushbutton-common pushbutton-flex pushbutton-clr-default pushbutton-hclr-red'
+                        classNameDisabled='pushbutton-common pushbutton-flex pushbutton-clr-default-disabled'
                         value='Stop'
                         enabled={this.props.jobState === 'Running'}
                         onClick={e => {

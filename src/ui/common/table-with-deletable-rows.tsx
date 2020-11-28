@@ -42,7 +42,7 @@ export class GTableWithDeletableRows<KE, KV, T, U extends T & Array<any>> extend
                                                 return (<div className='column-item' key={key}>{v[col.k]}</div>);
                                         })}
                                         <PushButton
-                                            className='pushbutton-delete'
+                                            className='pushbutton-common pushbutton-delete'
                                             key={`delbtn-${index}`}
                                             value='-'
                                             onClick={(e) => {

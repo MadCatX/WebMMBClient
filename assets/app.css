@@ -198,50 +198,45 @@
 
 .pushbutton-add {
     background-color: #007f00;
-    border: 0.1em solid black;
     color: white;
     height: 3em;
     margin-left: auto;
     width: 3em;
-    text-align: center;
-    transition: background-color 0.25s;
 }
 .pushbutton-add:hover {
     background-color: #005e00;
 }
 
-.pushbutton-chained {
+.pushbutton-common {
     border: 0.1em solid black;
-    display: inline-block;
-    margin: 0.2em;
     text-align: center;
+    transition: background-color 0.25s;
+}
+
+.pushbutton-chained {
+    display: inline-block;
+    text-align: center;
+    margin: 0.2em;
 }
 
 .pushbutton-default {
-    border: 0.1em solid black;
     margin: 0.2em;
-    text-align: center;
 }
 
 .pushbutton-delete {
     background-color: red;
-    border: 0.1em solid black;
     color: black;
     height: 80%;
     margin: auto 0 auto auto;
     width: 3em;
-    text-align: center;
-    transition: background-color 0.25s;
 }
 .pushbutton-delete:hover {
     background-color: #e00000;
 }
 
 .pushbutton-flex {
-    border: 0.1em solid black;
     margin: 0 0.2em;
     flex-grow: 1;
-    text-align: center;
 }
 
 .pushbutton-clr-default {

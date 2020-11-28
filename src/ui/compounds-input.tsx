@@ -136,7 +136,7 @@ class CompoundsInputInner extends FormBlock<CompoundsInputInner.Props> {
                         spellcheck={false}
                         options={[]} />
                     <PushButton
-                        className='pushbutton-add'
+                        className='pushbutton-common pushbutton-add'
                         value="+"
                         onClick={(e) => {
                             e.preventDefault();

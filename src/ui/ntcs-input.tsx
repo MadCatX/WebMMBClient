@@ -153,7 +153,7 @@ class NtCsInputInner extends FormBlock<NtCsInputInner.Props> {
                         inputType='combo-box'
                         options={MmbUtil.AllNtCsOptions} />
                     <PushButton
-                        className="pushbutton-add"
+                        className="pushbutton-common pushbutton-add"
                         value="+"
                         onClick={(e) => {
                             e.preventDefault();

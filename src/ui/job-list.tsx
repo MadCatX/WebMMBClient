@@ -256,7 +256,7 @@ export class JobList extends React.Component<JobList.Props, State> {
                     {this.renderInner()}
                 </div>
                 <PushButton
-                    className='pushbutton-default pushbutton-clr-default pushbutton-hclr-green'
+                    className='pushbutton-common pushbutton-default pushbutton-clr-default pushbutton-hclr-green'
                     value='+ New job'
                     onClick={() => this.onSelectJobClicked(undefined)} />
             </div>

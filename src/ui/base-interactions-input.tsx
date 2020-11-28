@@ -177,7 +177,7 @@ class BaseInteractionsInputInner extends FormBlock<BaseInteractionsInputInner.Pr
                         inputType='combo-box'
                         options={OrientationOptions} />
                     <PushButton
-                        className="pushbutton-add"
+                        className="pushbutton-common pushbutton-add"
                         value="+"
                         onClick={(e) => {
                             e.preventDefault();

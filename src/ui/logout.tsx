@@ -58,7 +58,7 @@ export class Logout extends React.Component<Logout.Props, State> {
                         () => (<div className='inlined' onClick={this.copyIdToClipboard}>Session ID: {this.props.username ?? ''}</div>)
                     } />
                 <PushButton
-                    className='pushbutton-chained pushbutton-clr-default pushbutton-hclr-red'
+                    className='pushbutton-common pushbutton-chained pushbutton-clr-default pushbutton-hclr-red'
                     value='Log out'
                     onClick={() => this.logOut()} />
             </div>
