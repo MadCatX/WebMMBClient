@@ -8,6 +8,7 @@
 
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
+import { isExtResAvailable } from './external-resources-loader';
 import { JobList } from './ui/job-list';
 import { Logout } from './ui/logout';
 import { TabsBar } from './ui/tabs-bar';
@@ -89,7 +90,7 @@ export class Main extends React.Component<Props, State> {
     private onTabChanged(id: Tabs) {
         console.log(id);
 
-        if (id === 'job-control' && this.state.session_id === undefined)
+        if (id === 'job-control' && (this.state.session_id === undefined || !isExtResAvailable('molstar-app')))
             return;
 
         this.setState({ ...this.state, activeTab: id });

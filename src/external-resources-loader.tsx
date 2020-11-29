@@ -37,6 +37,12 @@ async function loadScript(src: string, id: string) {
     er.appendChild(s);
 }
 
+export function isExtResAvailable(id: string) {
+    if (!Resources.has(id))
+        return false;
+    return Resources.get(id)!.checkAvailable();
+}
+
 export class ExternalResourcesLoader extends React.Component {
     componentDidMount() {
         for (const [k, v] of Resources)
