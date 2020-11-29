@@ -43,7 +43,7 @@ class GlobalParametersInputInner extends FormBlock<GlobalParametersInputInner.Pr
                         formId={this.props.formId}
                         label='Interaction scale factor'
                         tooltip='baseInteractionScaleFactor'
-                        position='above'
+                        style='above'
                         inputType='line-edit'
                         options={[]} />
                     <NumLabeledField
@@ -51,7 +51,7 @@ class GlobalParametersInputInner extends FormBlock<GlobalParametersInputInner.Pr
                         formId={this.props.formId}
                         label='Reporting interval'
                         tooltip='reportingInterval'
-                        position='above'
+                        style='above'
                         inputType='line-edit'
                         options={[]} />
                     <NumLabeledField
@@ -59,7 +59,7 @@ class GlobalParametersInputInner extends FormBlock<GlobalParametersInputInner.Pr
                         formId={this.props.formId}
                         label='Number of reports'
                         tooltip='numReportingIntervals'
-                        position='above'
+                        style='above'
                         inputType='line-edit'
                         options={[]} />
                     <NumLabeledField
@@ -67,7 +67,7 @@ class GlobalParametersInputInner extends FormBlock<GlobalParametersInputInner.Pr
                         formId={this.props.formId}
                         label='Temperature'
                         tooltip='temperature'
-                        position='above'
+                        style='above'
                         inputType='line-edit'
                         options={[]} />
                     <CheckBox
@@ -75,7 +75,7 @@ class GlobalParametersInputInner extends FormBlock<GlobalParametersInputInner.Pr
                         formId={this.props.formId}
                         label='Turn on electrostatic and Lennard-Jones forces'
                         tooltip='setDefaultMDParameters'
-                        position='left'
+                        style='left'
                         inputType='check-box'
                         options={[]} />
                 </div>

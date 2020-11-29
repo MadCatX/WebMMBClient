@@ -23,7 +23,7 @@ export class JobNameInputInner extends React.Component<JobNameInputInner.Props> 
                     <StrLabeledField
                         {...GLabeledField.tags('mol-in-job-name', this.props.formId, ['labeled-field'])}
                         formId={this.props.formId}
-                        position='left'
+                        style='left-tabular'
                         label='Job name'
                         inputType='line-edit'
                         options={[]} />

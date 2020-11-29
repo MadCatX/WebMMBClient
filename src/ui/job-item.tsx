@@ -10,6 +10,13 @@ import * as React from 'react';
 import * as Api from '../mmb/api';
 import { PushButton } from './common/push-button';
 
+function padStr(num: number) {
+    let s = num.toString();
+    while (s.length < 2)
+        s = '0' + s;
+    return s;
+}
+
 export class JobItem extends React.Component<JobItem.Props> {
     private renderJobStatus(s: Api.JobState) {
         switch (s) {
@@ -26,11 +33,29 @@ export class JobItem extends React.Component<JobItem.Props> {
         }
     }
 
+    private renderTime(epoch: number) {
+        if (epoch === 0) {
+            return (
+                <span className='centered-text error-message'>Invalid date</span>
+            );
+        }
+
+        const date = new Date();
+        date.setTime(epoch);
+
+        return (
+            <span className='centered-text'>
+                {`${date.getFullYear()}-${padStr(date.getMonth() + 1)}-${padStr(date.getDate())} ${padStr(date.getHours())}:${padStr(date.getMinutes())}:${padStr(date.getSeconds())}`}
+            </span>
+        );
+    }
+
     render() {
         return (
             <div className='job-item'>
                 <span className='centered-text job-item-name'>{this.props.name}</span>
                 {this.renderJobStatus(this.props.state)}
+                {this.renderTime(this.props.created_on)}
                 <PushButton
                     className='pushbutton-chained pushbutton-clr-default pushbutton-hclr-default'
                     value='Show >>'
@@ -53,6 +78,7 @@ export namespace JobItem {
         id: string;
         name: string;
         state: Api.JobState;
+        created_on: number;
         onSelect: ClickHandler;
         onDelete: ClickHandler;
     }

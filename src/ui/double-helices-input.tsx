@@ -182,14 +182,14 @@ class DoubleHelicesInputInner extends FormBlock<DoubleHelicesInputInner.Props> {
                         {...GLabeledField.tags('mol-in-dh-chain-one', this.props.formId, ['labeled-field'])}
                         formId={this.props.formId}
                         label='Chain'
-                        position='above'
+                        style='above'
                         inputType='combo-box'
                         options={MmbUtil.chainOptions(this.props.ctxData)} />
                     <NumLabeledField
                         {...GLabeledField.tags('mol-in-dh-first-res-no-one', this.props.formId, ['labeled-field'])}
                         formId={this.props.formId}
                         label='First residue'
-                        position='above'
+                        style='above'
                         inputType='combo-box'
                         converter={parseInt}
                         options={MmbUtil.residueOptions(compounds, chainOne)} />
@@ -197,7 +197,7 @@ class DoubleHelicesInputInner extends FormBlock<DoubleHelicesInputInner.Props> {
                         {...GLabeledField.tags('mol-in-dh-last-res-no-one', this.props.formId, ['labeled-field'])}
                         formId={this.props.formId}
                         label='Last residue'
-                        position='above'
+                        style='above'
                         inputType='combo-box'
                         converter={parseInt}
                         options={MmbUtil.residueOptions(compounds, chainOne, firstResNoOne)} />
@@ -205,14 +205,14 @@ class DoubleHelicesInputInner extends FormBlock<DoubleHelicesInputInner.Props> {
                         {...GLabeledField.tags('mol-in-dh-chain-two', this.props.formId, ['labeled-field'])}
                         formId={this.props.formId}
                         label='Chain'
-                        position='above'
+                        style='above'
                         inputType='combo-box'
                         options={MmbUtil.chainOptions(this.props.ctxData)} />
                     <NumLabeledField
                         {...GLabeledField.tags('mol-in-dh-first-res-no-two', this.props.formId, ['labeled-field'])}
                         formId={this.props.formId}
                         label='First residue'
-                        position='above'
+                        style='above'
                         inputType='combo-box'
                         converter={parseInt}
                         options={secondOpts} />

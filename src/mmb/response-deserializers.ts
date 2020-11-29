@@ -8,6 +8,7 @@
 
 import * as Api from './api';
 import { checkProps, checkType, isArr, isBool, isInt, isObj, isStr } from '../util/json';
+import { Num } from '../util/num';
 
 const NOT_AN_OBJ = 'Input variable is not an object';
 
@@ -19,6 +20,7 @@ const JobInfoObj: Api.JobInfo = {
     total_steps: 0,
     last_available_stage: 0,
     last_completed_stage: 0,
+    created_on: 0,
 };
 const JobListItemObj: Api.JobListItem = {
     ok: false,
@@ -61,6 +63,7 @@ export namespace ResponseDeserializers {
         checkType(tObj, 'total_steps', isInt);
         checkType(tObj, 'last_available_stage', isInt);
         checkType(tObj, 'last_completed_stage', isInt);
+        checkType(tObj, 'created_on', isInt);
 
         return {
             id: tObj.id,
@@ -70,6 +73,7 @@ export namespace ResponseDeserializers {
             total_steps: tObj.total_steps,
             last_available_stage: tObj.last_available_stage,
             last_completed_stage: tObj.last_completed_stage,
+            created_on: Num.parseIntStrict(tObj.created_on),  // On-wire value is a string to prevent rounding
         };
     }
 

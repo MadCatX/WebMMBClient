@@ -29,13 +29,7 @@ function jobListItemToEntry(item: Api.JobListItem): JobEntry {
     if (item.ok) {
         return {
             ok: true,
-            id: item.info.id,
-            name: item.info.name,
-            state: item.info.state,
-            step: item.info.step,
-            total_steps: item.info.total_steps,
-            last_available_stage: item.info.last_available_stage,
-            last_completed_stage: item.info.last_completed_stage,
+            ...item.info,
         };
     } else {
         return {
@@ -47,6 +41,7 @@ function jobListItemToEntry(item: Api.JobListItem): JobEntry {
             total_steps: 0,
             last_available_stage: 0,
             last_completed_stage: 0,
+            created_on: 0,
         };
     }
 }
@@ -220,20 +215,23 @@ export class JobList extends React.Component<JobList.Props, State> {
         if (this.state.error !== '') {
             return (<div className='error-message'>{this.state.error}</div>);
         } else {
+            const sorted = this.state.jobs.sort((a, b) => a.created_on - b.created_on);
             return (
                 <>
                     <div className='job-item'>
                         <div className='bold'>Name</div>
                         <div className='bold'>State</div>
+                        <div className='bold'>Created on</div>
                         <div></div>
                         <div></div>
                     </div>
-                    {this.state.jobs.map((e, n) =>
+                    {sorted.map((e, n) =>
                         <JobItem
                             key={`job-item-${n}`}
                             id={e.id}
                             name={e.name}
                             state={e.state}
+                            created_on={e.created_on}
                             onSelect={() => this.onSelectJobClicked(e.id)}
                             onDelete={() => this.onDeleteJobClicked(e.id)} />
                         )}

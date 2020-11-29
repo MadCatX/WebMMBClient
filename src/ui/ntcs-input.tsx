@@ -126,14 +126,14 @@ class NtCsInputInner extends FormBlock<NtCsInputInner.Props> {
                         {...GLabeledField.tags('mol-in-ntcs-chain', this.props.formId, ['labeled-field'])}
                         formId={this.props.formId}
                         label='Chain'
-                        position='above'
+                        style='above'
                         inputType='combo-box'
                         options={MmbUtil.chainOptions(this.props.ctxData)} />
                     <NumLabeledField
                         {...GLabeledField.tags('mol-in-ntcs-first-res-no', this.props.formId, ['labeled-field'])}
                         formId={this.props.formId}
                         label='First residue'
-                        position='above'
+                        style='above'
                         inputType='combo-box'
                         converter={parseInt}
                         options={firstResOpts} />
@@ -141,7 +141,7 @@ class NtCsInputInner extends FormBlock<NtCsInputInner.Props> {
                         {...GLabeledField.tags('mol-in-ntcs-last-res-no', this.props.formId, ['labeled-field'])}
                         formId={this.props.formId}
                         label="Last residue"
-                        position='above'
+                        style='above'
                         inputType='combo-box'
                         converter={parseInt}
                         options={lastResOpts} />
@@ -149,7 +149,7 @@ class NtCsInputInner extends FormBlock<NtCsInputInner.Props> {
                         {...GLabeledField.tags('mol-in-ntcs-ntc', this.props.formId, ['labeled-field'])}
                         formId={this.props.formId}
                         label='NtC'
-                        position='above'
+                        style='above'
                         inputType='combo-box'
                         options={MmbUtil.AllNtCsOptions} />
                     <PushButton

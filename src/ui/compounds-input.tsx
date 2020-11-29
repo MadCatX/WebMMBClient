@@ -104,21 +104,21 @@ class CompoundsInputInner extends FormBlock<CompoundsInputInner.Props> {
                         {...GLabeledField.tags('mol-in-cp-chain-id', this.props.formId, ['labeled-field'])}
                         formId={this.props.formId}
                         label='Chain'
-                        position='above'
+                        style='above'
                         inputType='line-edit'
                         options={[]} />
                     <StrLabeledField
                         {...GLabeledField.tags('mol-in-cp-first-res-no', this.props.formId, ['labeled-field'])}
                         formId={this.props.formId}
                         label='First residue no.'
-                        position='above'
+                        style='above'
                         inputType='line-edit'
                         options={[]} />
                     <StrLabeledField
                         {...GLabeledField.tags('mol-in-cp-compound-type', this.props.formId, ['labeled-field'])}
                         formId={this.props.formId}
                         label='Type'
-                        position='above'
+                        style='above'
                         inputType='combo-box'
                         options={
                             [
@@ -130,7 +130,7 @@ class CompoundsInputInner extends FormBlock<CompoundsInputInner.Props> {
                         {...GLabeledField.tags('mol-in-cp-sequence', this.props.formId, ['labeled-field'])}
                         formId={this.props.formId}
                         label='Sequence'
-                        position='above'
+                        style='above'
                         inputType='text-area'
                         hint='Enter sequence'
                         spellcheck={false}

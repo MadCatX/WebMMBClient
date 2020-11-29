@@ -82,19 +82,21 @@ export class Login extends Form<LfUtil.ErrorKeys, LfUtil.ValueKeys, LfUtil.Value
             <Ctx.Provider value={ctxData}>
                 <div className='login-form-container'>
                     <div className='login-form-caption'>WebMMB alpha</div>
-                    <StrLabeledField
-                        {...GLabeledField.tags('login-session-id', this.props.id, ['centered-horizontal', 'login-form-input'])}
-                        formId={this.props.id}
-                        label='Session ID'
-                        position='left'
-                        inputType='line-edit'
-                        hint='Enter session ID to restore session'
-                        options={[]} />
+                    <div className='login-form-input'>
+                        <StrLabeledField
+                            {...GLabeledField.tags('login-session-id', this.props.id, ['centered-horizontal', 'login-form-input'])}
+                            formId={this.props.id}
+                            label='Session ID'
+                            style='left-tabular'
+                            inputType='line-edit'
+                            hint='Enter session ID to restore session'
+                            options={[]} />
+                    </div>
                     <ErrorBox
                         errors={this.getErrors(this.state, 'login-errors') ?? new Array<string>()} />
                     <PushButton
                         value='Enter'
-                        className='pushbutton-common pushbutton-default pushbutton-clr-default pushbutton-hclr-green'
+                        className='pushbutton-common pushbutton-clr-default pushbutton-hclr-green'
                         onClick={() => this.logIn()} />
                 </div>
             </Ctx.Provider>

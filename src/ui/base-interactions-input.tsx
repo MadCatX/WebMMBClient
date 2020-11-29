@@ -129,14 +129,14 @@ class BaseInteractionsInputInner extends FormBlock<BaseInteractionsInputInner.Pr
                         {...GLabeledField.tags('mol-in-bi-chain-one', this.props.formId, ['labeled-field'])}
                         formId={this.props.formId}
                         label="Chain"
-                        position='above'
+                        style='above'
                         inputType='combo-box'
                         options={MmbUtil.chainOptions(this.props.ctxData)} />
                     <NumLabeledField
                         {...GLabeledField.tags('mol-in-bi-res-no-one', this.props.formId, ['labeled-field'])}
                         formId={this.props.formId}
                         label="Residue"
-                        position='above'
+                        style='above'
                         inputType='combo-box'
                         converter={parseInt}
                         options={MmbUtil.residueOptions(compounds, chainOne)} />
@@ -144,21 +144,21 @@ class BaseInteractionsInputInner extends FormBlock<BaseInteractionsInputInner.Pr
                         {...GLabeledField.tags('mol-in-bi-edge-one', this.props.formId, ['labeled-field'])}
                         formId={this.props.formId}
                         label="Edge"
-                        position='above'
+                        style='above'
                         inputType='combo-box'
                         options={EdgeOptions} />
                     <NumLabeledField
                         {...GLabeledField.tags('mol-in-bi-chain-two', this.props.formId, ['labeled-field'])}
                         label="Chain"
                         formId={this.props.formId}
-                        position='above'
+                        style='above'
                         inputType='combo-box'
                         options={MmbUtil.chainOptions(this.props.ctxData)} />
                     <NumLabeledField
                         {...GLabeledField.tags('mol-in-bi-res-no-two', this.props.formId, ['labeled-field'])}
                         formId={this.props.formId}
                         label="Residue"
-                        position='above'
+                        style='above'
                         inputType='combo-box'
                         converter={parseInt}
                         options={MmbUtil.residueOptions(compounds, chainTwo)} />
@@ -166,14 +166,14 @@ class BaseInteractionsInputInner extends FormBlock<BaseInteractionsInputInner.Pr
                         {...GLabeledField.tags('mol-in-bi-edge-two', this.props.formId, ['labeled-field'])}
                         formId={this.props.formId}
                         label="Edge"
-                        position='above'
+                        style='above'
                         inputType='combo-box'
                         options={EdgeOptions} />
                     <OrientLabeledField
                         {...GLabeledField.tags('mol-in-bi-orientation', this.props.formId, ['labeled-field'])}
                         formId={this.props.formId}
                         label="Orientation"
-                        position='above'
+                        style='above'
                         inputType='combo-box'
                         options={OrientationOptions} />
                     <PushButton

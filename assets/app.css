@@ -46,7 +46,19 @@
     width: 90%;
 }
 
+
+.form-field-label-vcenter {
+    display: table-cell;
+    vertical-align: middle;
+}
+
+.form-field-left-container-flex {
+    display: flex;
+    width: 100%;
+}
+
 .form-field-input-left {
+    flex: 1;
     margin: auto auto auto 0.6em;
 }
 
@@ -66,7 +78,7 @@
 
 .job-item {
     display: grid;
-    grid-template-columns: auto 6em 6em 6em;
+    grid-template-columns: auto 6em 12em 6em 6em;
     margin: 0.2em 0 0.2em 0;
 }
 
@@ -99,8 +111,10 @@
 }
 
 .login-form-container {
+    border: 0.1em solid black;
     margin: auto;
     width: 33%;
+    padding: 0.4em;
     position: absolute;
     top: 50%;
     left: 50%;
@@ -114,8 +128,7 @@
 }
 
 .login-form-input {
-    padding-top: 0.2em;
-    padding-bottom: 0.2em;
+    padding: 0.4em 0 0.4em 0;
 }
 
 .logout-container {

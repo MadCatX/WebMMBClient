@@ -6,6 +6,8 @@
  * @author Jiří Černý (jiri.cerny@ibt.cas.cz)
  */
 
+import { Num } from './num';
+
 export type AnyObject = Record<string, unknown>;
 
 export interface TypeChecker<V> {
@@ -48,7 +50,7 @@ export function isInt(obj: unknown): obj is number {
     if (typeof obj === 'number')
         return Number.isInteger(obj);
     if (typeof obj === 'string')
-        return !isNaN(parseInt(obj));
+        return !isNaN(Num.parseIntStrict(obj));
     return false;
 }
 

@@ -82,6 +82,7 @@ export type JobInfo = {
     total_steps: JobTotalSteps,
     last_available_stage: number,
     last_completed_stage: number,
+    created_on: number,
 }
 
 export type JobListItem = {
