@@ -312,10 +312,10 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
 
     private setupAutoRefresh(enabled: boolean, interval: number, state: Api.JobState) {
         if (this.autoRefresherId !== null)
-            clearInterval(this.autoRefresherId);
+            window.clearInterval(this.autoRefresherId);
 
         if (enabled && state === 'Running')
-            this.autoRefresherId = setInterval(this.refreshJob, interval * 1000);
+            this.autoRefresherId = window.setInterval(this.refreshJob, interval * 1000);
         else
             this.autoRefresherId = null;
     }
@@ -325,7 +325,7 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
             return;
 
         if (this.autoRefresherId !== null) {
-            clearInterval(this.autoRefresherId);
+            window.clearInterval(this.autoRefresherId);
             this.autoRefresherId = null;
         }
 
