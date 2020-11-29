@@ -57,6 +57,10 @@ export class Main extends React.Component<Props, State> {
         this.onTabChanged = this.onTabChanged.bind(this);
     }
 
+    private allowJobControl() {
+        return this.state.session_id !== undefined && isExtResAvailable('molstar-app');
+    }
+
     private onJobDeleted(id: string) {
         if (this.state.activeJob?.info.id === id) {
             this.setState({
@@ -67,6 +71,9 @@ export class Main extends React.Component<Props, State> {
     }
 
     private onSelectJob(info?: Api.JobInfo, commands?: JsonCommands) {
+        if (!this.allowJobControl())
+            return;
+
         const aj = (() => {
             if (info !== undefined && commands !== undefined)
                 return { info, commands };
@@ -90,7 +97,7 @@ export class Main extends React.Component<Props, State> {
     private onTabChanged(id: Tabs) {
         console.log(id);
 
-        if (id === 'job-control' && (this.state.session_id === undefined || !isExtResAvailable('molstar-app')))
+        if (id === 'job-control' && !this.allowJobControl())
             return;
 
         this.setState({ ...this.state, activeTab: id });
@@ -104,12 +111,12 @@ export class Main extends React.Component<Props, State> {
                     onSelectJob={this.onSelectJob}
                     jobDeleted={this.onJobDeleted} />);
         case 'job-control':
-            if (this.state.session_id === undefined)
-                throw new Error('No username');
+            if (!this.allowJobControl())
+                throw new Error('Job control is not available');
 
             return (
                 <VisualJobRunner
-                    username={this.state.session_id}
+                    username={this.state.session_id!}
                     onJobStarted={this.onJobStarted}
                     info={this.state.activeJob?.info}
                     commands={this.state.activeJob?.commands} />
