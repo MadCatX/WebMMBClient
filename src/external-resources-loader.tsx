@@ -10,7 +10,20 @@ import * as React from 'react';
 
 const ElementTag = 'external-resources';
 
-function loadScript(src: string, id: string) {
+interface AvailChecker {
+    (): boolean;
+}
+
+class Resource {
+    constructor(readonly url: string, readonly checkAvailable: AvailChecker) {
+    }
+}
+
+const Resources = new Map([
+    ['molstar-app', new Resource('./molstar.js', () => (window as any).WebMmbViewer !== undefined)]
+]);
+
+async function loadScript(src: string, id: string) {
     const s: HTMLScriptElement = document.createElement('script');
     s.async = false;
     s.defer = false;
@@ -26,7 +39,8 @@ function loadScript(src: string, id: string) {
 
 export class ExternalResourcesLoader extends React.Component {
     componentDidMount() {
-        loadScript('./molstar.js', 'molstar-app');
+        for (const [k, v] of Resources)
+            loadScript(v.url, k);
     }
 
     render() {
