@@ -1,0 +1,4 @@
+[submodule "molstar"]
+	path = molstar
+	url = https://github.com/MadCatX/molstar
+	branch = webmmb

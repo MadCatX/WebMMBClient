@@ -25,12 +25,12 @@ export class GTableWithDeletableRows<KE, KV, T, U extends T & Array<any>> extend
                 {(data: FormUtil.ContextData<KE, KV, T>) => {
                     const values = this.FU.getArray<U>(data, this.props.valuesKey);
                     return (
-                        <div className={this.props.className}>
+                        <div className={this.props.className} key='top'>
                             {this.props.columns.map((col, n) => {
                                 const key = `col-${n}`;
                                 return (<div key={key} className='column-header'>{col.caption}</div>);
                             })}
-                            <div className='column-header'></div>
+                            <div className='column-header' key='entries'></div>
                             {values.map((v, index) => {
                                 return (
                                     <>
