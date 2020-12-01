@@ -391,7 +391,7 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
                     <Viewer
                         structureUrl={this.structureUrl()}
                         structureName={this.state.jobName}
-                        stage={'last'}
+                        stage={this.state.jobLastCompletedStage}
                         autoRefreshChanged={this.onAutoRefreshChanged}
                         defaultAutoRefreshEnabled={DefaultAutoRefreshEnabled}
                         defaultAutoRefreshInterval={DefaultAutoRefreshInterval}

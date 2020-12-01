@@ -74,8 +74,9 @@ export class Viewer extends React.Component<Viewer.Props, State> {
         this.initAndLoad();
     }
 
-    componentDidUpdate() {
-        this.load();
+    componentDidUpdate(prevProps: Viewer.Props) {
+        if (this.props.stage > prevProps.stage)
+            this.load();
 
         const mmbOutput = document.getElementById('mmb-output-item');
         if (mmbOutput !== null)
@@ -163,7 +164,7 @@ export namespace Viewer {
     export interface Props {
         structureUrl?: string;
         structureName?: string;
-        stage: number | 'last';
+        stage: number;
         autoRefreshChanged: AutoRefreshChanged;
         defaultAutoRefreshEnabled: boolean;
         defaultAutoRefreshInterval: number;
