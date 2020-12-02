@@ -176,7 +176,7 @@ export namespace JsonCommandsSerializer {
     }
 
     export function serialize(params: CommandsSerializer.Parameters) {
-        let cmds = Commands;
+        let cmds = Object.assign({}, Commands);
 
         // Global
         cmds.baseInteractionScaleFactor = [params.global.baseInteractionScaleFactor.toString()];
