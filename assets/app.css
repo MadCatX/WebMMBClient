@@ -7,6 +7,11 @@
     display: none;
 }
 
+#main-block {
+    margin: 0
+    padding: 0
+}
+
 #viewer {
     position: relative;
     width: 100%;
@@ -26,6 +31,15 @@
 .centered-horizontal {
     margin-left: auto;
     margin-right: auto;
+}
+
+.job-list-container {
+    width: 50vw;
+}
+
+.job-runner-container {
+    display: grid;
+    grid-template-columns: 40% 60%;
 }
 
 .error-message {
@@ -137,11 +151,6 @@
     right: 0;
     top: 50%;
     transform: translateY(-50%);
-}
-
-.main-block {
-    display: grid;
-    grid-template-columns: 40% 60%;
 }
 
 .main-navbar {

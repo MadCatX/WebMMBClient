@@ -217,7 +217,7 @@ export class JobList extends React.Component<JobList.Props, State> {
         } else {
             const sorted = this.state.jobs.sort((a, b) => a.created_on - b.created_on);
             return (
-                <>
+                <div>
                     <div className='job-item'>
                         <div className='bold'>Name</div>
                         <div className='bold'>State</div>
@@ -235,7 +235,7 @@ export class JobList extends React.Component<JobList.Props, State> {
                             onSelect={() => this.onSelectJobClicked(e.id)}
                             onDelete={() => this.onDeleteJobClicked(e.id)} />
                         )}
-                </>
+                </div>
             );
         }
     }
@@ -248,7 +248,7 @@ export class JobList extends React.Component<JobList.Props, State> {
 
     render() {
         return (
-            <div>
+            <div className='job-list-container'>
                 <div className='section-caption'>Jobs</div>
                 <div className='job-items-container'>
                     {this.renderInner()}

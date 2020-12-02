@@ -386,7 +386,7 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
 
     render() {
         return (
-            <>
+            <div className='job-runner-container'>
                 <div>
                     <Viewer
                         structureUrl={this.structureUrl()}
@@ -411,7 +411,7 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
                         handleStop={this.stopJob}
                         jobState={this.state.jobState} />
                 </div>
-            </>
+            </div>
         );
     }
 }
