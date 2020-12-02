@@ -223,6 +223,7 @@
 .pushbutton-common {
     border: 0.1em solid black;
     text-align: center;
+    text-decoration: none;
     transition: background-color 0.25s;
 }
 

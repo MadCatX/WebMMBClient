@@ -12,10 +12,9 @@ export class LinkButton extends AbstractPushButton<LinkButton.Props, {}> {
     private text() {
         if (this.props.url !== undefined) {
             return (
-                <a
-                    className='linkbutton-text'
-                    href={this.props.url}
-                    download={this.props.downloadAs} >{this.props.value}</a>
+                <div
+                    className='linkbutton-text'>{this.props.value}
+                </div>
             );
         } else {
             return (<div className='pushbutton-text'>{this.props.value}</div>);
@@ -24,11 +23,13 @@ export class LinkButton extends AbstractPushButton<LinkButton.Props, {}> {
 
     renderButton() {
         return (
-            <div
+            <a
                 id={this.props.id}
-                className={this.clsName()} >
+                className={this.clsName()}
+                href={this.props.url}
+                download={this.props.downloadAs} >
                 {this.text()}
-            </div>
+            </a>
         );
     }
 }
