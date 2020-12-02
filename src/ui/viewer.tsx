@@ -30,14 +30,20 @@ export class Viewer extends React.Component<Viewer.Props, State> {
 
         this.renderMmbOutput = this.renderMmbOutput.bind(this);
     }
+
+    private clear() {
+        WebMmbViewer.clear();
+    }
+
     private async initAndLoad() {
         await WebMmbViewer.init(document.getElementById('viewer'));
         this.load();
     }
 
+
     private load() {
         const url = this.url();
-        if (url !== undefined)
+        if (url !== undefined && this.props.step > 0)
             WebMmbViewer.load(url, 'pdb');
     }
 
@@ -75,7 +81,9 @@ export class Viewer extends React.Component<Viewer.Props, State> {
     }
 
     componentDidUpdate(prevProps: Viewer.Props) {
-        if (this.props.stage > prevProps.stage)
+        if (this.props.step === 0 && prevProps.step !== 0)
+            this.clear();
+        else if (this.props.step !== prevProps.step)
             this.load();
 
         const mmbOutput = document.getElementById('mmb-output-item');
@@ -164,7 +172,8 @@ export namespace Viewer {
     export interface Props {
         structureUrl?: string;
         structureName?: string;
-        stage: number;
+        stage: number | string;
+        step: number;
         autoRefreshChanged: AutoRefreshChanged;
         defaultAutoRefreshEnabled: boolean;
         defaultAutoRefreshInterval: number;
