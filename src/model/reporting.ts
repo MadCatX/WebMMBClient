@@ -16,6 +16,6 @@ export class Reporting {
 
     static readonly Defaults = {
         interval: 3,
-        count: 1,
+        count: 5,
     }
 }
