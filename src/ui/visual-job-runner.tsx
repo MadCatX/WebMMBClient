@@ -400,7 +400,7 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
                     <Viewer
                         structureUrl={this.structureUrl()}
                         structureName={this.state.jobName}
-                        stage={'last'}
+                        availableStages={this.state.jobAvailableStages}
                         step={((this.state.jobStep === 'preparing' || this.state.jobState === 'NotStarted') ? 0 : this.state.jobStep) as number}
                         autoRefreshChanged={this.onAutoRefreshChanged}
                         defaultAutoRefreshEnabled={DefaultAutoRefreshEnabled}

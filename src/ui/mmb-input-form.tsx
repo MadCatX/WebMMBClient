@@ -77,6 +77,14 @@ export class MmbInputForm extends Form<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, Mmb
         }
     }
 
+    componentDidUpdate(prevProps: MmbInputForm.Props) {
+        if (this.props.availableStages.length !== prevProps.availableStages.length) {
+            const v = this.emptyValues();
+            v.set('mol-in-gp-stage', this.props.availableStages.length);
+            this.setValues(new Map([...this.state.values, ...v]));
+        }
+    }
+
     componentWillUnmount() {
         FCM.unregisterContext(this.props.id);
     }

@@ -17,6 +17,7 @@ declare let WebMmbViewer: any;
 interface State {
     autoRefreshEnabled: boolean;
     autoRefreshInterval: number | null;
+    selectedStage?: string
 }
 
 export class Viewer extends React.Component<Viewer.Props, State> {
@@ -73,17 +74,20 @@ export class Viewer extends React.Component<Viewer.Props, State> {
     private url() {
         if (this.props.structureUrl === undefined)
             return undefined;
-        return `./${this.props.structureUrl}/${this.props.stage}`;
+        const stage = this.state.selectedStage ?? 'last';
+        return `./${this.props.structureUrl}/${stage}`;
     }
 
     componentDidMount() {
         this.initAndLoad();
     }
 
-    componentDidUpdate(prevProps: Viewer.Props) {
+    componentDidUpdate(prevProps: Viewer.Props, prevState: State) {
         if (this.props.step === 0 && prevProps.step !== 0)
             this.clear();
-        else if (this.props.step !== prevProps.step)
+        else if (this.props.availableStages.length !== prevProps.availableStages.length ||
+                 this.props.step !== prevProps.step ||
+                 this.state.selectedStage !== prevState.selectedStage)
             this.load();
 
         const mmbOutput = document.getElementById('mmb-output-item');
@@ -92,6 +96,16 @@ export class Viewer extends React.Component<Viewer.Props, State> {
     }
 
     render() {
+        const stageOptions = this.props.availableStages.map(n => { return{ caption: n.toString(), value: n.toString() }} );
+        const stageValue = (() => {
+            if (this.state.selectedStage)
+                return this.state.selectedStage;
+            const len = stageOptions.length;
+            if (len < 1)
+                return undefined;
+            return stageOptions[len - 1].value;
+        })();
+
         return (
             <div className='viewer-container'>
                 <div id='viewer'></div>
@@ -112,6 +126,16 @@ export class Viewer extends React.Component<Viewer.Props, State> {
                         downloadAs={`${this.props.structureName}.pdb`} />
                 </div>
                 <div className='padded'>
+                    <TooltippedField
+                        position='above'
+                        text='Select which stage of simulation to display'
+                        renderContent={() => (<span className='padded'>Show stage:</span>)} />
+                    <select
+                        value={stageValue}
+                        onChange={e => this.setState({...this.state, selectedStage: e.currentTarget.value}) }
+                    >
+                        {stageOptions.map(o => (<option key={o.value}>{o.caption}</option>))}
+                    </select>
                     <TooltippedField
                         position='above'
                         text='Query the server for job status automatically every N seconds'
@@ -172,11 +196,11 @@ export namespace Viewer {
     export interface Props {
         structureUrl?: string;
         structureName?: string;
-        stage: number | string;
         step: number;
         autoRefreshChanged: AutoRefreshChanged;
         defaultAutoRefreshEnabled: boolean;
         defaultAutoRefreshInterval: number;
         mmbOutput: MmbOutput;
+        availableStages: number[];
     }
 }

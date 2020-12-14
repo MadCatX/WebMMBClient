@@ -17,14 +17,6 @@ import { Reporting } from '../model/reporting';
 const NumLabeledField = LabeledField<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, MmbUtil.Values, number>();
 const CheckBox = LabeledCheckBox<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, MmbUtil.Values>();
 
-function getStageOptions(stages: number[]) {
-    const mapped = stages.map(n => { return{ caption: n.toString(), value: n.toString(), selected: false }} );
-    const len = mapped.length;
-    if (len > 0)
-        return { options: mapped, selected: mapped[len - 1].value };
-    return { options: mapped, selected: undefined };
-}
-
 class GlobalParametersInputInner extends FormBlock<GlobalParametersInputInner.Props> {
     componentDidMount() {
         const bisf = MMBFU.getScalar(this.props.ctxData, 'mol-in-gp-bisf', GlobalConfig.Defaults.baseInteractionScaleFactor);
@@ -44,7 +36,6 @@ class GlobalParametersInputInner extends FormBlock<GlobalParametersInputInner.Pr
     }
 
     render() {
-        const { options, selected } = getStageOptions(this.props.availableStages);
         return (
             <div className='section'>
                 <div className='section-caption'>Global parameters</div>
@@ -88,8 +79,7 @@ class GlobalParametersInputInner extends FormBlock<GlobalParametersInputInner.Pr
                         tooltip='firstStage, lastStage'
                         style='above'
                         inputType='combo-box'
-                        options={options}
-                        forcedValue={selected} />
+                        options={this.props.availableStages.map(n => { return{ caption: n.toString(), value: n.toString() }})} />
                     <CheckBox
                         {...GLabeledField.tags('mol-in-gp-def-md-params', this.props.formId, ['labeled-field-concise'])}
                         formId={this.props.formId}
