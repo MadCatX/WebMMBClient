@@ -43,14 +43,6 @@ export namespace JobQuery {
         return Request.api(req);
     }
 
-    export function resume(id: string, commands: JsonCommands) {
-        const req: Api.ApiRequest<Api.ResumeJobRqData> = {
-            req_type: 'ResumeJob',
-            data: { id, commands },
-        };
-        return Request.api(req);
-    }
-
     export function status(jobId: string) {
         const req: Api.ApiRequest<Api.SimpleJobRqData> = {
             req_type: 'JobStatus',

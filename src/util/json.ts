@@ -11,7 +11,7 @@ import { Num } from './num';
 export type AnyObject = Record<string, unknown>;
 
 export interface TypeChecker<V> {
-    (v: V): boolean;
+    (v: unknown): v is V;
 }
 
 export function assign<T, K extends keyof T>(dst: T, src: AnyObject, prop: K): T {
@@ -34,12 +34,20 @@ export function checkProps<T>(checked: AnyObject, template: T) {
 }
 
 export function checkType<V, T, K extends keyof T>(obj: T, prop: K, checker: TypeChecker<V>) {
-    if (!checker(obj[prop] as unknown as V))
+    if (!checker(obj[prop] as unknown))
         throw new Error(`Property ${prop} has a wrong type`);
 }
 
-export function isArr(obj: unknown): obj is Array<unknown> {
-    return Array.isArray(obj);
+export function isArr<T>(obj: unknown, chk: TypeChecker<T>): obj is T[] {
+    if (Array.isArray(obj) === false)
+        return false;
+
+    for (const elem of obj as unknown[]) {
+        if (chk(elem) === false)
+            return false;
+    }
+
+    return true;
 }
 
 export function isBool(obj: unknown): obj is boolean {

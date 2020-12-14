@@ -21,7 +21,7 @@ export class GComboBox<KE, KV extends string, T, U extends FormUtil.V<T>> extend
         return (
             <CtxConsumer>
                 {(data: FormUtil.ContextData<KE, KV, T>) => {
-                    const value = this.getValue(data);
+                    const value = this.props.forcedValue ?? this.getValue(data);
 
                     return (
                         <select
@@ -65,6 +65,8 @@ export namespace GComboBox {
         options: Option[];
         converter?: (s: string) => U;
         className?: string;
+        selected?: string;
+        forcedValue?: string;
     }
 }
 

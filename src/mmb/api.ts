@@ -11,7 +11,6 @@ import { AnyObject } from '../util/json';
 type ApiRequestType =
     'StartJob'    |
     'StopJob'     |
-    'ResumeJob'   |
     'DeleteJob'   |
     'JobStatus'   |
     'ListJobs'    |
@@ -80,8 +79,7 @@ export type JobInfo = {
     state: JobState,
     step: JobStep,
     total_steps: JobTotalSteps,
-    last_available_stage: number,
-    last_completed_stage: number,
+    available_stages: number[],
     created_on: number,
 }
 

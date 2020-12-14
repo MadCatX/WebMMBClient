@@ -22,7 +22,7 @@ export namespace MmbInputUtil {
         'mol-in-dh-chain-one' | 'mol-in-dh-first-res-no-one' | 'mol-in-dh-last-res-no-one' | 'mol-in-dh-chain-two' | 'mol-in-dh-first-res-no-two' | 'mol-in-dh-added' |
         'mol-in-bi-chain-one' | 'mol-in-bi-res-no-one' | 'mol-in-bi-edge-one' | 'mol-in-bi-chain-two' | 'mol-in-bi-res-no-two' | 'mol-in-bi-edge-two' | 'mol-in-bi-orientation' | 'mol-in-bi-added' |
         'mol-in-ntcs-chain' | 'mol-in-ntcs-first-res-no' | 'mol-in-ntcs-last-res-no' | 'mol-in-ntcs-ntc' | 'mol-in-ntcs-added' |
-        'mol-in-gp-reporting-interval' | 'mol-in-gp-num-reports' | 'mol-in-gp-temperature' | 'mol-in-gp-bisf' | 'mol-in-gp-def-md-params' |
+        'mol-in-gp-reporting-interval' | 'mol-in-gp-num-reports' | 'mol-in-gp-temperature' | 'mol-in-gp-bisf' | 'mol-in-gp-def-md-params' | 'mol-in-gp-stage' |
         'mol-in-job-name';
     export type ValueTypes = BaseInteraction[] | Compound[] | DoubleHelix[] | NtCConformation[] | string[];
     export type V<T> = FormUtil.V<T>;

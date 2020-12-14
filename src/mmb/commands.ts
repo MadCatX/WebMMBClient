@@ -32,13 +32,8 @@ export function jsonCommandsFromJson(obj: unknown): JsonCommands {
     for (const prop in JsonCommands) {
         if (!obj.hasOwnProperty(prop))
             throw new Error(`No property ${prop} on source object`);
-        if (!isArr(obj[prop]))
-            throw new Error(`Property ${prop} is not an array`);
-
-        for (const elem of (obj[prop] as unknown[])) {
-            if (!isStr(elem))
-                throw new Error(`Element of ${prop} array is not a string`);
-        }
+        if (!isArr<string>(obj[prop], isStr))
+            throw new Error(`Property ${prop} is not a string array`);
     }
 
     let cmds = assignAll({}, obj, JsonCommands) as AnyObject;

@@ -27,14 +27,14 @@ import { JobNameInput } from './job-name-input';
 import {MmbCommands} from './mmb-commands';
 import { Num } from '../util/num';
 
-export class MmbInputForm extends Form<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, MmbUtil.ValueTypes, MmbUtil.Props> {
-    constructor(props: MmbUtil.Props) {
+export class MmbInputForm extends Form<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, MmbUtil.ValueTypes, MmbInputForm.Props> {
+    constructor(props: MmbInputForm.Props) {
         super(props);
 
         FCM.registerContext<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, MmbUtil.ValueTypes>(props.id);
     }
 
-    commandsToJob(lastCompletedStage: number) {
+    commandsToJob() {
         const name = this.getScalar(this.state, 'mol-in-job-name', '');
 
         const ne = this.emptyErrors();
@@ -54,14 +54,14 @@ export class MmbInputForm extends Form<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, Mmb
             });
         }
 
-        const commands =  JsonCommandsSerializer.serialize(this.makeParams(2));
+        const commands = JsonCommandsSerializer.serialize(this.makeParams());
 
         return { name, commands };
     }
 
     private makeMmbCommands() {
         try {
-            const cmds = TextCommandsSerializer.serialize(this.makeParams(2));
+            const cmds = TextCommandsSerializer.serialize(this.makeParams());
 
             return (
                 <MmbCommands
@@ -81,7 +81,7 @@ export class MmbInputForm extends Form<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, Mmb
         FCM.unregisterContext(this.props.id);
     }
 
-    private makeParams(stage: number): CommandsSerializer.Parameters {
+    private makeParams(): CommandsSerializer.Parameters {
         const errors: string[] = [];
 
         const bisf = Num.parseIntStrict(this.getScalar(this.state, 'mol-in-gp-bisf', ''));
@@ -89,6 +89,7 @@ export class MmbInputForm extends Form<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, Mmb
         const numReps = Num.parseIntStrict(this.getScalar(this.state, 'mol-in-gp-num-reports', ''));
         const temp = Num.parseFloatStrict(this.getScalar(this.state, 'mol-in-gp-temperature', ''));
         const useDefMd = this.getScalar(this.state, 'mol-in-gp-def-md-params', false);
+        const stage = this.getScalar(this.state, 'mol-in-gp-stage', NaN);
 
         if (isNaN(bisf))
             errors.push('Base interaction scale factor must be a number');
@@ -98,6 +99,8 @@ export class MmbInputForm extends Form<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, Mmb
             errors.push('Number of reports must be a number');
         if (isNaN(temp))
             errors.push('Temperature must be a number');
+        if (isNaN(stage))
+            errors.push('Stage is not a valid number');
 
         if (errors.length > 0) {
             throw errors;
@@ -142,10 +145,16 @@ export class MmbInputForm extends Form<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, Mmb
                     <DoubleHelicesInput formId={this.props.id} />
                     <BaseInteractionsInput formId={this.props.id} />
                     <NtCsInput formId={this.props.id} />
-                    <GlobalParametersInput formId={this.props.id} />
+                    <GlobalParametersInput formId={this.props.id} availableStages={this.props.availableStages} />
                     {this.makeMmbCommands()}
                 </form>
             </Ctx.Provider>
         );
+    }
+}
+
+export namespace MmbInputForm {
+    export interface Props extends MmbUtil.Props {
+        availableStages: number[];
     }
 }

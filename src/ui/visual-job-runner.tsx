@@ -30,7 +30,7 @@ interface State {
     jobState: Api.JobState;
     jobStep: Api.JobStep;
     jobTotalSteps: Api.JobTotalSteps;
-    jobLastCompletedStage: number,
+    jobAvailableStages: number[];
     jobError: string;
     autoRefreshEnabled: boolean;
     autoRefreshInterval: number;
@@ -53,7 +53,7 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
             jobState: props.info?.state ?? 'NotStarted',
             jobStep: props.info?.step ?? 'none',
             jobTotalSteps: props.info?.total_steps ?? 'none',
-            jobLastCompletedStage: props.info?.last_completed_stage ?? 0,
+            jobAvailableStages: props.info?.available_stages ?? new Array<number>(),
             jobError: '',
             autoRefreshEnabled: true,
             autoRefreshInterval: 10,
@@ -86,18 +86,19 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
             jobState: data.state,
             jobStep: data.step,
             jobTotalSteps: data.total_steps,
-            jobLastCompletedStage: data.last_completed_stage,
+            jobAvailableStages: data.available_stages,
             jobError: '',
         };
     }
 
-    private makeInitialValues(commands?: JsonCommands, name?: string) {
+    private makeInitialValues(stages: number[], commands?: JsonCommands, name?: string) {
         const map = new Map<MmbUtil.ValueKeys, MmbUtil.V<MmbUtil.ValueTypes>>();
 
         if (commands === undefined || name === undefined)
             return map;
 
         const global = JsonCommandsDeserializer.toGlobal(commands);
+        const stage = stages[stages.length - 1];
         const md = JsonCommandsDeserializer.toMdParams(commands);
         const compounds = JsonCommandsDeserializer.toCompounds(commands);
         const doubleHelices = JsonCommandsDeserializer.toDoubleHelices(commands);
@@ -111,6 +112,7 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
         map.set('mol-in-gp-bisf', global.baseInteractionScaleFactor);
         map.set('mol-in-gp-temperature', global.temperature);
         map.set('mol-in-gp-def-md-params', md.useDefaults);
+        map.set('mol-in-gp-stage', stage);
         map.set('mol-in-cp-added', compounds);
         map.set('mol-in-bi-added', baseInteractions);
         map.set('mol-in-dh-added', doubleHelices);
@@ -122,12 +124,23 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
 
     private makeMmbInputForm() {
         try {
-            const initVals = this.makeInitialValues(this.props.commands, this.props.info?.name);
+            const stages = (() => {
+                const sorted = [...this.state.jobAvailableStages].sort((a, b) => a - b);
+                if (sorted.length === 0)
+                    sorted.push(1);
+                else {
+                    const last = sorted[sorted.length - 1];
+                    sorted.push(last + 1);
+                }
+                return sorted;
+            })();
+            const initVals = this.makeInitialValues(stages, this.props.commands, this.props.info?.name);
             return (
                 <MmbInputForm
                     ref={this.mmbInputFormRef}
                     id='molecule-input'
                     jobName={this.props.info?.name}
+                    availableStages={stages}
                     initialValues={initVals} />
             );
         } catch (e) {
@@ -259,16 +272,12 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
             return;
         }
 
-        const resume = this.state.jobLastCompletedStage > 0 && this.state.jobId !== undefined;
-        const func = resume ? JobQuery.resume : JobQuery.start;
-
         try {
-            const {name, commands} = this.mmbInputFormRef.current.commandsToJob(this.state.jobLastCompletedStage);
-            const fid = resume ? this.state.jobId! : name;
+            const {name, commands} = this.mmbInputFormRef.current.commandsToJob();
 
             Net.abortFetch(this.startJobAborter);
 
-            const { promise, aborter } = func(fid, commands);
+            const { promise, aborter } = JobQuery.start(name, commands);
             this.startJobAborter = aborter;
             promise.then(resp => {
                 resp.json().then(json => {

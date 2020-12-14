@@ -17,12 +17,21 @@ import { Reporting } from '../model/reporting';
 const NumLabeledField = LabeledField<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, MmbUtil.Values, number>();
 const CheckBox = LabeledCheckBox<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, MmbUtil.Values>();
 
+function getStageOptions(stages: number[]) {
+    const mapped = stages.map(n => { return{ caption: n.toString(), value: n.toString(), selected: false }} );
+    const len = mapped.length;
+    if (len > 0)
+        return { options: mapped, selected: mapped[len - 1].value };
+    return { options: mapped, selected: undefined };
+}
+
 class GlobalParametersInputInner extends FormBlock<GlobalParametersInputInner.Props> {
     componentDidMount() {
         const bisf = MMBFU.getScalar(this.props.ctxData, 'mol-in-gp-bisf', GlobalConfig.Defaults.baseInteractionScaleFactor);
         const temperature = MMBFU.getScalar(this.props.ctxData, 'mol-in-gp-temperature', GlobalConfig.Defaults.temperature);
         const repInt = MMBFU.getScalar(this.props.ctxData, 'mol-in-gp-reporting-interval', Reporting.Defaults.interval);
         const repCount = MMBFU.getScalar(this.props.ctxData, 'mol-in-gp-num-reports', Reporting.Defaults.count);
+        const stage = MMBFU.getScalar(this.props.ctxData, 'mol-in-gp-stage', 1);
         MMBFU.updateValues(
             this.props.ctxData,
             [
@@ -30,10 +39,12 @@ class GlobalParametersInputInner extends FormBlock<GlobalParametersInputInner.Pr
                 { key: 'mol-in-gp-temperature', value: temperature },
                 { key: 'mol-in-gp-reporting-interval', value: repInt },
                 { key: 'mol-in-gp-num-reports', value: repCount },
+                { key: 'mol-in-gp-stage', value: stage },
             ]);
     }
 
     render() {
+        const { options, selected } = getStageOptions(this.props.availableStages);
         return (
             <div className='section'>
                 <div className='section-caption'>Global parameters</div>
@@ -70,6 +81,15 @@ class GlobalParametersInputInner extends FormBlock<GlobalParametersInputInner.Pr
                         style='above'
                         inputType='line-edit'
                         options={[]} />
+                    <NumLabeledField
+                        {...GLabeledField.tags('mol-in-gp-stage', this.props.formId, ['labeled-field-concise'])}
+                        formId={this.props.formId}
+                        label='Stage'
+                        tooltip='firstStage, lastStage'
+                        style='above'
+                        inputType='combo-box'
+                        options={options}
+                        forcedValue={selected} />
                     <CheckBox
                         {...GLabeledField.tags('mol-in-gp-def-md-params', this.props.formId, ['labeled-field-concise'])}
                         formId={this.props.formId}
@@ -87,6 +107,7 @@ class GlobalParametersInputInner extends FormBlock<GlobalParametersInputInner.Pr
 namespace GlobalParametersInputInner {
     export interface Props extends FormBlock.Props {
         ctxData: MmbUtil.ContextData;
+        availableStages: number[];
     }
 }
 
@@ -106,5 +127,6 @@ export class GlobalParametersInput extends FormBlock<GlobalParametersInput.Props
 
 export namespace GlobalParametersInput {
     export interface Props extends FormBlock.Props {
+        availableStages: number[];
     }
 }

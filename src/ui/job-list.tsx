@@ -39,8 +39,7 @@ function jobListItemToEntry(item: Api.JobListItem): JobEntry {
             state: 'NotStarted',
             step: 0,
             total_steps: 0,
-            last_available_stage: 0,
-            last_completed_stage: 0,
+            available_stages: new Array<number>(),
             created_on: 0,
         };
     }
