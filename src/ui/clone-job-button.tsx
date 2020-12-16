@@ -95,12 +95,12 @@ export class CloneJobButton extends React.Component<CloneJobButton.Props, State>
 
     render() {
         return (
-            <span>
+            <div>
                 <PushButton
                     value={this.state.expanded ? 'Clone <<' : 'Clone >>'}
                     onClick={() => this.setState({...this.state, expanded: !this.state.expanded })} />
                 {this.renderInner()}
-            </span>
+            </div>
         );
     }
 }

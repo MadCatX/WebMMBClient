@@ -102,13 +102,13 @@ textarea {
 }
 
 input.fit-width-lineedit {
-    width: 80%;
+    margin: 0.2em;
+    width: calc(100% - 0.8em);
 }
 
 .form-field-input-above {
     width: 100%;
 }
-
 
 .form-field-label-vcenter {
     display: table-cell;
