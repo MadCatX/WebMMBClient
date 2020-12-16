@@ -19,6 +19,14 @@ export namespace JobQuery {
         return Request.api(req);
     }
 
+    export function clone(id: string, name: string) {
+        const req: Api.ApiRequest<Api.CloneJobRqData> = {
+            req_type: 'CloneJob',
+            data: { id, name },
+        };
+        return Request.api(req);
+    }
+
     export function del(id: string) {
         const req: Api.ApiRequest<Api.SimpleJobRqData> = {
             req_type: 'DeleteJob',

@@ -109,54 +109,7 @@ export class JobList extends React.Component<JobList.Props, State> {
             return;
         }
 
-        const job = this.state.jobs.find(e => e.id === id);
-        if (job === undefined)
-            throw new Error(`Job ${id} does not exist`);
-
-        Net.abortFetch(this.selectJobAborter);
-
-        const { promise, aborter } = JobQuery.commands(id);
-        this.selectJobAborter = aborter;
-        promise.then(resp => {
-            if (resp.status === 200) {
-                resp.json().then(json => {
-                    if (Net.isFetchAborted(aborter))
-                        return;
-
-                    const r = Response.parse<JsonCommands>(json, jsonCommandsFromJson);
-
-                    if (Response.isError(r)) {
-                        this.setState({
-                            ...this.state,
-                            error: r.message,
-                        });
-                    } else if (Response.isOk(r)) {
-                        this.setState({
-                            ...this.state,
-                            error: '',
-                        });
-                        this.props.onSelectJob(job, r.data);
-                    }
-                }).catch(e => {
-                    this.setState({
-                        ...this.state,
-                        error: e.toString(),
-                    });
-                });
-            } else {
-                this.setState({
-                    ...this.state,
-                    error: `Failed to fetch job commands (${resp.status}: ${resp.statusText}`,
-                });
-            }
-        }).catch(e => {
-            if (Net.isAbortError(e))
-                return;
-            this.setState({
-                ...this.state,
-                error: e.toString(),
-            });
-        });
+        this.selectJob(id);
     }
 
     private refresh() {
@@ -231,12 +184,64 @@ export class JobList extends React.Component<JobList.Props, State> {
                             name={e.name}
                             state={e.state}
                             created_on={e.created_on}
+                            notifyCloned={(_id: string) => this.refresh()}
                             onSelect={() => this.onSelectJobClicked(e.id)}
                             onDelete={() => this.onDeleteJobClicked(e.id)} />
                         )}
                 </div>
             );
         }
+    }
+
+    private selectJob(id: string) {
+        const job = this.state.jobs.find(e => e.id === id);
+        if (job === undefined)
+            throw new Error(`Job ${id} does not exist`);
+
+        Net.abortFetch(this.selectJobAborter);
+
+        const { promise, aborter } = JobQuery.commands(id);
+        this.selectJobAborter = aborter;
+        promise.then(resp => {
+            if (resp.status === 200) {
+                resp.json().then(json => {
+                    if (Net.isFetchAborted(aborter))
+                        return;
+
+                    const r = Response.parse<JsonCommands>(json, jsonCommandsFromJson);
+
+                    if (Response.isError(r)) {
+                        this.setState({
+                            ...this.state,
+                            error: r.message,
+                        });
+                    } else if (Response.isOk(r)) {
+                        this.setState({
+                            ...this.state,
+                            error: '',
+                        });
+                        this.props.onSelectJob(job, r.data);
+                    }
+                }).catch(e => {
+                    this.setState({
+                        ...this.state,
+                        error: e.toString(),
+                    });
+                });
+            } else {
+                this.setState({
+                    ...this.state,
+                    error: `Failed to fetch job commands (${resp.status}: ${resp.statusText}`,
+                });
+            }
+        }).catch(e => {
+            if (Net.isAbortError(e))
+                return;
+            this.setState({
+                ...this.state,
+                error: e.toString(),
+            });
+        });
     }
 
     componentWillUnmount() {

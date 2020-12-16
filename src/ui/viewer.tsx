@@ -41,10 +41,9 @@ export class Viewer extends React.Component<Viewer.Props, State> {
         this.load();
     }
 
-
     private load() {
         const url = this.url();
-        if (url !== undefined && this.props.step > 0)
+        if (url !== undefined)
             WebMmbViewer.load(url, 'pdb');
     }
 

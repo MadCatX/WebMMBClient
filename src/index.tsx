@@ -70,6 +70,13 @@ export class Main extends React.Component<Props, State> {
         }
     }
 
+    private onJobStarted(info: Api.JobInfo, commands: JsonCommands) {
+        this.setState({
+            ...this.state,
+            activeJob: { info, commands },
+        });
+    }
+
     private onSelectJob(info?: Api.JobInfo, commands?: JsonCommands) {
         if (!this.allowJobControl())
             return;
@@ -84,13 +91,6 @@ export class Main extends React.Component<Props, State> {
             ...this.state,
             activeTab: 'job-control',
             activeJob: aj,
-        });
-    }
-
-    private onJobStarted(info: Api.JobInfo, commands: JsonCommands) {
-        this.setState({
-            ...this.state,
-            activeJob: { info, commands },
         });
     }
 

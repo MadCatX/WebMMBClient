@@ -19,6 +19,41 @@
     margin-bottom: 2em;
 }
 
+input {
+    -moz-appearance: none;
+    -webkit-appearance: none;
+    appearance: none;
+
+    background: none;
+    border: 0.1em solid black;
+    min-width: 2em;
+    height: 1.5em;
+}
+
+.checkbox input {
+    -moz-appearance: none;
+    -webkit-appearance: none;
+    appearance: none;
+
+    background: none;
+    outline: solid black 0.1em 0.1em;
+    width: 1.5em;
+    height: 1.5em;
+}
+
+.checkbox input:checked {
+    background-color: black;
+}
+
+select {
+    -moz-appearance: none;
+    -webkit-appearance: none;
+    appearance: none;
+
+    background: none;
+    border: 0.1em solid black;
+}
+
 .bold {
     font-weight: bold;
 }
@@ -54,6 +89,10 @@
 .fading-text-visible {
     opacity: 1;
     transition: opacity 0.1s;
+}
+
+.fit-width-lineedit {
+    width: 80%;
 }
 
 .form-field-input-above {
@@ -92,7 +131,7 @@
 
 .job-item {
     display: grid;
-    grid-template-columns: auto 6em 12em 6em 6em;
+    grid-template-columns: auto 6em 12em 6em 6em 6em;
     margin: 0.2em 0 0.2em 0;
 }
 

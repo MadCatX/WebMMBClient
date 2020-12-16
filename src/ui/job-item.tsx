@@ -8,6 +8,7 @@
 
 import * as React from 'react';
 import * as Api from '../mmb/api';
+import { CloneJobButton } from './clone-job-button';
 import { PushButton } from './common/push-button';
 
 function padStr(num: number) {
@@ -21,7 +22,7 @@ export class JobItem extends React.Component<JobItem.Props> {
     private renderJobStatus(s: Api.JobState) {
         switch (s) {
         case 'NotStarted':
-            return (<span>Not started</span>);
+            return (<span className='centered-text ok-message'>Not started</span>);
         case 'Running':
             return (<span className='centered-text ok-message'>Running</span>);
         case 'Finished':
@@ -60,6 +61,10 @@ export class JobItem extends React.Component<JobItem.Props> {
                     className='pushbutton-common pushbutton-chained pushbutton-clr-default pushbutton-hclr-default'
                     value='Show >>'
                     onClick={() => this.props.onSelect(this.props.id)} />
+                <CloneJobButton
+                    id={this.props.id}
+                    sourceName={this.props.name}
+                    notifyCloned={(id: string) => this.props.notifyCloned(id) } />
                 <PushButton
                     className='pushbutton-common pushbutton-chained pushbutton-clr-default pushbutton-hclr-red'
                     value='Delete'
@@ -70,7 +75,7 @@ export class JobItem extends React.Component<JobItem.Props> {
 }
 
 export namespace JobItem {
-    export interface ClickHandler {
+    export interface ActionHandler {
         (id: string): void;
     }
 
@@ -79,7 +84,8 @@ export namespace JobItem {
         name: string;
         state: Api.JobState;
         created_on: number;
-        onSelect: ClickHandler;
-        onDelete: ClickHandler;
+        notifyCloned: ActionHandler;
+        onSelect: ActionHandler;
+        onDelete: ActionHandler;
     }
 }

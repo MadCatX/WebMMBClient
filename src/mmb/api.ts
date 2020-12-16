@@ -16,7 +16,8 @@ type ApiRequestType =
     'ListJobs'    |
     'MmbOutput'   |
     'JobCommands' |
-    'SessionInfo';
+    'SessionInfo' |
+    'CloneJob';
 
 type AuthRequestType =
     'LogIn' |
@@ -36,6 +37,11 @@ export type ApiRequest<T> = {
 export type AuthRequest = {
     auth_type: AuthRequestType,
     session_id: string,
+}
+
+export type CloneJobRqData = {
+    id: string,
+    name: string,
 }
 
 export type SimpleJobRqData = {
