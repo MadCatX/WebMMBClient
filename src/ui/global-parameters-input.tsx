@@ -57,7 +57,7 @@ class GlobalParametersInputInner extends FormBlock<GlobalParametersInputInner.Pr
                         inputType='line-edit'
                         options={[]} />
                     <NumLabeledField
-                        {...GLabeledField.tags('mol-in-gp-num-reports', this.props.formId, ['labeled-field-concise'])} 
+                        {...GLabeledField.tags('mol-in-gp-num-reports', this.props.formId, ['labeled-field-concise'])}
                         formId={this.props.formId}
                         label='Number of reports'
                         tooltip='numReportingIntervals'
@@ -65,7 +65,7 @@ class GlobalParametersInputInner extends FormBlock<GlobalParametersInputInner.Pr
                         inputType='line-edit'
                         options={[]} />
                     <NumLabeledField
-                        {...GLabeledField.tags('mol-in-gp-temperature', this.props.formId, ['labeled-field-concise'])} 
+                        {...GLabeledField.tags('mol-in-gp-temperature', this.props.formId, ['labeled-field-concise'])}
                         formId={this.props.formId}
                         label='Temperature'
                         tooltip='temperature'

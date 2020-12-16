@@ -174,7 +174,7 @@ export class Viewer extends React.Component<Viewer.Props, State> {
                             }
                         }
                         checked={this.state.autoRefreshEnabled}
-                        className='padded' />
+                        className='padded checkbox' />
                 </div>
                 {this.renderMmbOutput()}
             </div>

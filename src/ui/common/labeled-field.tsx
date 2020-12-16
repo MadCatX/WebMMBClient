@@ -37,7 +37,7 @@ export class GLabeledField<KE, KV extends string, T, U extends FormUtil.V<T>> ex
 
         switch (this.props.inputType) {
         case 'check-box':
-            return (<this.CheckBox {...this.props} className={cname} />);
+            return (<this.CheckBox {...this.props} className={`${cname} checkbox`} />);
         case 'combo-box':
             return (<this.ComboBox {...this.props} className={cname} />);
         case 'line-edit':

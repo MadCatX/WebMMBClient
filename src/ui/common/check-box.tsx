@@ -22,10 +22,10 @@ export class GCheckBox<KE, KV, T> extends FormField<KE, KV, T, GCheckBox.Props<K
 
                     return (
                         <input
-                            type="checkbox" 
+                            className={this.props.className}
+                            type='checkbox'
                             id={this.props.id}
                             name={this.props.id}
-                            className={this.props.className}
                             checked={checked}
                             onChange={e => this.updateValue(data, e.currentTarget.checked)} />
                     );

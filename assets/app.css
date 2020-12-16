@@ -26,22 +26,24 @@ input {
 
     background: none;
     border: 0.1em solid black;
-    min-width: 2em;
+    min-width: 1em;
     height: 1.5em;
 }
 
-.checkbox input {
+input.checkbox {
     -moz-appearance: none;
     -webkit-appearance: none;
     appearance: none;
 
     background: none;
-    outline: solid black 0.1em 0.1em;
-    width: 1.5em;
-    height: 1.5em;
+    border: none;
+    outline: black solid 0.1em;
+    outline-offset: 0.2em;
+    width: 1em;
+    height: 1em;
 }
 
-.checkbox input:checked {
+input.checkbox:checked {
     background-color: black;
 }
 
@@ -51,6 +53,14 @@ select {
     appearance: none;
 
     background: none;
+    border: 0.1em solid black;
+}
+
+textarea {
+    -moz-appearance: none;
+    -webkit-appearance: none;
+    appearance: none;
+
     border: 0.1em solid black;
 }
 
@@ -91,12 +101,12 @@ select {
     transition: opacity 0.1s;
 }
 
-.fit-width-lineedit {
+input.fit-width-lineedit {
     width: 80%;
 }
 
 .form-field-input-above {
-    width: 90%;
+    width: 100%;
 }
 
 
