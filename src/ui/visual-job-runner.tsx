@@ -396,17 +396,15 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
     render() {
         return (
             <div className='job-runner-container'>
-                <div>
-                    <Viewer
-                        structureUrl={this.structureUrl()}
-                        structureName={this.state.jobName}
-                        availableStages={this.state.jobAvailableStages}
-                        step={((this.state.jobStep === 'preparing' || this.state.jobState === 'NotStarted') ? 0 : this.state.jobStep) as number}
-                        autoRefreshChanged={this.onAutoRefreshChanged}
-                        defaultAutoRefreshEnabled={DefaultAutoRefreshEnabled}
-                        defaultAutoRefreshInterval={DefaultAutoRefreshInterval}
-                        mmbOutput={this.state.mmbOutput} />
-                </div>
+                <Viewer
+                    structureUrl={this.structureUrl()}
+                    structureName={this.state.jobName}
+                    availableStages={this.state.jobAvailableStages}
+                    step={((this.state.jobStep === 'preparing' || this.state.jobState === 'NotStarted') ? 0 : this.state.jobStep) as number}
+                    autoRefreshChanged={this.onAutoRefreshChanged}
+                    defaultAutoRefreshEnabled={DefaultAutoRefreshEnabled}
+                    defaultAutoRefreshInterval={DefaultAutoRefreshInterval}
+                    mmbOutput={this.state.mmbOutput} />
                 <div id='mmb-controls'>
                     <JobStatus
                         state={this.state.jobState}

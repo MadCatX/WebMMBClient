@@ -87,7 +87,7 @@ textarea {
 
 .job-runner-container {
     display: grid;
-    grid-template-columns: 40% 60%;
+    grid-template-columns: auto auto;
 }
 
 .error-message {
@@ -215,6 +215,7 @@ input.fit-width-lineedit {
 
 .mmb-controls {
     margin-left: 0.4em;
+    min-width: 40em;
 }
 
 .mmb-output {
@@ -486,6 +487,7 @@ input.fit-width-lineedit {
 
 .viewer-container {
     margin-right: 0.4em;
+    min-width: 35em;
 }
 
 .viewer-controls {
