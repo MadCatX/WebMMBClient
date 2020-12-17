@@ -43,7 +43,7 @@ export namespace Request {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                redirect: 'follow',
+                redirect: 'error',
                 body: JSON.stringify(req),
                 signal: aborter.signal,
             },

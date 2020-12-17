@@ -54,6 +54,7 @@ select {
 
     background: none;
     border: 0.1em solid black;
+    height: 1.7em;
 }
 
 textarea {

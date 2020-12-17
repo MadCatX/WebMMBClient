@@ -39,7 +39,7 @@ export class Logout extends React.Component<Logout.Props, State> {
 
     private logOut() {
         AuthQuery.logOut().promise.then(resp => {
-            if (resp.ok && resp.redirected)
+            if (resp.status === 200)
                 window.location.href = resp.url;
         }).catch(e => {
             alert(`Logout failure: ${e.message}`);

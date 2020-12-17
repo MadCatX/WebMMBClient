@@ -38,11 +38,11 @@ export class Login extends Form<LfUtil.ErrorKeys, LfUtil.ValueKeys, LfUtil.Value
         const { promise, aborter } = AuthQuery.logIn(session_id);
         this.aborter = aborter;
         promise.then(resp => {
-            if (resp.ok === true && resp.redirected) {
+            if (resp.status === 200) {
                 window.location.href = resp.url;
             } else {
                 resp.text().then(text => {
-                    this.setAuthError(text);
+                    this.setAuthError(text, resp.status);
                 }).catch(e => {
                     this.setAuthError(e.toString());
                 });
@@ -54,9 +54,9 @@ export class Login extends Form<LfUtil.ErrorKeys, LfUtil.ValueKeys, LfUtil.Value
         });
     }
 
-    private setAuthError(error: string) {
+    private setAuthError(error: string, status?: number) {
         const ne = this.emptyErrors();
-        ne.set('login-errors', [`Authentication failure: ${error}`]);
+        ne.set('login-errors', [`Authentication failure: ${status} ${error}`]);
         this.setState({
             ...this.state,
             errors: ne,
