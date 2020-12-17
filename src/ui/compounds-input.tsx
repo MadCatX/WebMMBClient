@@ -99,7 +99,7 @@ class CompoundsInputInner extends FormBlock<CompoundsInputInner.Props> {
         return (
             <div className='section'>
                 <div className='section-caption'>Compound definiton</div>
-                <div className='mol-in-cp-input'>
+                <div className='mol-in-cp-input spaced-grid'>
                     <StrLabeledField
                         {...GLabeledField.tags('mol-in-cp-chain-id', this.props.formId, ['labeled-field'])}
                         formId={this.props.formId}
@@ -147,7 +147,7 @@ class CompoundsInputInner extends FormBlock<CompoundsInputInner.Props> {
                     errors={this.props.ctxData.errors.get('mol-in-cp-errors') ?? new Array<string>()} />
                 <AddedTable
                     formId={this.props.formId}
-                    className='mol-in-cp-added'
+                    className='mol-in-cp-added spaced-grid'
                     valuesKey='mol-in-cp-added'
                     deleter={this.compoundRemoved}
                     columns={[

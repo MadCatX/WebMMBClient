@@ -26,8 +26,9 @@ input {
 
     background: none;
     border: 0.1em solid black;
-    min-width: 1em;
     height: 1.5em;
+    min-width: 1em;
+    padding: 0.2em;
 }
 
 input.checkbox {
@@ -54,7 +55,8 @@ select {
 
     background: none;
     border: 0.1em solid black;
-    height: 1.7em;
+    height: 2.0em;
+    padding: 0.2em;
 }
 
 textarea {
@@ -348,6 +350,10 @@ input.fit-width-lineedit {
     margin-bottom: 0.2em;
     font-size: 14pt;
     font-weight: bold;
+}
+
+.spaced-grid {
+    column-gap: 0.4em;
 }
 
 .tabbutton-common {

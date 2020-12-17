@@ -119,9 +119,9 @@ class NtCsInputInner extends FormBlock<NtCsInputInner.Props> {
         }
 
         return (
-            <div className="section">
-                <div className="section-caption">NtCs</div>
-                <div className="mol-in-ntcs-input">
+            <div className='section'>
+                <div className='section-caption'>NtCs</div>
+                <div className='mol-in-ntcs-input spaced-grid'>
                     <StrLabeledField
                         {...GLabeledField.tags('mol-in-ntcs-chain', this.props.formId, ['labeled-field'])}
                         formId={this.props.formId}
@@ -164,7 +164,7 @@ class NtCsInputInner extends FormBlock<NtCsInputInner.Props> {
                     errors={this.props.ctxData.errors.get('mol-in-ntcs-errors') ?? new Array<string>()} />
                 <AddedTable
                     formId={this.props.formId}
-                    className='mol-in-ntcs-added'
+                    className='mol-in-ntcs-added spaced-grid'
                     valuesKey='mol-in-ntcs-added'
                     columns={[
                         {caption: 'Chain', k: 'chain'},

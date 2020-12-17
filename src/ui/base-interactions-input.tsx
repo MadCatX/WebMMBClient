@@ -122,9 +122,9 @@ class BaseInteractionsInputInner extends FormBlock<BaseInteractionsInputInner.Pr
         const chainTwo = MMBFU.getScalar(this.props.ctxData, 'mol-in-bi-chain-two', '');
 
         return (
-            <div className="section">
-                <div className="section-caption">Base interactions</div>
-                <div className="mol-in-bi-input">
+            <div className='section'>
+                <div className='section-caption'>Base interactions</div>
+                <div className='mol-in-bi-input spaced-grid'>
                     <NumLabeledField
                         {...GLabeledField.tags('mol-in-bi-chain-one', this.props.formId, ['labeled-field'])}
                         formId={this.props.formId}
@@ -188,7 +188,7 @@ class BaseInteractionsInputInner extends FormBlock<BaseInteractionsInputInner.Pr
                     errors={this.props.ctxData.errors.get('mol-in-bi-errors') ?? new Array<string>()} />
                 <AddedTable
                     formId={this.props.formId}
-                    className='mol-in-bi-added'
+                    className='mol-in-bi-added spaced-grid'
                     valuesKey='mol-in-bi-added'
                     columns={[
                         {caption: 'Chain', k: 'chainOne'},

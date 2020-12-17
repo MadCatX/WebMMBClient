@@ -177,7 +177,7 @@ class DoubleHelicesInputInner extends FormBlock<DoubleHelicesInputInner.Props> {
         return (
             <div className='section'>
                 <div className='section-caption'>Double helices</div>
-                <div className='mol-in-dh-input'>
+                <div className='mol-in-dh-input spaced-grid'>
                     <StrLabeledField
                         {...GLabeledField.tags('mol-in-dh-chain-one', this.props.formId, ['labeled-field'])}
                         formId={this.props.formId}
@@ -232,7 +232,7 @@ class DoubleHelicesInputInner extends FormBlock<DoubleHelicesInputInner.Props> {
                     errors={this.props.ctxData.errors.get('mol-in-dh-errors') ?? new Array<string>()} />
                 <AddedTable
                     formId={this.props.formId}
-                    className='mol-in-dh-added'
+                    className='mol-in-dh-added spaced-grid'
                     valuesKey='mol-in-dh-added'
                     columns={[
                         {caption: 'Chain', k: 'chainOne'},
