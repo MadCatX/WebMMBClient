@@ -171,9 +171,9 @@ export class JobList extends React.Component<JobList.Props, State> {
             return (
                 <div>
                     <div className='job-item'>
-                        <div className='bold'>Name</div>
-                        <div className='bold'>State</div>
-                        <div className='bold'>Created on</div>
+                        <div className='table-column-header'>Name</div>
+                        <div className='table-column-header'>State</div>
+                        <div className='table-column-header'>Created on</div>
                         <div></div>
                         <div></div>
                     </div>

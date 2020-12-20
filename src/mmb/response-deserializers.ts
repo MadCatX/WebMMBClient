@@ -7,11 +7,15 @@
  */
 
 import * as Api from './api';
-import { checkProps, checkType, isArr, isBool, isInt, isObj, isStr } from '../util/json';
+import { checkProps, checkType, isArr, isBool, isInt, isObj, isStr, TypeChecker } from '../util/json';
 import { Num } from '../util/num';
 
 const NOT_AN_OBJ = 'Input variable is not an object';
 
+const ExampleListItemObj: Api.ExampleListItem = {
+    name: '',
+    description: '',
+};
 const JobInfoObj: Api.JobInfo = {
     id: '',
     name: '',
@@ -26,6 +30,21 @@ const JobListItemObj: Api.JobListItem = {
     info: JobInfoObj,
 };
 const SessionInfoObj: Api.SessionInfo = { id: '' };
+
+function isExampleListItem(v: unknown): v is Api.ExampleListItem {
+    if (!isObj(v))
+        return false;
+
+    try {
+        checkProps(v, ExampleListItemObj);
+        checkType(v, 'name', isStr);
+        checkType(v, 'description', isStr);
+        return true;
+    } catch (e) {
+        console.error(e);
+        return false;
+    }
+}
 
 function isJobListItem(v: unknown): v is Api.JobListItem {
     if (!isObj(v))
@@ -85,6 +104,17 @@ function isJobStep(v: unknown): v is Api.JobStep {
 }
 
 export namespace ResponseDeserializers {
+    interface TypeConverter<T> {
+        (obj: unknown): T;
+    }
+
+    function toList<T>(obj: unknown, checker: TypeChecker<T>, converter: TypeConverter<T>): T[] {
+        if (isArr(obj, checker)) {
+            return obj.map(item => converter(item));
+        } else
+            throw new Error();
+    }
+
     export function toEmpty(obj: unknown): Api.Empty {
         if (!isObj(obj))
             throw new Error(NOT_AN_OBJ);
@@ -92,6 +122,21 @@ export namespace ResponseDeserializers {
         if (Object.keys(obj).length > 0)
             throw new Error('Object is not empty');
         return {};
+    }
+
+    export function toExampleListItem(obj: unknown): Api.ExampleListItem {
+        if (isExampleListItem(obj)) {
+            return { name: obj.name, description: obj.description }
+        } else
+            throw new Error('Object is not ExampleListItem');
+    }
+
+    export function toExampleList(obj: unknown): Api.ExampleListItem[] {
+        try {
+            return toList(obj, isExampleListItem, toExampleListItem);
+        } catch (_) {
+            throw new Error('Object is not ExampleList');
+        }
     }
 
     export function toJobInfo(obj: unknown): Api.JobInfo {
@@ -120,14 +165,11 @@ export namespace ResponseDeserializers {
     }
 
     export function toJobList(obj: unknown): Api.JobListItem[] {
-        if (isArr(obj, isJobListItem)) {
-            const list = new Array<Api.JobListItem>();
-            for (const item of obj)  {
-                list.push(toJobListItem(item));
-            }
-            return list;
-        } else
+        try {
+            return toList(obj, isJobListItem, toJobListItem);
+        } catch (_) {
             throw new Error('Object is not JobListItem array');
+        }
     }
 
     export function toMmbOutput(obj: unknown): string {

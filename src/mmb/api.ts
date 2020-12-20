@@ -9,15 +9,17 @@
 import { AnyObject } from '../util/json';
 
 type ApiRequestType =
-    'StartJob'    |
-    'StopJob'     |
-    'DeleteJob'   |
-    'JobStatus'   |
-    'ListJobs'    |
-    'MmbOutput'   |
-    'JobCommands' |
-    'SessionInfo' |
-    'CloneJob';
+    'StartJob'        |
+    'StopJob'         |
+    'DeleteJob'       |
+    'JobStatus'       |
+    'ListJobs'        |
+    'MmbOutput'       |
+    'JobCommands'     |
+    'SessionInfo'     |
+    'CloneJob'        |
+    'ListExamples'    |
+    'ActivateExample';
 
 type AuthRequestType =
     'LogIn' |
@@ -78,6 +80,11 @@ export type OkResponse<T> = {
 
 const Empty = {};
 export type Empty = typeof Empty;
+
+export type ExampleListItem = {
+    name: string,
+    description: string,
+}
 
 export type JobInfo = {
     id: string,

@@ -9,6 +9,7 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { isExtResAvailable } from './external-resources-loader';
+import { ExampleList } from './ui/example-list';
 import { JobList } from './ui/job-list';
 import { Logout } from './ui/logout';
 import { TabsBar } from './ui/tabs-bar';
@@ -21,7 +22,7 @@ import { ResponseDeserializers } from './mmb/response-deserializers';
 import { SessionQuery } from './mmb/session-query';
 import { Net } from './util/net';
 
-type Tabs = 'job-list' | 'job-control';
+type Tabs = 'job-list' | 'job-control' | 'example-list';
 
 type ActiveJob = {
     info: Api.JobInfo,
@@ -55,10 +56,15 @@ export class Main extends React.Component<Props, State> {
         this.onJobDeleted = this.onJobDeleted.bind(this);
         this.onJobStarted = this.onJobStarted.bind(this);
         this.onTabChanged = this.onTabChanged.bind(this);
+        this.onExampleSelected = this.onExampleSelected.bind(this);
     }
 
     private allowJobControl() {
         return this.state.session_id !== undefined && isExtResAvailable('molstar-app');
+    }
+
+    private onExampleSelected(info: Api.JobInfo, commands: JsonCommands) {
+        this.onSelectJob(info, commands);
     }
 
     private onJobDeleted(id: string) {
@@ -120,6 +126,11 @@ export class Main extends React.Component<Props, State> {
                     onJobStarted={this.onJobStarted}
                     info={this.state.activeJob?.info}
                     commands={this.state.activeJob?.commands} />
+                );
+        case 'example-list':
+            return (
+                <ExampleList
+                    onExampleSelected={this.onExampleSelected} />
             );
         }
     }
@@ -171,6 +182,7 @@ export class Main extends React.Component<Props, State> {
                         tabs={[
                             { id: 'job-list', caption: 'Jobs' },
                             { id: 'job-control', caption: 'Control' },
+                            { id: 'example-list', caption: 'Examples' },
                         ]}
                         activeTab={this.state.activeTab}
                         changeTab={this.onTabChanged}

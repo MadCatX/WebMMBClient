@@ -81,17 +81,17 @@ textarea {
     margin-right: auto;
 }
 
-.job-list-container {
-    width: 50vw;
-}
-
-.job-runner-container {
-    display: grid;
-    grid-template-columns: auto auto;
-}
-
 .error-message {
     color: #ff0000;
+}
+
+.example-items-container {
+    display: grid;
+    grid-template-columns: 12em auto 6em;
+    min-width: 30em;
+    max-width: 50vw;
+    margin-top: 1em;
+    margin-bottom: 1em;
 }
 
 .fading-text-invisible {
@@ -148,13 +148,19 @@ input.fit-width-lineedit {
     margin: 0.2em 0 0.2em 0;
 }
 
-.job-item-name {
-    font-weight: bold;
-}
-
 .job-items-container {
     margin-top: 1em;
     margin-bottom: 1em;
+}
+
+.job-list-container {
+    min-width: 30em;
+    max-width: 50vw;
+}
+
+.job-runner-container {
+    display: grid;
+    grid-template-columns: auto auto;
 }
 
 .job-status {
@@ -400,6 +406,14 @@ input.fit-width-lineedit {
     text-decoration: underline;
     text-decoration-color: transparent;
     transition: 0.25s;
+}
+
+.table-column-header {
+    font-weight: bold;
+}
+
+.table-item {
+    margin: 0.2em 0 0.2em 0;
 }
 
 .tabs-bar {
