@@ -33,7 +33,7 @@ export class GTableWithDeletableRows<KE, KV, T, U extends T & Array<any>> extend
                             <div className='column-header' key='entries'></div>
                             {values.map((v, index) => {
                                 return (
-                                    <>
+                                    <React.Fragment key={`row-item-${index}`}>
                                         {this.props.columns.map((col, n) => {
                                             const key = `col-item-${index}-${n}`
                                             if (col.stringify !== undefined)
@@ -49,7 +49,7 @@ export class GTableWithDeletableRows<KE, KV, T, U extends T & Array<any>> extend
                                                 e.preventDefault();
                                                 this.removeRow(index, data);
                                             }} />
-                                    </>
+                                    </React.Fragment>
                                 );
                             })
                             }
