@@ -40,16 +40,16 @@ export class ExampleList extends React.Component<ExampleList.Props, State> {
                 <div className='table-column-header'>Name</div>
                 <div className='table-column-header'>Description</div>
                 <div className='table-column-header'>&nbsp;</div>
-                {this.state.examples.map(item => {
+                {this.state.examples.map((item, index) => {
                     return (
-                        <>
+                        <React.Fragment key={`${item.name}-${index}`}>
                             <div className='table-item'>{item.name}</div>
                             <div className='table-item'>{item.description}</div>
                             <PushButton
                                 className='pushbutton-common pushbutton-chained pushbutton-clr-default pushbutton-hclr-default table-item'
                                 value='Show >>'
                                 onClick={() => this.activateExample(item.name)} />
-                        </>
+                        </React.Fragment>
                     );
                 })}
             </>
