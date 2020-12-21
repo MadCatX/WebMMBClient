@@ -102,6 +102,13 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
         };
     }
 
+    private killAutoRefresh() {
+        if (this.autoRefresherId !== null) {
+            window.clearInterval(this.autoRefresherId);
+            this.autoRefresherId = null;
+        }
+    }
+
     private makeInitialValues(stages: number[], commands?: JsonCommands, name?: string) {
         const map = new Map<MmbUtil.ValueKeys, MmbUtil.V<MmbUtil.ValueTypes>>();
 
@@ -331,8 +338,7 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
     }
 
     private setupAutoRefresh(enabled: boolean, interval: number, state: Api.JobState) {
-        if (this.autoRefresherId !== null)
-            window.clearInterval(this.autoRefresherId);
+        this.killAutoRefresh();
 
         if (enabled && state === 'Running')
             this.autoRefresherId = window.setInterval(this.refreshJob, interval * 1000);
@@ -344,10 +350,7 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
         if (this.state.jobId === undefined)
             return;
 
-        if (this.autoRefresherId !== null) {
-            window.clearInterval(this.autoRefresherId);
-            this.autoRefresherId = null;
-        }
+        this.killAutoRefresh();
 
         Net.abortFetch(this.stopJobAborter);
 
@@ -391,19 +394,23 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
     componentDidMount() {
         if (this.state.jobId !== undefined)
             this.queryJobStatus();
+        if (this.state.jobState === 'Running')
+            this.setupAutoRefresh(this.state.autoRefreshEnabled, this.state.autoRefreshInterval, 'Running');
 
         forceResize();
     }
 
-    componentDidUpdate(_prevProps: VisualJobRunner.Props, prevState: State) {
-        if (prevState.jobState === 'Running' && this.state.jobState !== 'Running')
-            this.setupAutoRefresh(false, this.state.autoRefreshInterval, this.state.jobState)
+    componentDidUpdate(_prevProps: VisualJobRunner.Props) {
+        if (this.state.jobState !== 'Running')
+            this.killAutoRefresh();
     }
 
     componentWillUnmount() {
         Net.abortFetch(this.jobQueryAborter);
         Net.abortFetch(this.startJobAborter);
         Net.abortFetch(this.startJobAborter);
+
+        this.killAutoRefresh();
     }
 
     render() {
