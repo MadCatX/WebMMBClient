@@ -39,7 +39,7 @@ export class ExampleList extends React.Component<ExampleList.Props, State> {
             <>
                 <div className='table-column-header'>Name</div>
                 <div className='table-column-header'>Description</div>
-                <div className='table-column-header'></div>
+                <div className='table-column-header'>&nbsp;</div>
                 {this.state.examples.map(item => {
                     return (
                         <>
