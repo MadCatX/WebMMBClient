@@ -152,14 +152,23 @@ class DoubleHelicesInputInner extends FormBlock<DoubleHelicesInputInner.Props> {
         const compounds = MMBFU.getArray<Compound[]>(this.props.ctxData, 'mol-in-cp-added');
         const chainOne = MMBFU.getScalar<string>(this.props.ctxData, 'mol-in-dh-chain-one', '');
         let   firstResNoOne = MMBFU.maybeGetScalar<number>(this.props.ctxData, 'mol-in-dh-first-res-no-one', MmbUtil.defaultFirstResNo(compounds, chainOne));
-        const lastResNoOne = MMBFU.maybeGetScalar<number>(this.props.ctxData, 'mol-in-dh-last-res-no-one');
+        let   lastResNoOne = MMBFU.maybeGetScalar<number>(this.props.ctxData, 'mol-in-dh-last-res-no-one');
         const chainTwo = MMBFU.getScalar<string>(this.props.ctxData, 'mol-in-dh-chain-two', '');
 
         if (chainOne !== '') {
             const c = MmbUtil.getCompound(compounds, chainOne);
-            if (c !== undefined && firstResNoOne !== undefined) {
-                if (firstResNoOne > c.lastResidueNo)
-                    firstResNoOne = c.firstResidueNo;
+            if (c !== undefined) {
+                /* Clamp first residue number to sensible values */
+                if (firstResNoOne !== undefined) {
+                    if (firstResNoOne > c.lastResidueNo || firstResNoOne < c.firstResidueNo)
+                        firstResNoOne = c.firstResidueNo;
+
+                    /* Clamp last residue to sensible values */
+                    if (lastResNoOne !== undefined) {
+                        if (lastResNoOne > c.lastResidueNo || lastResNoOne < firstResNoOne)
+                            lastResNoOne = c.lastResidueNo;
+                    }
+                }
             }
         }
 
@@ -169,8 +178,11 @@ class DoubleHelicesInputInner extends FormBlock<DoubleHelicesInputInner.Props> {
 
         let lastResNoTwo = 'N/A';
         if (secondOpts.length > 0 && firstResNoTwo !== undefined && !isNaN(firstResNoTwo)) {
-            const availFirstResNoTwo = parseInt(secondOpts[0].value);
-            firstResNoTwo = availFirstResNoTwo < firstResNoTwo ? availFirstResNoTwo : firstResNoTwo;
+            /* Mind the greatest -> smallest ordering */
+            const lastAvail = parseInt(secondOpts[0].value);
+            const firstAvail = parseInt(secondOpts[secondOpts.length-1].value);
+            if (firstResNoTwo > lastAvail || firstResNoTwo < firstAvail)
+                firstResNoTwo = lastAvail;
             lastResNoTwo = (this.lastResNoTwo(firstResNoOne, lastResNoOne, firstResNoTwo) ?? 'N/A').toString();
         }
 
