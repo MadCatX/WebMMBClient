@@ -55,11 +55,13 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
     constructor(props: VisualJobRunner.Props) {
         super(props);
 
+        const step = (props.info?.state === 'NotStarted' ? 'none' : (props.info?.step ?? 'none')) ?? 'none';
+
         this.state = {
             jobId: props.info?.id,
             jobName: props.info?.name,
             jobState: props.info?.state ?? 'NotStarted',
-            jobStep: props.info?.step ?? 'none',
+            jobStep: step,
             jobTotalSteps: props.info?.total_steps ?? 'none',
             jobAvailableStages: props.info?.available_stages ?? new Array<number>(),
             jobError: '',
@@ -88,11 +90,12 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
     }
 
     private jobInfoOkBlock(data: Api.JobInfo) {
+        const step = data.state === 'NotStarted' ? 'none' : data.step;
         return {
             jobId: data.id,
             jobName: data.name,
             jobState: data.state,
-            jobStep: data.step,
+            jobStep: step,
             jobTotalSteps: data.total_steps,
             jobAvailableStages: data.available_stages,
             jobError: '',
