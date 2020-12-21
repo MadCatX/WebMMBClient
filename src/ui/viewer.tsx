@@ -132,7 +132,7 @@ export class Viewer extends React.Component<Viewer.Props, State> {
                         classNameDisabled='pushbutton-common pushbutton-flex pushbutton-clr-default-disabled'
                         value='Download'
                         url={this.url()}
-                        downloadAs={`${this.props.structureName}.pdb`} />
+                        downloadAs={`${this.props.structureName}.${this.state.selectedStage ?? 1}.pdb`} />
                 </div>
                 <div className='padded'>
                     <TooltippedField
