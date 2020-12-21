@@ -24,6 +24,14 @@ import { Net } from '../util/net';
 const DefaultAutoRefreshEnabled = true;
 const DefaultAutoRefreshInterval = 10;
 
+function forceResize() {
+    const elem = document.getElementById('viewer');
+    if (elem) {
+        const forceResize = new Event('resize', { bubbles: true });
+        elem.dispatchEvent(forceResize);
+    }
+}
+
 interface State {
     jobId?: string;
     jobName?: string;
@@ -380,6 +388,8 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
     componentDidMount() {
         if (this.state.jobId !== undefined)
             this.queryJobStatus();
+
+        forceResize();
     }
 
     componentDidUpdate(_prevProps: VisualJobRunner.Props, prevState: State) {
@@ -405,7 +415,7 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
                     defaultAutoRefreshEnabled={DefaultAutoRefreshEnabled}
                     defaultAutoRefreshInterval={DefaultAutoRefreshInterval}
                     mmbOutput={this.state.mmbOutput} />
-                <div id='mmb-controls'>
+                <div className='mmb-controls'>
                     <JobStatus
                         state={this.state.jobState}
                         step={this.state.jobStep}
