@@ -16,10 +16,10 @@ import { TabsBar } from './ui/tabs-bar';
 import { VisualJobRunner } from './ui/visual-job-runner';
 import { ExternalResourcesLoader } from './external-resources-loader';
 import * as Api from './mmb/api';
+import { AppQuery } from './mmb/app-query';
 import { JsonCommands } from './mmb/commands';
 import { Response } from './mmb/response';
 import { ResponseDeserializers } from './mmb/response-deserializers';
-import { SessionQuery } from './mmb/session-query';
 import { Net } from './util/net';
 
 type Tabs = 'job-list' | 'job-control' | 'example-list';
@@ -138,7 +138,7 @@ export class Main extends React.Component<Props, State> {
     componentDidMount() {
         Net.abortFetch(this.sessionInfoAborter);
 
-        const { promise, aborter } = SessionQuery.info();
+        const { promise, aborter } = AppQuery.sessionInfo();
         this.sessionInfoAborter = aborter;
 
         promise.then(resp => {

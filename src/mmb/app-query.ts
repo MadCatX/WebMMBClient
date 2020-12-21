@@ -25,4 +25,9 @@ export namespace AppQuery {
         };
         return Request.api(req);
     }
+
+    export function sessionInfo() {
+        const req: Api.ApiRequest<null> = { req_type: 'SessionInfo', data: null };
+        return Request.api(req);
+    }
 }
