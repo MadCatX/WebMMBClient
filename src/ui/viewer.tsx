@@ -14,6 +14,14 @@ import { TooltippedField } from './common/tooltipped-field';
 
 declare let WebMmbViewer: any;
 
+function forceResize() {
+    const elem = document.getElementById('viewer');
+    if (elem) {
+        const forceResize = new Event('resize', { bubbles: true });
+        elem.dispatchEvent(forceResize);
+    }
+}
+
 interface State {
     autoRefreshEnabled: boolean;
     autoRefreshInterval: number | null;
@@ -92,6 +100,8 @@ export class Viewer extends React.Component<Viewer.Props, State> {
         const mmbOutput = document.getElementById('mmb-output-item');
         if (mmbOutput !== null)
             mmbOutput.scrollTo(0, mmbOutput.scrollHeight);
+
+        forceResize();
     }
 
     render() {
