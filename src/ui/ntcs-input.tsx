@@ -23,6 +23,13 @@ const StrLabeledField = LabeledField<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, MmbUt
 const NumLabeledField = LabeledField<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, MmbUtil.Values, number>();
 const NtCLabeledField = LabeledField<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, MmbUtil.Values, NtC.Conformer>();
 
+const VKeys: MmbUtil.ValueKeys[] = [
+    'mol-in-ntcs-chain',
+    'mol-in-ntcs-first-res-no',
+    'mol-in-ntcs-last-res-no',
+    'mol-in-ntcs-ntc'
+];
+
 class NtCsInputInner extends FormBlock<NtCsInputInner.Props> {
     private addNtC(data: MmbUtil.ContextData) {
         const chain = MMBFU.maybeGetScalar<string>(data, 'mol-in-ntcs-chain');
@@ -57,10 +64,16 @@ class NtCsInputInner extends FormBlock<NtCsInputInner.Props> {
         MMBFU.updateErrorsAndValues(data, [{ key: 'mol-in-ntcs-errors', errors: [] }], [{ key: 'mol-in-ntcs-added', value: ntcs }]);
     }
 
-    componentDidUpdate(prevProps: NtCsInput.Props, prevState: {}, snapshot: any) {
+    private clearAll() {
+        this.props.ctxData.clearErrorsAndValues(['mol-in-ntcs-errors'], VKeys);
+    }
+
+    componentDidUpdate() {
         const compounds = MMBFU.getArray<Compound[]>(this.props.ctxData, 'mol-in-cp-added');
-        if (compounds.length === 0)
+        if (compounds.length === 0) {
+            this.clearAll();
             return;
+        }
 
         const nv = MMBFU.emptyValues();
 

@@ -34,6 +34,16 @@ const NumLabeledField = LabeledField<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, MmbUt
 const EdgeLabeledField = LabeledField<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, MmbUtil.Values, EdgeInteraction.Edge>();
 const OrientLabeledField = LabeledField<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, MmbUtil.Values, Orientation.Orientation>();
 
+const VKeys: MmbUtil.ValueKeys[] = [
+    'mol-in-bi-chain-one',
+    'mol-in-bi-res-no-one',
+    'mol-in-bi-edge-one',
+    'mol-in-bi-chain-two',
+    'mol-in-bi-res-no-two',
+    'mol-in-bi-edge-two',
+    'mol-in-bi-orientation',
+];
+
 class BaseInteractionsInputInner extends FormBlock<BaseInteractionsInputInner.Props> {
     private addBaseInteraction(data: MmbUtil.ContextData) {
         const chainOne = MMBFU.maybeGetScalar<string>(data, 'mol-in-bi-chain-one');
@@ -76,10 +86,16 @@ class BaseInteractionsInputInner extends FormBlock<BaseInteractionsInputInner.Pr
         MMBFU.updateErrorsAndValues(data, [{ key: 'mol-in-bi-errors', errors }], [{ key: 'mol-in-bi-added', value }]);
     }
 
+    private clearAll() {
+        this.props.ctxData.clearErrorsAndValues(['mol-in-bi-errors'], VKeys);
+    }
+
     componentDidUpdate() {
         const compounds = MMBFU.getArray<Compound[]>(this.props.ctxData, 'mol-in-cp-added');
-        if (compounds.length === 0)
+        if (compounds.length === 0) {
+            this.clearAll();
             return;
+        }
 
         const nv = MMBFU.emptyValues();
 
