@@ -16,6 +16,7 @@ import { LabeledField, GLabeledField } from './common/labeled-field';
 import { PushButton } from './common/push-button';
 import { Compound } from '../model/compound';
 import { DoubleHelix } from '../model/double-helix';
+import { Num } from '../util/num';
 
 const AddedTable = MmbUtil.TWDR<DoubleHelix[]>();
 const NumLabeledField = LabeledField<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, MmbUtil.Values, number>();
@@ -159,12 +160,12 @@ class DoubleHelicesInputInner extends FormBlock<DoubleHelicesInputInner.Props> {
             const c = MmbUtil.getCompound(compounds, chainOne);
             if (c !== undefined) {
                 /* Clamp first residue number to sensible values */
-                if (firstResNoOne !== undefined) {
+                if (Num.isNum(firstResNoOne)) {
                     if (firstResNoOne > c.lastResidueNo || firstResNoOne < c.firstResidueNo)
                         firstResNoOne = c.firstResidueNo;
 
                     /* Clamp last residue to sensible values */
-                    if (lastResNoOne !== undefined) {
+                    if (Num.isNum(lastResNoOne)) {
                         if (lastResNoOne > c.lastResidueNo || lastResNoOne < firstResNoOne)
                             lastResNoOne = c.lastResidueNo;
                     }
@@ -177,7 +178,7 @@ class DoubleHelicesInputInner extends FormBlock<DoubleHelicesInputInner.Props> {
         const secondOpts: GComboBox.Option[] = lastAvail ? MmbUtil.residueOptionsRev(compounds, chainTwo, undefined, lastSel) : [];
 
         let lastResNoTwo = 'N/A';
-        if (secondOpts.length > 0 && firstResNoTwo !== undefined && !isNaN(firstResNoTwo)) {
+        if (secondOpts.length > 0 && Num.isNum(firstResNoTwo)) {
             /* Mind the greatest -> smallest ordering */
             const lastAvail = parseInt(secondOpts[0].value);
             const firstAvail = parseInt(secondOpts[secondOpts.length-1].value);

@@ -10,6 +10,14 @@ const ZeroChar = '0'.charCodeAt(0);
 const NineChar = '9'.charCodeAt(0);
 
 export namespace Num {
+    export function isNum(obj?: unknown): obj is number {
+        if (obj === undefined)
+            return false;
+        if (typeof obj === 'number')
+            return !isNaN(obj);
+        return false;
+    }
+
     export function parseFloatStrict(obj: unknown) {
         if (typeof obj === 'number')
             return obj;
