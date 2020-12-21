@@ -71,6 +71,9 @@ export class Login extends Form<LfUtil.ErrorKeys, LfUtil.ValueKeys, LfUtil.Value
     renderContent() {
         const ctxData: LfUtil.ContextData = {
             ...this.state,
+            clearErrors: this.clearErrors,
+            clearValues: this.clearValues,
+            clearErrorsAndValues: this.clearErrorsAndValues,
             setErrors: this.setErrors,
             setValues: this.setValues,
             setErrorsAndValues: this.setErrorsAndValues,

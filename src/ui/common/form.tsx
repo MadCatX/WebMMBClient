@@ -65,6 +65,62 @@ export abstract class Form<KE, KV, T, PE extends FormUtil.Props<KV, T>> extends 
 
     protected abstract renderContent(): React.ReactNode;
 
+    clearErrors = (keys: KE[]) => {
+        if (!keys.some(k => this.state.errors.has(k)))
+            return;
+
+        const errors = this.state.errors;
+
+        keys.map(k => errors.delete(k));
+        this.setState(
+            {
+                ...this.state,
+                errors,
+            }
+        );
+    }
+
+    clearErrorsAndValues = (ke: KE[], kv: KV[]) => {
+        const errors = this.state.errors;
+        const values = this.state.values;
+        let changed = false;
+
+        if (ke.some(k => this.state.errors.has(k))) {
+            ke.map(k => errors.delete(k));
+            changed = true;
+        }
+
+        if (kv.some(k => this.state.values.has(k))) {
+            kv.map(k => values.delete(k));
+            changed = true;
+        }
+
+        if (changed) {
+            this.setState(
+                {
+                    ...this.state,
+                    errors,
+                    values,
+                }
+            );
+        }
+    }
+
+    clearValues = (keys: KV[]) => {
+        if (!keys.some(k => this.state.values.has(k)))
+            return;
+
+        const values = this.state.values;
+
+        keys.map(k => values.delete(k));
+        this.setState(
+            {
+                ...this.state,
+                values,
+            }
+        );
+    }
+
     setErrors = (errors: FormUtil.Errors<KE>) => {
         this.setState(
             {
@@ -121,6 +177,9 @@ export namespace FormUtil {
     }
 
     export interface ContextData<KE, KV, T> extends State<KE, KV, T> {
+        clearErrors: (keys: KE[]) => void;
+        clearValues: (keys: KV[]) => void;
+        clearErrorsAndValues: (ke: KE[], kv: KV[]) => void;
         setErrors: (errors: Errors<KE>) => void;
         setValues: (values: Values<KV, V<T>>) => void;
         setErrorsAndValues: (errors: Errors<KE>, values: Values<KV, V<T>>) => void;

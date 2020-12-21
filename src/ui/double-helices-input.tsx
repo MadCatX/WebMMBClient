@@ -22,6 +22,14 @@ const AddedTable = MmbUtil.TWDR<DoubleHelix[]>();
 const NumLabeledField = LabeledField<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, MmbUtil.Values, number>();
 const StrLabeledField = LabeledField<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, MmbUtil.Values, string>();
 
+const VKeys: MmbUtil.ValueKeys[] = [
+    'mol-in-dh-chain-one',
+    'mol-in-dh-first-res-no-one',
+    'mol-in-dh-last-res-no-one',
+    'mol-in-dh-chain-two',
+    'mol-in-dh-first-res-no-two'
+];
+
 class DoubleHelicesInputInner extends FormBlock<DoubleHelicesInputInner.Props> {
     private addDoubleHelix(data: MmbUtil.ContextData) {
         const chainOne = MMBFU.maybeGetScalar<string>(data, 'mol-in-dh-chain-one');
@@ -75,6 +83,10 @@ class DoubleHelicesInputInner extends FormBlock<DoubleHelicesInputInner.Props> {
         MMBFU.updateErrorsAndValues(data, [{ key: 'mol-in-dh-errors', errors }], [{ key: 'mol-in-dh-added', value }]);
     }
 
+    private clearAll() {
+        this.props.ctxData.clearErrorsAndValues(['mol-in-dh-errors'], VKeys);
+    }
+
     private lastResNoTwo(firstResNoOne?: number, lastResNoOne?: number, firstResNoTwo?: number) {
         if (firstResNoOne !== undefined && lastResNoOne !== undefined && firstResNoTwo !== undefined)
             return firstResNoTwo - (lastResNoOne - firstResNoOne);
@@ -99,8 +111,10 @@ class DoubleHelicesInputInner extends FormBlock<DoubleHelicesInputInner.Props> {
 
     componentDidUpdate() {
         const compounds = MMBFU.getArray<Compound[]>(this.props.ctxData, 'mol-in-cp-added');
-        if (compounds.length === 0)
+        if (compounds.length === 0) {
+            this.clearAll();
             return;
+        }
 
         const nv = MMBFU.emptyValues();
 

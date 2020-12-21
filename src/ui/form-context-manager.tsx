@@ -11,6 +11,8 @@ import { FormUtil } from './common/form';
 
 const ActiveContexts = new Map<string, any>();
 
+function NoFunc() {}
+
 export namespace FormContextManager {
     export function getContext(id: string) {
         const ctx = ActiveContexts.get(id);
@@ -39,9 +41,12 @@ export namespace FormContextManager {
             {
                 errors: new Map<KE, string[]>(),
                 values: new Map<KV, FormUtil.V<T>>(),
-                setErrors: () => {},
-                setValues: () => {},
-                setErrorsAndValues: () => {}
+                clearErrors: NoFunc,
+                clearValues: NoFunc,
+                clearErrorsAndValues: NoFunc,
+                setErrors: NoFunc,
+                setValues: NoFunc,
+                setErrorsAndValues: NoFunc,
             },
         );
     }

@@ -138,6 +138,9 @@ export class MmbInputForm extends Form<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, Mmb
     protected renderContent() {
         const ctxData: MmbUtil.ContextData = {
             ...this.state,
+            clearErrors: this.clearErrors,
+            clearValues: this.clearValues,
+            clearErrorsAndValues: this.clearErrorsAndValues,
             setErrors: this.setErrors,
             setValues: this.setValues,
             setErrorsAndValues: this.setErrorsAndValues,
