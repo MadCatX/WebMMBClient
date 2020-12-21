@@ -151,7 +151,7 @@ export class Main extends React.Component<Props, State> {
                 if (Net.isFetchAborted(aborter))
                     return;
 
-                const r = Response.parse<Api.SessionInfo>(json, ResponseDeserializers.toSessionInfo);
+                const r = Response.parse(json, ResponseDeserializers.toSessionInfo);
 
                 if (Response.isError(r)) {
                     console.error(r.message);

@@ -76,7 +76,7 @@ export class JobList extends React.Component<JobList.Props, State> {
                 if (Net.isFetchAborted(aborter))
                     return;
 
-                const r = Response.parse<Api.Empty>(json, ResponseDeserializers.toEmpty);
+                const r = Response.parse(json, ResponseDeserializers.toEmpty);
 
                 if (Response.isError(r)) {
                     this.setState({
@@ -123,7 +123,7 @@ export class JobList extends React.Component<JobList.Props, State> {
                     if (Net.isFetchAborted(aborter))
                         return;
 
-                    const r = Response.parse<Api.JobListItem[]>(json, ResponseDeserializers.toJobList);
+                    const r = Response.parse(json, ResponseDeserializers.toJobList);
 
                     if (Response.isError(r)) {
                         this.setState({
@@ -208,7 +208,7 @@ export class JobList extends React.Component<JobList.Props, State> {
                     if (Net.isFetchAborted(aborter))
                         return;
 
-                    const r = Response.parse<JsonCommands>(json, jsonCommandsFromJson);
+                    const r = Response.parse(json, jsonCommandsFromJson);
 
                     if (Response.isError(r)) {
                         this.setState({

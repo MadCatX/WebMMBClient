@@ -201,7 +201,7 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
             resp.json().then(json => {
                 if (Net.isFetchAborted(aborter))
                     return;
-                const r = Response.parse<Api.JobInfo>(json, ResponseDeserializers.toJobInfo);
+                const r = Response.parse(json, ResponseDeserializers.toJobInfo);
 
                 if (Response.isError(r)) {
                     this.setState({
@@ -230,7 +230,7 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
                         if (Net.isFetchAborted(aborter))
                             return;
 
-                        const r2 = Response.parse<string>(json, ResponseDeserializers.toMmbOutput);
+                        const r2 = Response.parse(json, ResponseDeserializers.toMmbOutput);
                         if (Response.isError(r2)) {
                             this.setState({
                                 ...this.state,
@@ -302,7 +302,7 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
                     if (Net.isFetchAborted(aborter))
                         return;
 
-                    const r = Response.parse<Api.JobInfo>(json, ResponseDeserializers.toJobInfo);
+                    const r = Response.parse(json, ResponseDeserializers.toJobInfo);
 
                     if (Response.isError(r))
                         throw new Error(r.message);
@@ -361,7 +361,7 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
                 if (Net.isFetchAborted(aborter))
                     return;
 
-                const r = Response.parse<Api.JobInfo>(json, ResponseDeserializers.toJobInfo);
+                const r = Response.parse(json, ResponseDeserializers.toJobInfo);
                 if (Response.isError(r)) {
                     this.setState({
                         ...this.state,
