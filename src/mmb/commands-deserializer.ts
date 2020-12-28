@@ -6,6 +6,7 @@
  * @author Jiří Černý (jiri.cerny@ibt.cas.cz)
  */
 
+import { Parameters, ParameterNames } from '../mmb/available-parameters';
 import { BaseInteraction } from '../model/base-interaction';
 import { Compound } from '../model/compound';
 import { DoubleHelix } from '../model/double-helix';
@@ -15,9 +16,10 @@ import { MdParameters } from '../model/md-parameters';
 import { NtC } from '../model/ntc';
 import { NtCConformation } from '../model/ntc-conformation';
 import { Orientation } from '../model/orientation';
+import { Parameter as P } from '../model/parameter';
 import { Reporting } from '../model/reporting';
 import { StagesSpan } from '../model/stages-span';
-import { DefaultMdParamsKey, JsonCommands } from './commands';
+import { DefaultMdParamsKey, JsonAdvancedParameters, JsonCommands } from './commands';
 import { Num } from '../util/num';
 
 export namespace JsonCommandsDeserializer {
@@ -75,6 +77,48 @@ export namespace JsonCommandsDeserializer {
         return n;
     }
 
+    export function toAdvancedParameters(commands: JsonCommands): JsonAdvancedParameters {
+        const advParams = {} as JsonAdvancedParameters;
+
+        for (const key in commands.advParams) {
+            if (!Parameters.has(key as ParameterNames))
+                throw new Error(`Advanced parameter ${name} does not exist`);
+
+            const value = commands.advParams[key];
+            const param = Parameters.get(key as ParameterNames)!;
+            if (P.isIntegral(param)) {
+                const num = Num.parseIntStrict(value);
+                if (param.isValid(num))
+                    advParams[key] = num;
+                else
+                    throw new Error(`Advanced parameter ${name} has invalid value ${value}`);
+            } else if (P.isReal(param)) {
+                const num = Num.parseFloatStrict(value);
+                if (param.isValid(num))
+                    advParams[key] = num;
+                else
+                    throw new Error(`Advanced parameter ${name} has invalid value ${value}`);
+            } else if (P.isBoolean(param)) {
+                if (param.chkType(value))
+                    advParams[key] = value;
+                else
+                    throw new Error(`Advanced parameter ${name} has invalid value ${value}`);
+            } else if (P.isTextual(param)) {
+                if (param.chkType(value))
+                    advParams[key] = value;
+                else
+                    throw new Error(`Advanced parameter ${name} has invalid value ${value}`);
+            } else if (P.isOptions(param)) {
+                if (param.chkType(value))
+                    advParams[key] = value;
+                else
+                    throw new Error(`Advanced parameter ${name} has invalid value ${value}`);
+            }
+        }
+
+        return advParams;
+    }
+
     export function toBaseInteractions(commands: JsonCommands) {
         const baseInteractions: BaseInteraction[] = [];
 
@@ -106,6 +150,7 @@ export namespace JsonCommandsDeserializer {
 
         return baseInteractions;
     }
+
     export function toDoubleHelices(commands: JsonCommands) {
         const doubleHelices: DoubleHelix[] = [];
 

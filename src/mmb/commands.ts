@@ -8,6 +8,8 @@
 
 import { AnyObject, assignAll, isArr, isObj, isStr } from '../util/json';
 
+export type JsonAdvancedParameters = Record<string, string | boolean | number>;
+
 export const DefaultMdParamsKey = 'setDefaultMDParameters';
 
 const JsonCommands = {
@@ -22,6 +24,7 @@ const JsonCommands = {
     doubleHelices: [] as string[],
     baseInteractions: [] as string[],
     ntcs: [] as string[],
+    advParams: {} as JsonAdvancedParameters,
 };
 export type JsonCommands = typeof JsonCommands;
 
@@ -32,7 +35,10 @@ export function jsonCommandsFromJson(obj: unknown): JsonCommands {
     for (const prop in JsonCommands) {
         if (!obj.hasOwnProperty(prop))
             throw new Error(`No property ${prop} on source object`);
-        if (!isArr<string>(obj[prop], isStr))
+        if (prop === 'advParams') {
+            if (!isObj(obj[prop]))
+                throw new Error(`Property ${prop} is not an object`);
+        } else if (!isArr<string>(obj[prop], isStr))
             throw new Error(`Property ${prop} is not a string array`);
     }
 

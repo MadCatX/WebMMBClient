@@ -7,6 +7,7 @@
  */
 
 import * as React from 'react';
+import { AdvancedMmbOptions } from './advanced-mmb-options';
 import { FormContextManager as FCM } from './form-context-manager';
 import { MmbInputUtil as MmbUtil } from './mmb-input-form-util';
 import { Form } from './common/form';
@@ -15,6 +16,7 @@ import { CompoundsInput } from './compounds-input';
 import { DoubleHelicesInput } from './double-helices-input';
 import { GlobalParametersInput } from './global-parameters-input';
 import { NtCsInput } from './ntcs-input';
+import { ParameterNames, Parameters } from '../mmb/available-parameters';
 import { CommandsSerializer, JsonCommandsSerializer, TextCommandsSerializer } from '../mmb/commands-serializer';
 import { GlobalConfig } from '../model/global-config';
 import { Reporting } from '../model/reporting';
@@ -24,7 +26,7 @@ import { DoubleHelix } from '../model/double-helix';
 import { NtCConformation } from '../model/ntc-conformation';
 import { MdParameters } from '../model/md-parameters';
 import { JobNameInput } from './job-name-input';
-import {MmbCommands} from './mmb-commands';
+import { MmbCommands } from './mmb-commands';
 import { Num } from '../util/num';
 
 export class MmbInputForm extends Form<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, MmbUtil.ValueTypes, MmbInputForm.Props> {
@@ -89,8 +91,8 @@ export class MmbInputForm extends Form<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, Mmb
         FCM.unregisterContext(this.props.id);
     }
 
-    private makeParams(): CommandsSerializer.Parameters {
-        const errors: string[] = [];
+    private makeParams(): CommandsSerializer.Parameters<ParameterNames> {
+        let errors: string[] = [];
 
         const bisf = Num.parseIntStrict(this.getScalar(this.state, 'mol-in-gp-bisf', ''));
         const repInt = Num.parseFloatStrict(this.getScalar(this.state, 'mol-in-gp-reporting-interval', ''));
@@ -110,6 +112,8 @@ export class MmbInputForm extends Form<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, Mmb
         if (isNaN(stage))
             errors.push('Stage is not a valid number');
 
+        errors = errors.concat(this.getErrors(this.state, 'mol-adv-params'));
+
         if (errors.length > 0) {
             throw errors;
         }
@@ -122,6 +126,7 @@ export class MmbInputForm extends Form<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, Mmb
         const doubleHelices = this.getArray<DoubleHelix[]>(this.state, 'mol-in-dh-added');
         const baseInteractions = this.getArray<BaseInteraction[]>(this.state, 'mol-in-bi-added');
         const ntcs = this.getArray<NtCConformation[]>(this.state, 'mol-in-ntcs-added');
+        const advValues = this.getScalar(this.state, 'mol-adv-params', new Map<ParameterNames, unknown>());
 
         return {
             global,
@@ -132,6 +137,7 @@ export class MmbInputForm extends Form<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, Mmb
             baseInteractions,
             ntcs,
             mdParameters,
+            advParams: { parameters: Parameters, values: advValues },
         };
     }
 
@@ -157,6 +163,7 @@ export class MmbInputForm extends Form<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, Mmb
                     <BaseInteractionsInput formId={this.props.id} />
                     <NtCsInput formId={this.props.id} />
                     <GlobalParametersInput formId={this.props.id} availableStages={this.props.availableStages} />
+                    <AdvancedMmbOptions formId={this.props.id} />
                     {this.makeMmbCommands()}
                 </form>
             </Ctx.Provider>

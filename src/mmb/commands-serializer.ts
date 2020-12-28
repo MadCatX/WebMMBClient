@@ -6,18 +6,25 @@
  * @author Jiří Černý (jiri.cerny@ibt.cas.cz)
  */
 
-import { JsonCommands } from './commands';
+import { JsonAdvancedParameters, JsonCommands } from './commands';
 import { BaseInteraction } from '../model/base-interaction';
 import { Compound } from '../model/compound';
 import { DoubleHelix } from '../model/double-helix';
 import { GlobalConfig } from '../model/global-config';
 import { MdParameters } from '../model/md-parameters';
 import { NtCConformation } from '../model/ntc-conformation';
+import { Parameter as P } from '../model/parameter';
 import { Reporting } from '../model/reporting';
 import { StagesSpan } from '../model/stages-span';
+import { Num } from '../util/num';
 
 export namespace CommandsSerializer {
-    export type Parameters = {
+    export type AdvancedParameters<K extends (string extends K ? never : string)> = {
+        parameters: ReadonlyMap<K, P.Parameter<K>>,
+        values: Map<K, unknown>,
+    }
+
+    export type Parameters<K extends (string extends K ? never : string)> = {
         baseInteractions: BaseInteraction[],
         global: GlobalConfig,
         compounds: Compound[],
@@ -26,6 +33,7 @@ export namespace CommandsSerializer {
         ntcs: NtCConformation[],
         reporting: Reporting,
         stages: StagesSpan,
+        advParams: AdvancedParameters<K>,
     }
 
     export function trueFalse(b: boolean) {
@@ -34,6 +42,21 @@ export namespace CommandsSerializer {
 }
 
 export namespace TextCommandsSerializer {
+    function advancedParameters<K extends (string extends K ? never : string)>(advParams: CommandsSerializer.AdvancedParameters<K>) {
+        const ret = [ '', '# Advanced parameters'];
+
+        for (const [name, value] of advParams.values.entries()) {
+            const param = advParams.parameters.get(name)!;
+
+            if (P.isBoolean(param))
+                ret.push(`${name} ${CommandsSerializer.trueFalse(value as boolean)}`);
+            else
+                ret.push(`${name} ${value}`);
+        }
+
+        return ret;
+    }
+
     function global(config: GlobalConfig) {
         return [ '',
             '# Common configuration',
@@ -65,7 +88,7 @@ export namespace TextCommandsSerializer {
             `lastStage ${stages.last}`];
     }
 
-    export function serialize(params: CommandsSerializer.Parameters) {
+    export function serialize<K extends (string extends K ? never : string)>(params: CommandsSerializer.Parameters<K>) {
         let commands: string[] = [];
 
         // Write general config
@@ -79,6 +102,9 @@ export namespace TextCommandsSerializer {
 
         // Write MD parameters
         commands = commands.concat(mdParams(params.mdParameters));
+
+        // Write advanced parameters
+        commands = commands.concat(advancedParameters(params.advParams));
 
         // Write sequences
         commands.push('', '# Sequences');
@@ -125,7 +151,27 @@ export namespace JsonCommandsSerializer {
         doubleHelices: [],
         baseInteractions: [],
         ntcs: [],
+        advParams: {} as JsonAdvancedParameters,
     };
+
+    function advancedParameters<K extends (string extends K ? never : string)>(advParams: CommandsSerializer.AdvancedParameters<K>) {
+        let defs = {} as JsonAdvancedParameters;
+
+        for (const [name, value] of advParams.values.entries()) {
+            const param = advParams.parameters.get(name)!;
+
+            if (P.isIntegral(param)) {
+                defs[name] = Num.parseIntStrict(value);
+            } else if (P.isReal(param)) {
+                defs[name] = Num.parseFloatStrict(value);
+            } else if (P.isBoolean(param)) {
+                defs[name] = value as boolean;
+            } else
+                defs[name] = value as string;
+        }
+
+        return defs;
+    }
 
     function baseInteractions(bis: BaseInteraction[]) {
         const defs: string[] = [];
@@ -175,13 +221,16 @@ export namespace JsonCommandsSerializer {
         return defs;
     }
 
-    export function serialize(params: CommandsSerializer.Parameters) {
+    export function serialize<K extends (string extends K ? never : string)>(params: CommandsSerializer.Parameters<K>) {
         let cmds = Object.assign({}, Commands);
 
         // Global
         cmds.baseInteractionScaleFactor = [params.global.baseInteractionScaleFactor.toString()];
         cmds.useMultithreadedComputation = [CommandsSerializer.trueFalse(params.global.useMultithreading)];
         cmds.temperature = [params.global.temperature.toString()];
+
+        // Advanced
+        cmds.advParams = advancedParameters(params.advParams);
 
         // Stages
         cmds.firstStage = [params.stages.first.toString()];

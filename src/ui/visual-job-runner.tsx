@@ -20,6 +20,7 @@ import { Response } from '../mmb/response';
 import { ResponseDeserializers } from '../mmb/response-deserializers';
 import { JsonCommandsDeserializer } from '../mmb/commands-deserializer';
 import { Net } from '../util/net';
+import {ParameterNames} from '../mmb/available-parameters';
 
 const DefaultAutoRefreshEnabled = true;
 const DefaultAutoRefreshInterval = 10;
@@ -123,6 +124,15 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
         const baseInteractions = JsonCommandsDeserializer.toBaseInteractions(commands);
         const ntcs = JsonCommandsDeserializer.toNtCs(commands);
         const rep = JsonCommandsDeserializer.toReporting(commands);
+        const advParams = (() => {
+            const obj = JsonCommandsDeserializer.toAdvancedParameters(commands);
+            const map = new Map<ParameterNames, unknown>();
+
+            for (const prop in obj) {
+                map.set(prop as ParameterNames, obj[prop]);
+            }
+            return map;
+        })();
 
         // Global
         map.set('mol-in-gp-reporting-interval', rep.interval);
@@ -135,6 +145,7 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
         map.set('mol-in-bi-added', baseInteractions);
         map.set('mol-in-dh-added', doubleHelices);
         map.set('mol-in-ntcs-added', ntcs);
+        map.set('mol-adv-params', advParams);
         map.set('mol-in-job-name', name);
 
         return map;
