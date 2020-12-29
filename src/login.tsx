@@ -84,30 +84,36 @@ export class Login extends Form<LfUtil.ErrorKeys, LfUtil.ValueKeys, LfUtil.Value
         const Ctx = FCM.getContext(this.props.id);
 
         return (
-            <Ctx.Provider value={ctxData}>
-                <div className='login-form-container'>
-                    <div className='login-form-caption'>WebMMB alpha</div>
-                    <div className='login-form-version-info'>
-                        <span className='version-info-text'>{`Version: ${verinfo.date} (${verinfo.rev})`}</span>
+            <>
+                <Ctx.Provider value={ctxData}>
+                    <div className='login-form-container'>
+                        <div className='login-form-caption'>WebMMB alpha</div>
+                        <div className='login-form-version-info'>
+                            <span className='version-info-text'>{`Version: ${verinfo.date} (${verinfo.rev})`}</span>
+                        </div>
+                        <div className='login-form-input'>
+                            <StrLabeledField
+                                {...GLabeledField.tags('login-session-id', this.props.id, ['centered-horizontal', 'login-form-input'])}
+                                formId={this.props.id}
+                                label='Session ID'
+                                style='left-tabular'
+                                inputType='line-edit'
+                                hint='Enter session ID to restore session'
+                                options={[]} />
+                        </div>
+                        <ErrorBox
+                            errors={this.getErrors(this.state, 'login-errors') ?? new Array<string>()} />
+                        <PushButton
+                            value='Enter'
+                            className='pushbutton-common pushbutton-clr-default pushbutton-hclr-green'
+                            onClick={() => this.logIn()} />
                     </div>
-                    <div className='login-form-input'>
-                        <StrLabeledField
-                            {...GLabeledField.tags('login-session-id', this.props.id, ['centered-horizontal', 'login-form-input'])}
-                            formId={this.props.id}
-                            label='Session ID'
-                            style='left-tabular'
-                            inputType='line-edit'
-                            hint='Enter session ID to restore session'
-                            options={[]} />
-                    </div>
-                    <ErrorBox
-                        errors={this.getErrors(this.state, 'login-errors') ?? new Array<string>()} />
-                    <PushButton
-                        value='Enter'
-                        className='pushbutton-common pushbutton-clr-default pushbutton-hclr-green'
-                        onClick={() => this.logIn()} />
+                </Ctx.Provider>
+                <div className='cookie-notice'>
+                    <span className='bold'>Privacy notice:&nbsp;</span>
+                    This site uses cookies to keep track of your session. By logging into WebMMB, you agree to have cookies stored in your browser cache.
                 </div>
-            </Ctx.Provider>
+            </>
         );
     }
 }

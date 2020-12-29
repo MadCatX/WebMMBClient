@@ -95,6 +95,17 @@ textarea {
     margin-right: auto;
 }
 
+.cookie-notice {
+    border: 0.1em solid black;
+    left: 50%;
+    max-width: 35em;
+    padding: 0.4em;
+    position: absolute;
+    top: 66%;
+    transform: translateX(-50%);
+    width: 33%;
+}
+
 .error-message {
     color: #ff0000;
 }
@@ -226,6 +237,7 @@ input.fit-width-lineedit {
 .login-form-container {
     border: 0.1em solid black;
     margin: auto;
+    max-width: 35em;
     width: 33%;
     padding: 0.4em;
     position: absolute;
