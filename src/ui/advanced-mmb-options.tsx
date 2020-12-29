@@ -213,7 +213,7 @@ export class AdvancedMmbOptionsInner extends FormBlock<AdvancedMmbOptionsInner.P
                             description: Parameters.get(e.currentTarget.value as ParameterNames)!.description
                         })}
                     >
-                        {Array.from(Parameters.values()).map(o => (<option key={o.name} value={o.name}>{o.name}</option>))}
+                        {Array.from(Parameters.values()).sort().map(o => (<option key={o.name} value={o.name}>{o.name}</option>))}
                     </select>
                     <div>{this.state.description}</div>
                     <PushButton
