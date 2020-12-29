@@ -51,9 +51,9 @@ export type ParameterNames = 'addAllAtomSterics' | 'addAllHeavyAtomSterics' | 'a
     'restrainingForceConstant' | 'restrainingTorqueConstant' | 'rigidifyFormedHelices' |
     'scrubberPeriod' | 'setChiBondMobility' | 'setForceAndStericScrubber' |
     'setForceScrubber' | 'setHelicalStacking' | 'setRemoveBasePairsInRigidStretch' |
-    'setTemperature' | 'smallGroupInertiaMultiplier' | 'sphericalHelixCenter' |
-    'sphericalHelixRadius' | 'sphericalHelixStartTheta' | 'sphericalHelixPhiOffset' |
-    'sphericalHelixInterStrandDistance' | 'stackAllHelicalResidues' | 'temperature' |
+    'setTemperature' | 'smallGroupInertiaMultiplier' | 'sphericalHelix center' |
+    'sphericalHelix radius' | 'sphericalHelix startTheta' | 'sphericalHelix phiOffset' |
+    'sphericalHelix interStrandDistance' | 'stackAllHelicalResidues' | 'temperature' |
     'thermostatType' | 'tinkerParameterFileName' | 'useFixedStepSize' |
     'useMultithreadedComputation' | 'useOpenMMAcceleration' | 'vanderWallSphereRadius' |
     'velocityRescalingInterval' | 'verbose' | 'vmdOutput' |
@@ -148,11 +148,11 @@ export const Parameters: ReadonlyMap<ParameterNames, P.Parameter<ParameterNames>
     ['setRemoveBasePairsInRigidStretch', new P.BooleanParameter<ParameterNames>('setRemoveBasePairsInRigidStretch', '')],
     ['setTemperature', new P.BooleanParameter<ParameterNames>('setTemperature', '')],
     ['smallGroupInertiaMultiplier', new P.RealParameter<ParameterNames>('smallGroupInertiaMultiplier', '')],
-    ['sphericalHelixCenter', new P.TextualParameter<ParameterNames>('sphericalHelixCenter', '', (v: string) => v.split(' ').length === 3)],
-    ['sphericalHelixRadius', new P.RealParameter<ParameterNames>('sphericalHelixRadius', '')],
-    ['sphericalHelixStartTheta', new P.RealParameter<ParameterNames>('sphericalHelixStartTheta', '')],
-    ['sphericalHelixPhiOffset', new P.RealParameter<ParameterNames>('sphericalHelixPhiOffset', '')],
-    ['sphericalHelixInterStrandDistance', new P.RealParameter<ParameterNames>('sphericalHelixInterStrandDistance', '')],
+    ['sphericalHelix center', new P.TextualParameter<ParameterNames>('sphericalHelix center', '', (v: string) => v.split(' ').length === 3)],
+    ['sphericalHelix radius', new P.RealParameter<ParameterNames>('sphericalHelix radius', '')],
+    ['sphericalHelix startTheta', new P.RealParameter<ParameterNames>('sphericalHelix startTheta', '')],
+    ['sphericalHelix phiOffset', new P.RealParameter<ParameterNames>('sphericalHelix phiOffset', '')],
+    ['sphericalHelix interStrandDistance', new P.RealParameter<ParameterNames>('sphericalHelix interStrandDistance', '')],
     ['stackAllHelicalResidues', new P.BooleanParameter<ParameterNames>('stackAllHelicalResidues', '')],
     ['temperature', new P.RealParameter<ParameterNames>('temperature', '', P.PositiveRange)],
     ['thermostatType', new P.OptionsParameter<ParameterNames, ThermostatTypes>('thermostatType', '', options(ThermostatTypes))],

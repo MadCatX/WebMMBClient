@@ -150,10 +150,10 @@ export namespace Parameter {
     export interface TextualValidator {
         (v: string): boolean;
     }
-    export const NoopTextualValidator = (_s: string) => true;
+    export const AllOkTextualValidator = (_s: string) => true;
 
     export class TextualParameter<K extends (string extends K ? never : string)> extends TypeCheckedParameter<K, string> {
-        constructor(name: K, description: string, readonly validator: TextualValidator = NoopTextualValidator) {
+        constructor(name: K, description: string, readonly validator: TextualValidator = AllOkTextualValidator) {
             super(name, description, 'textual');
         }
 
