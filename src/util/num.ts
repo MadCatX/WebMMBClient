@@ -8,6 +8,7 @@
 
 const ZeroChar = '0'.charCodeAt(0);
 const NineChar = '9'.charCodeAt(0);
+const MinusChar = '-';
 
 export namespace Num {
     export function isNum(obj?: unknown): obj is number {
@@ -24,10 +25,16 @@ export namespace Num {
         if (typeof obj !== 'string')
             return NaN;
 
+        if (obj.length < 1)
+            return NaN;
+
         const s = obj.trim().replace(',', '.');
 
         let decSepCnt = 0;
-        for (let idx = 0; idx < s.length; idx++) {
+        let idx = 0;
+        if (s[0] === MinusChar)
+            idx++;
+        for (; idx < s.length; idx++) {
             if (s.charAt(idx) == '.') {
                 decSepCnt++;
                 if (decSepCnt > 1)
@@ -51,7 +58,10 @@ export namespace Num {
 
         const s = obj.trim();
 
-        for (let idx = 0; idx < s.length; idx++) {
+        let idx = 0;
+        if (s[0] === MinusChar)
+            idx++;
+        for (; idx < s.length; idx++) {
             const code = s.charCodeAt(idx);
             if (code < ZeroChar || code > NineChar)
                 return NaN;
