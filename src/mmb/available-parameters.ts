@@ -76,7 +76,7 @@ export const Parameters: ReadonlyMap<ParameterNames, P.Parameter<ParameterNames>
     ['calcEnergy', new P.BooleanParameter<ParameterNames>('calcEnergy', '')],
     ['constrainRigidSegments', new P.BooleanParameter<ParameterNames>('constrainRigidSegments', '')],
     ['constraintTolerance', new P.RealParameter<ParameterNames>('constraintTolerance', '')],
-    ['cutoffRadius', new P.RealParameter<ParameterNames>('cutoffRadius', '(nm)')],
+    ['cutoffRadius', new P.RealParameter<ParameterNames>('cutoffRadius', '(nm)', new P.Range(new P.Min(0.1, 'inclusive')))],
     ['densityAtomFraction', new P.RealParameter<ParameterNames>('densityAtomFraction', '', P.EZeroEOneRange)],
     ['densityFileName', new P.TextualParameter<ParameterNames>('densityFileName', '')],
     ['densityFitPhosphates', new P.BooleanParameter<ParameterNames>('densityFitPhosphates', 'When set to False, this means phosphate groups in DNA and RNA will feel zero density map fitting force. Be warned that this slows down your run A LOT -- proportional to the number of nucleic acid residues that have fitting forces turned on')],
