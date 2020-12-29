@@ -85,6 +85,7 @@ export class ExampleList extends React.Component<ExampleList.Props, State> {
 
                             const rr = Response.parse(json, jsonCommandsFromJson);
                             if (Response.isError(rr)) {
+                                JobQuery.del(info.id);
                                 this.setState({
                                     ...this.state,
                                     error: rr.message
@@ -93,6 +94,7 @@ export class ExampleList extends React.Component<ExampleList.Props, State> {
                                 this.props.onExampleSelected(info, rr.data);
                             }
                         }).catch(e => {
+                            JobQuery.del(info.id);
                             this.setState({
                                 ...this.state,
                                 error: e.toString()
