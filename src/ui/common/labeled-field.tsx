@@ -33,11 +33,12 @@ export class GLabeledField<KE, KV extends string, T, U extends FormUtil.V<T>> ex
     }
 
     private inputField(pos: GLabeledField.LabelStyle) {
-        const cname = (pos === 'above') ? 'form-field-input-above' : 'form-field-input-left';
+        const cname = (pos === 'above') ? 'form-field-input-above' :
+                                          (this.props.inputType === 'check-box') ? 'form-field-input-left-noflex checkbox' : 'form-field-input-left';
 
         switch (this.props.inputType) {
         case 'check-box':
-            return (<this.CheckBox {...this.props} className={`${cname} checkbox`} />);
+            return (<this.CheckBox {...this.props} className={cname} />);
         case 'combo-box':
             return (<this.ComboBox {...this.props} className={cname} />);
         case 'line-edit':
@@ -47,8 +48,8 @@ export class GLabeledField<KE, KV extends string, T, U extends FormUtil.V<T>> ex
         }
     }
 
-    private renderLabel(vcenter: boolean) {
-        const cls = vcenter ? 'form-field-label-vcenter' : 'form-field-label';
+    private renderLabel(left: boolean) {
+        const cls = left ? 'form-field-label-left' : 'form-field-label';
         return (<label className={cls} htmlFor={`${this.props.id}`}>{this.props.label}</label>);
     }
 
@@ -67,14 +68,12 @@ export class GLabeledField<KE, KV extends string, T, U extends FormUtil.V<T>> ex
                 </div>
             );
         case 'left':
-        case 'left-tabular':
-            const tabular = this.props.style === 'left-tabular';
             return (
-                <div className={tabular ? 'form-field-left-container-flex' : 'form-field-left-container'}>
+                <div className='form-field-left-container'>
                     <TooltippedField
                         position='left'
                         text={this.props.tooltip}
-                        renderContent={() => this.renderLabel(tabular)} />
+                        renderContent={() => this.renderLabel(true)} />
                     {this.inputField(this.props.style)}
                 </div>
             );
@@ -83,7 +82,7 @@ export class GLabeledField<KE, KV extends string, T, U extends FormUtil.V<T>> ex
 }
 
 export namespace GLabeledField {
-    export type LabelStyle = 'left' | 'left-tabular' | 'above';
+    export type LabelStyle = 'left' | 'above';
     export type InputType = 'line-edit' | 'combo-box' | 'text-area' | 'check-box';
 
     export interface Props<KV extends string, T, U extends FormUtil.V<T>> extends

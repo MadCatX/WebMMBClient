@@ -145,23 +145,26 @@ input.fit-width-lineedit {
     width: calc(100% - 0.8em);
 }
 
-.form-field-input-above {
+.form-field-left-container {
+    display: flex;
     width: 100%;
 }
 
-.form-field-label-vcenter {
-    display: table-cell;
-    vertical-align: middle;
-}
-
-.form-field-left-container-flex {
-    display: flex;
+.form-field-input-above {
     width: 100%;
 }
 
 .form-field-input-left {
     flex: 1;
     margin: auto auto auto 0.6em;
+}
+
+.form-field-input-left-noflex {
+    margin: auto auto auto 0.6em;
+}
+
+.form-field-label-left {
+    margin: auto;
 }
 
 .footer {
@@ -257,6 +260,7 @@ input.fit-width-lineedit {
 }
 
 .login-form-version-info {
+    padding: 0.2em;
     position: absolute;
     color: #404040;
     font-size: 8pt;
