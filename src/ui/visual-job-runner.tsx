@@ -309,28 +309,50 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
             const { promise, aborter } = JobQuery.start(name, commands);
             this.startJobAborter = aborter;
             promise.then(resp => {
-                resp.json().then(json => {
-                    if (Net.isFetchAborted(aborter))
-                        return;
+                if (resp.ok) {
+                    resp.json().then(json => {
+                        if (Net.isFetchAborted(aborter))
+                            return;
 
-                    const r = Response.parse(json, ResponseDeserializers.toJobInfo);
+                        const r = Response.parse(json, ResponseDeserializers.toJobInfo);
 
-                    if (Response.isError(r))
-                        throw new Error(r.message);
-                    else if (Response.isOk(r)) {
-                        this.setupAutoRefresh(this.state.autoRefreshEnabled, this.state.autoRefreshInterval, 'Running');
+                        if (Response.isError(r))
+                            throw new Error(r.message);
+                        else if (Response.isOk(r)) {
+                            this.setupAutoRefresh(this.state.autoRefreshEnabled, this.state.autoRefreshInterval, 'Running');
+                            this.setState({
+                                ...this.state,
+                                ...this.jobInfoOkBlock(r.data)
+                            });
+                            this.props.onJobStarted(r.data, commands);
+                        }
+                    }).catch(e => {
                         this.setState({
                             ...this.state,
-                            ...this.jobInfoOkBlock(r.data)
+                            ...this.jobInfoErrorBlock(e, 'none', 'none'),
                         });
-                        this.props.onJobStarted(r.data, commands);
-                    }
-                }).catch(e => {
-                    this.setState({
-                        ...this.state,
-                        ...this.jobInfoErrorBlock(e, 'none', 'none'),
                     });
-                });
+                } else {
+                    if (resp.status === 403) {
+                        this.setState({
+                            ...this.state,
+                            ...this.jobInfoErrorBlock(
+                                new Error(`(${resp.status}) ${resp.statusText} - You session may have expired. Try logging in again.`),
+                                'none',
+                                'none'
+                            )
+                        });
+                    } else {
+                        this.setState({
+                            ...this.state,
+                            ...this.jobInfoErrorBlock(
+                                new Error(`(${resp.status}) ${resp.statusText} - You session may have expired. Try logging in again.`),
+                                'none',
+                                'none'
+                            )
+                        });
+                    }
+                }
             }).catch(e => {
                 this.setState({
                     ...this.state,
