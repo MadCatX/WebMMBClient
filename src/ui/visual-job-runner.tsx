@@ -81,6 +81,28 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
         this.mmbInputFormRef = React.createRef();
     }
 
+    private handleHttpError(code: number, text: string) {
+        if (code === 403) {
+            this.setState({
+                ...this.state,
+                ...this.jobInfoErrorBlock(
+                    new Error(`(${code}) ${text} - You session may have expired. Try logging in again.`),
+                    'none',
+                    'none'
+                )
+            });
+        } else {
+            this.setState({
+                ...this.state,
+                ...this.jobInfoErrorBlock(
+                    new Error(`(${code}) ${text} - You session may have expired. Try logging in again.`),
+                    'none',
+                    'none'
+                )
+            });
+        }
+    }
+
     private jobInfoErrorBlock(e: Error, step?: Api.JobStep, totalSteps?: Api.JobTotalSteps) {
         let obj = { jobState: 'Failed' as Api.JobState, jobError: e.toString() };
         if (step !== undefined)
@@ -209,51 +231,63 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
         let { promise, aborter } = JobQuery.status(this.state.jobId);
         this.jobQueryAborter = aborter;
         promise.then(resp => {
-            resp.json().then(json => {
-                if (Net.isFetchAborted(aborter))
-                    return;
-                const r = Response.parse(json, ResponseDeserializers.toJobInfo);
+            if (resp.ok) {
+                resp.json().then(json => {
+                    if (Net.isFetchAborted(aborter))
+                        return;
+                    const r = Response.parse(json, ResponseDeserializers.toJobInfo);
 
-                if (Response.isError(r)) {
-                    this.setState({
-                        ...this.state,
-                        ...this.jobInfoErrorBlock(new Error(r.message)),
-                    });
-                    return;
-                }
-                if (!Response.isOk(r))
-                    throw new Error('Unexpected response payload type');
+                    if (Response.isError(r)) {
+                        this.setState({
+                            ...this.state,
+                            ...this.jobInfoErrorBlock(new Error(r.message)),
+                        });
+                        return;
+                    }
+                    if (!Response.isOk(r))
+                        throw new Error('Unexpected response payload type');
 
-                // We have basic job status data, now fetch MMB output
-                if (this.state.jobId === undefined) {
-                    // This should never happen
-                    this.setState({
-                        ...this.state,
-                        ...this.jobInfoOkBlock(r.data),
-                    });
-                    return;
-                }
+                    // We have basic job status data, now fetch MMB output
+                    if (this.state.jobId === undefined) {
+                        // This should never happen
+                        this.setState({
+                            ...this.state,
+                            ...this.jobInfoOkBlock(r.data),
+                        });
+                        return;
+                    }
 
-                ({ promise, aborter } = JobQuery.mmbOutput(this.state.jobId));
-                this.jobQueryAborter = aborter;
-                promise.then(resp => {
-                    resp.json().then(json => {
-                        if (Net.isFetchAborted(aborter))
-                            return;
+                    ({ promise, aborter } = JobQuery.mmbOutput(this.state.jobId));
+                    this.jobQueryAborter = aborter;
+                    promise.then(resp => {
+                        if (resp.ok) {
+                            resp.json().then(json => {
+                                if (Net.isFetchAborted(aborter))
+                                    return;
 
-                        const r2 = Response.parse(json, ResponseDeserializers.toMmbOutput);
-                        if (Response.isError(r2)) {
-                            this.setState({
-                                ...this.state,
-                                ...this.jobInfoOkBlock(r.data),
+                                const r2 = Response.parse(json, ResponseDeserializers.toMmbOutput);
+                                if (Response.isError(r2)) {
+                                    this.setState({
+                                        ...this.state,
+                                        ...this.jobInfoOkBlock(r.data),
+                                    });
+                                } else if (Response.isOk(r2)) {
+                                    console.log(r2.data);
+                                    this.setState({
+                                        ...this.state,
+                                        ...this.jobInfoOkBlock(r.data),
+                                        ...this.mmbOutputOkBlock(r2.data),
+                                    });
+                                }
+                            }).catch(e => {
+                                this.setState({
+                                    ...this.state,
+                                    ...this.jobInfoOkBlock(r.data),
+                                    ...this.mmbOutputErrorBlock(e),
+                                });
                             });
-                        } else if (Response.isOk(r2)) {
-                            console.log(r2.data);
-                            this.setState({
-                                ...this.state,
-                                ...this.jobInfoOkBlock(r.data),
-                                ...this.mmbOutputOkBlock(r2.data),
-                            });
+                        } else {
+                            this.handleHttpError(resp.status, resp.statusText);
                         }
                     }).catch(e => {
                         this.setState({
@@ -265,16 +299,12 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
                 }).catch(e => {
                     this.setState({
                         ...this.state,
-                        ...this.jobInfoOkBlock(r.data),
-                        ...this.mmbOutputErrorBlock(e),
+                        ...this.jobInfoErrorBlock(e),
                     });
                 });
-            }).catch(e => {
-                this.setState({
-                    ...this.state,
-                    ...this.jobInfoErrorBlock(e),
-                });
-            });
+            } else {
+                this.handleHttpError(resp.status, resp.statusText);
+            }
         }).catch(e => {
             if (Net.isAbortError(e))
                 return;
@@ -333,25 +363,7 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
                         });
                     });
                 } else {
-                    if (resp.status === 403) {
-                        this.setState({
-                            ...this.state,
-                            ...this.jobInfoErrorBlock(
-                                new Error(`(${resp.status}) ${resp.statusText} - You session may have expired. Try logging in again.`),
-                                'none',
-                                'none'
-                            )
-                        });
-                    } else {
-                        this.setState({
-                            ...this.state,
-                            ...this.jobInfoErrorBlock(
-                                new Error(`(${resp.status}) ${resp.statusText} - You session may have expired. Try logging in again.`),
-                                'none',
-                                'none'
-                            )
-                        });
-                    }
+                    this.handleHttpError(resp.status, resp.statusText);
                 }
             }).catch(e => {
                 this.setState({
@@ -390,23 +402,27 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
         const { promise, aborter } = JobQuery.stop(this.state.jobId);
         this.stopJobAborter = aborter;
         promise.then(resp => {
-            resp.json().then(json => {
-                if (Net.isFetchAborted(aborter))
-                    return;
+            if (resp.ok) {
+                resp.json().then(json => {
+                    if (Net.isFetchAborted(aborter))
+                        return;
 
-                const r = Response.parse(json, ResponseDeserializers.toJobInfo);
-                if (Response.isError(r)) {
-                    this.setState({
-                        ...this.state,
-                        ...this.jobInfoErrorBlock(new Error(r.message)),
-                    });
-                } else if (Response.isOk(r)) {
-                    this.setState({
-                        ...this.state,
-                        ...this.jobInfoOkBlock(r.data),
-                    })
-                }
-            });
+                    const r = Response.parse(json, ResponseDeserializers.toJobInfo);
+                    if (Response.isError(r)) {
+                        this.setState({
+                            ...this.state,
+                            ...this.jobInfoErrorBlock(new Error(r.message)),
+                        });
+                    } else if (Response.isOk(r)) {
+                        this.setState({
+                            ...this.state,
+                            ...this.jobInfoOkBlock(r.data),
+                        });
+                    }
+                });
+            } else {
+                this.handleHttpError(resp.status, resp.statusText);
+            }
         }).catch(e => {
             if (Net.isAbortError(e))
                 return;
