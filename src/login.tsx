@@ -87,7 +87,9 @@ export class Login extends Form<LfUtil.ErrorKeys, LfUtil.ValueKeys, LfUtil.Value
             <Ctx.Provider value={ctxData}>
                 <div className='login-form-container'>
                     <div className='login-form-caption'>WebMMB alpha</div>
-                    <div className='login-form-version-info'>{`Version: ${verinfo.date} (${verinfo.rev})`}</div>
+                    <div className='login-form-version-info'>
+                        <span className='version-info-text'>{`Version: ${verinfo.date} (${verinfo.rev})`}</span>
+                    </div>
                     <div className='login-form-input'>
                         <StrLabeledField
                             {...GLabeledField.tags('login-session-id', this.props.id, ['centered-horizontal', 'login-form-input'])}

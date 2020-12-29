@@ -12,6 +12,14 @@
     padding: 0;
 }
 
+#main-container {
+    min-height: calc(100vh - 3.2em);
+    padding-bottom: 2em;
+    position: relative;
+    top: 0;
+    left: 0;
+}
+
 #viewer {
     position: relative;
     width: 100%;
@@ -143,6 +151,14 @@ input.fit-width-lineedit {
 .form-field-input-left {
     flex: 1;
     margin: auto auto auto 0.6em;
+}
+
+.footer {
+    background-color: #e0e0e0;
+    height: 1.2em;
+    bottom: 0;
+    position: absolute;
+    width: 100%;
 }
 
 .green {
@@ -536,6 +552,11 @@ input.fit-width-lineedit {
 .top-panel {
     position: relative;
     width: 100%;
+}
+
+.version-info-text {
+    color: #404040;
+    font-size: 8pt;
 }
 
 .viewer-container {

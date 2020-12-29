@@ -21,6 +21,7 @@ import { JsonCommands } from './mmb/commands';
 import { Response } from './mmb/response';
 import { ResponseDeserializers } from './mmb/response-deserializers';
 import { Net } from './util/net';
+import { versionInfo } from './version';
 
 type Tabs = 'job-list' | 'job-control' | 'example-list';
 
@@ -174,8 +175,10 @@ export class Main extends React.Component<Props, State> {
     }
 
     render() {
+        const verinfo = versionInfo();
+
         return (
-            <>
+            <div id='main-container'>
                 <ExternalResourcesLoader />
                 <div className='top-panel'>
                     <NavTabsBar
@@ -192,7 +195,10 @@ export class Main extends React.Component<Props, State> {
                 <div className='main-block'>
                     {this.renderTab(this.state.activeTab)}
                 </div>
-            </>
+                <div className='footer'>
+                    <div className='version-info-text'>{`Version: ${verinfo.date} (${verinfo.rev})`}</div>
+                </div>
+            </div>
         );
     }
 }
