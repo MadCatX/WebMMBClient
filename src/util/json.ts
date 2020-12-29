@@ -63,7 +63,9 @@ export function isInt(obj: unknown): obj is number {
 }
 
 export function isObj(obj: unknown): obj is AnyObject {
-    return typeof obj === 'object';
+    return typeof obj === 'object' &&
+                  obj !== null &&
+                  !Array.isArray(obj);
 }
 
 export function isStr(obj: unknown): obj is string {
