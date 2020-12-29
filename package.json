@@ -3,10 +3,10 @@
     "version": "0.0.1",
     "description": "Web-based interface for MacroMoleculeBuilder",
     "scripts": {
-        "build": "npm run build-tsc && npm run build-webpack",
+        "build": "node ./mk_version_info.js && npm run build-tsc && npm run build-webpack",
         "build-all": "cd molstar && npm run build && cd .. && npm run build",
         "build-install-all": "cd molstar && npm install && npm run build && cd .. && npm run build",
-        "build-dev": "npm run build-tsc-dev && npm run build-webpack-dev",
+        "build-dev": "node ./mk_version_info.js && npm run build-tsc-dev && npm run build-webpack-dev",
         "build-all-dev": "cd molstar && npm run build && cd .. && npm run build-dev",
         "build-install-all-dev": "cd molstar && npm install && npm run build && cd .. && npm run build-dev",
         "build-tsc": "tsc --build tsconfig.json --incremental",

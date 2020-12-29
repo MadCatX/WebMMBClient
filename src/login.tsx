@@ -16,6 +16,7 @@ import { FormContextManager as FCM } from './ui/form-context-manager';
 import { PushButton } from './ui/common/push-button';
 import { ErrorBox } from './ui/common/error-box';
 import { Net } from './util/net';
+import { versionInfo } from './version';
 
 const StrLabeledField = LabeledField<LfUtil.ErrorKeys, LfUtil.ValueKeys, LfUtil.Values, string>();
 
@@ -79,12 +80,14 @@ export class Login extends Form<LfUtil.ErrorKeys, LfUtil.ValueKeys, LfUtil.Value
             setErrorsAndValues: this.setErrorsAndValues,
         };
 
+        const verinfo = versionInfo();
         const Ctx = FCM.getContext(this.props.id);
 
         return (
             <Ctx.Provider value={ctxData}>
                 <div className='login-form-container'>
                     <div className='login-form-caption'>WebMMB alpha</div>
+                    <div className='login-form-version-info'>{`Version: ${verinfo.date} (${verinfo.rev})`}</div>
                     <div className='login-form-input'>
                         <StrLabeledField
                             {...GLabeledField.tags('login-session-id', this.props.id, ['centered-horizontal', 'login-form-input'])}
