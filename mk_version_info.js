@@ -1,11 +1,11 @@
+function td(v) {
+    return v < 10 ? `0${v}` : v;
+}
+
 function makeDateString() {
     const now = new Date(Date.now());
 
-    let secs = `${now.getUTCSeconds()}`;
-    if (secs.length < 2)
-        secs = `0${secs}`;
-
-    return `${now.getUTCFullYear()}-${now.getUTCMonth()+1}-${now.getUTCDate()} ${now.getUTCHours()}:${now.getUTCMinutes()}:${secs}`;
+    return `${now.getUTCFullYear()}-${td(now.getUTCMonth()+1)}-${td(now.getUTCDate())} ${td(now.getUTCHours())}:${td(now.getUTCMinutes())}:${td(now.getUTCSeconds())}`;
 }
 
 fs = require('fs');
