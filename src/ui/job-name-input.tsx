@@ -8,7 +8,7 @@
 
 import * as React from 'react';
 import { FormBlock } from './common/form-block';
-import { FormContextManager as FCM } from './form-context-manager';
+import { FormContextManager as FCM } from './common/form-context-manager';
 import { GLabeledField, LabeledField } from './common/labeled-field';
 import { MmbInputUtil as MmbUtil } from './mmb-input-form-util';
 import { ErrorBox } from './common/error-box';

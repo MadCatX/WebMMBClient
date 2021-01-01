@@ -7,8 +7,8 @@
  */
 
 import * as React from 'react';
-import { FormContextManager as FCM } from './form-context-manager';
 import { FormBlock } from './common/form-block';
+import { FormContextManager as FCM } from './common/form-context-manager';
 import { LabeledCheckBox, LabeledField, GLabeledField } from './common/labeled-field';
 import { MmbInputUtil as MmbUtil, MMBFU } from './mmb-input-form-util';
 import { GlobalConfig } from '../model/global-config';

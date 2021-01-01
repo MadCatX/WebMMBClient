@@ -8,10 +8,10 @@
 
 import * as React from 'react';
 import { BooleanParameterField, IntegralParameterField, OptionsParameterField, RealParameterField, TextualParameterField } from './advanced-parameter-field';
-import { FormContextManager as FCM } from './form-context-manager';
 import { MmbInputUtil as MmbUtil, MMBFU } from './mmb-input-form-util';
 import { ErrorBox } from './common/error-box';
 import { FormBlock } from './common/form-block';
+import { FormContextManager as FCM } from './common/form-context-manager';
 import { PushButton } from './common/push-button';
 import { ParameterNames, Parameters } from '../mmb/available-parameters';
 import { Parameter as P } from '../model/parameter';

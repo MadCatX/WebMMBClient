@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { FormUtil } from './form';
 import { FormField } from './form-field';
-import { FormContextManager as FCM } from '../form-context-manager';
+import { FormContextManager as FCM } from './form-context-manager';
 import { UiUtil } from '../util';
 
 export class GComboBox<KE, KV extends string, T, U extends FormUtil.V<T>> extends FormField<KE, KV, T, GComboBox.Props<KV, T, U>> {

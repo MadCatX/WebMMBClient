@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { FormUtil } from './form';
 import { FormField } from './form-field';
-import { FormContextManager as FCM } from '../form-context-manager';
+import { FormContextManager as FCM } from './form-context-manager';
 
 export class GCheckBox<KE, KV, T> extends FormField<KE, KV, T, GCheckBox.Props<KV>> {
     private isChecked(data: FormUtil.ContextData<KE, KV, T>) {

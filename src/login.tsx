@@ -12,9 +12,9 @@ import { AuthQuery } from './mmb/auth-query';
 import { Form } from './ui/common/form';
 import { LabeledField, GLabeledField } from './ui/common/labeled-field';
 import { LoginFormUtil as LfUtil } from './ui/login-form-util';
-import { FormContextManager as FCM } from './ui/form-context-manager';
-import { PushButton } from './ui/common/push-button';
 import { ErrorBox } from './ui/common/error-box';
+import { FormContextManager as FCM } from './ui/common/form-context-manager';
+import { PushButton } from './ui/common/push-button';
 import { Net } from './util/net';
 import { versionInfo } from './version';
 

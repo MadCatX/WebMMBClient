@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { FormUtil, FormUtilClass } from './form';
-import { FormContextManager as FCM } from '../form-context-manager';
+import { FormContextManager as FCM } from './form-context-manager';
 import { PushButton } from './push-button';
 
 type ArrayType<T> = T extends (infer AT)[] ? AT : never;

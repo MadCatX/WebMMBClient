@@ -7,7 +7,7 @@
  */
 
 import * as React from 'react';
-import { FormUtil } from './common/form';
+import { FormUtil } from './form';
 
 const ActiveContexts = new Map<string, any>();
 

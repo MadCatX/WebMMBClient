@@ -7,9 +7,9 @@
  */
 
 import * as React from 'react';
-import { FormContextManager as FCM } from './form-context-manager';
 import { ErrorBox } from './common/error-box';
 import { MmbInputUtil as MmbUtil, MMBFU } from './mmb-input-form-util';
+import { FormContextManager as FCM } from './common/form-context-manager';
 import { LabeledField, GLabeledField } from './common/labeled-field';
 import { PushButton } from './common/push-button';
 import { Compound } from '../model/compound';

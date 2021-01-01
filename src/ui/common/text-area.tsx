@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { FormUtil } from './form';
 import { FormField } from './form-field';
-import { FormContextManager as FCM } from '../form-context-manager';
+import { FormContextManager as FCM } from './form-context-manager';
 
 export class GTextArea<KE, KV extends string, T> extends FormField<KE, KV, T, GTextArea.Props<KV>> {
     private getValue(ctx: FormUtil.ContextData<KE, KV, T>) {

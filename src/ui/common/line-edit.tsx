@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { FormUtil } from './form';
 import { FormField } from './form-field';
-import { FormContextManager as FCM } from '../form-context-manager';
+import { FormContextManager as FCM } from './form-context-manager';
 import { UiUtil } from '../util';
 
 export class GLineEdit<KE, KV extends string, T> extends FormField<KE, KV, T, GLineEdit.Props<KV>> {
