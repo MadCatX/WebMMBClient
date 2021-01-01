@@ -8,7 +8,6 @@
 
 import * as React from 'react';
 import { FormBlock } from './common/form-block';
-import { FormContextManager as FCM } from './common/form-context-manager';
 import { LabeledCheckBox, LabeledField, GLabeledField } from './common/labeled-field';
 import { MmbInputUtil as MmbUtil, MMBFU } from './mmb-input-form-util';
 import { GlobalConfig } from '../model/global-config';
@@ -17,7 +16,7 @@ import { Reporting } from '../model/reporting';
 const NumLabeledField = LabeledField<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, MmbUtil.Values, number>();
 const CheckBox = LabeledCheckBox<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, MmbUtil.Values>();
 
-class GlobalParametersInputInner extends FormBlock<GlobalParametersInputInner.Props> {
+export class GlobalParametersInput extends FormBlock<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, MmbUtil.ValueTypes, GlobalParametersInput.Props> {
     componentDidMount() {
         const bisf = MMBFU.getScalar(this.props.ctxData, 'mol-in-gp-bisf', GlobalConfig.Defaults.baseInteractionScaleFactor);
         const temperature = MMBFU.getScalar(this.props.ctxData, 'mol-in-gp-temperature', GlobalConfig.Defaults.temperature);
@@ -94,29 +93,8 @@ class GlobalParametersInputInner extends FormBlock<GlobalParametersInputInner.Pr
     }
 }
 
-namespace GlobalParametersInputInner {
-    export interface Props extends FormBlock.Props {
-        ctxData: MmbUtil.ContextData;
-        availableStages: number[];
-    }
-}
-
-export class GlobalParametersInput extends FormBlock<GlobalParametersInput.Props> {
-    render() {
-        const CC = FCM.getContext(this.props.formId).Consumer;
-
-        return (
-            <CC>
-                {(data: MmbUtil.ContextData) =>
-                    <GlobalParametersInputInner {...this.props} ctxData={data} />
-                }
-            </CC>
-        );
-    }
-}
-
 export namespace GlobalParametersInput {
-    export interface Props extends FormBlock.Props {
+    export interface Props extends FormBlock.Props<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, MmbUtil.ValueTypes> {
         availableStages: number[];
     }
 }

@@ -11,7 +11,6 @@ import { MmbInputUtil as MmbUtil, MMBFU } from './mmb-input-form-util';
 import { GComboBox } from './common/combo-box';
 import { ErrorBox } from './common/error-box';
 import { FormBlock } from './common/form-block';
-import { FormContextManager as FCM } from './common/form-context-manager';
 import { LabeledField, GLabeledField } from './common/labeled-field';
 import { PushButton } from './common/push-button';
 import { Compound } from '../model/compound';
@@ -30,7 +29,7 @@ const VKeys: MmbUtil.ValueKeys[] = [
     'mol-in-dh-first-res-no-two'
 ];
 
-class DoubleHelicesInputInner extends FormBlock<DoubleHelicesInputInner.Props> {
+export class DoubleHelicesInput extends FormBlock<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, MmbUtil.ValueTypes, DoubleHelicesInput.Props> {
     private addDoubleHelix(data: MmbUtil.ContextData) {
         const chainOne = MMBFU.maybeGetScalar<string>(data, 'mol-in-dh-chain-one');
         const firstResNoOne = MMBFU.maybeGetScalar<number>(data, 'mol-in-dh-first-res-no-one');
@@ -273,27 +272,7 @@ class DoubleHelicesInputInner extends FormBlock<DoubleHelicesInputInner.Props> {
     }
 }
 
-namespace DoubleHelicesInputInner {
-    export interface Props extends FormBlock.Props {
-        ctxData: MmbUtil.ContextData;
-    }
-}
-
-export class DoubleHelicesInput extends FormBlock<DoubleHelicesInput.Props> {
-    render() {
-        const CC = FCM.getContext(this.props.formId).Consumer;
-
-        return (
-            <CC>
-                {(data: MmbUtil.ContextData) =>
-                    <DoubleHelicesInputInner {...this.props} ctxData={data} />
-                }
-            </CC>
-        );
-    }
-}
-
 export namespace DoubleHelicesInput {
-    export interface Props extends FormBlock.Props {
+    export interface Props extends FormBlock.Props<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, MmbUtil.ValueTypes> {
     }
 }

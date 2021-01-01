@@ -10,7 +10,6 @@ import * as React from 'react';
 import { MmbInputUtil as MmbUtil, MMBFU } from './mmb-input-form-util';
 import { ErrorBox } from './common/error-box';
 import { FormBlock } from './common/form-block';
-import { FormContextManager as FCM } from './common/form-context-manager';
 import { LabeledField, GLabeledField } from './common/labeled-field';
 import { PushButton } from './common/push-button';
 import { BaseInteraction } from '../model/base-interaction';
@@ -23,8 +22,8 @@ const AddedTable = MmbUtil.TWDR<Compound[]>();
 
 const StrLabeledField = LabeledField<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, MmbUtil.Values, string>();
 
-class CompoundsInputInner extends FormBlock<CompoundsInputInner.Props> {
-    constructor(props: CompoundsInputInner.Props) {
+export class CompoundsInput extends FormBlock<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, MmbUtil.ValueTypes, CompoundsInput.Props> {
+    constructor(props: CompoundsInput.Props) {
         super(props);
 
         this.compoundRemoved = this.compoundRemoved.bind(this);
@@ -160,27 +159,7 @@ class CompoundsInputInner extends FormBlock<CompoundsInputInner.Props> {
     }
 }
 
-namespace CompoundsInputInner {
-    export interface Props extends FormBlock.Props {
-        ctxData: MmbUtil.ContextData;
-    }
-}
-
-export class CompoundsInput extends FormBlock<CompoundsInput.Props> {
-    render() {
-        const CC = FCM.getContext(this.props.formId).Consumer;
-
-        return (
-            <CC>
-                {(data: MmbUtil.ContextData) =>
-                    <CompoundsInputInner {...this.props} ctxData={data} />
-                }
-            </CC>
-        );
-    }
-}
-
 export namespace CompoundsInput {
-    export interface Props extends FormBlock.Props {
+    export interface Props extends FormBlock.Props<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, MmbUtil.ValueTypes> {
     }
 }

@@ -8,14 +8,13 @@
 
 import * as React from 'react';
 import { FormBlock } from './common/form-block';
-import { FormContextManager as FCM } from './common/form-context-manager';
 import { GLabeledField, LabeledField } from './common/labeled-field';
 import { MmbInputUtil as MmbUtil } from './mmb-input-form-util';
 import { ErrorBox } from './common/error-box';
 
 const StrLabeledField = LabeledField<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, MmbUtil.Values, string>();
 
-export class JobNameInputInner extends React.Component<JobNameInputInner.Props> {
+export class JobNameInput extends FormBlock<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, MmbUtil.ValueTypes, JobNameInput.Props> {
     renderName() {
         if (this.props.name === undefined) {
             return (
@@ -48,29 +47,8 @@ export class JobNameInputInner extends React.Component<JobNameInputInner.Props> 
     }
 }
 
-export namespace JobNameInputInner {
-    export interface Props extends FormBlock.Props {
-        ctxData: MmbUtil.ContextData;
-        name?: string;
-    }
-}
-
-export class JobNameInput extends FormBlock<JobNameInput.Props> {
-    render() {
-        const CC = FCM.getContext(this.props.formId).Consumer;
-
-        return (
-            <CC>
-                {(data: MmbUtil.ContextData) =>
-                    <JobNameInputInner {...this.props} ctxData={data} />
-                }
-            </CC>
-        );
-    }
-}
-
 export namespace JobNameInput {
-    export interface Props extends FormBlock.Props {
+    export interface Props extends FormBlock.Props<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, MmbUtil.ValueTypes> {
         name?: string;
     }
 }

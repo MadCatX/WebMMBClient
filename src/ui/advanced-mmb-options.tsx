@@ -11,7 +11,6 @@ import { BooleanParameterField, IntegralParameterField, OptionsParameterField, R
 import { MmbInputUtil as MmbUtil, MMBFU } from './mmb-input-form-util';
 import { ErrorBox } from './common/error-box';
 import { FormBlock } from './common/form-block';
-import { FormContextManager as FCM } from './common/form-context-manager';
 import { PushButton } from './common/push-button';
 import { ParameterNames, Parameters } from '../mmb/available-parameters';
 import { Parameter as P } from '../model/parameter';
@@ -28,8 +27,8 @@ interface State {
     description: string;
 }
 
-export class AdvancedMmbOptionsInner extends FormBlock<AdvancedMmbOptionsInner.Props, State> {
-    constructor(props: AdvancedMmbOptionsInner.Props) {
+export class AdvancedMmbOptions extends FormBlock<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, MmbUtil.ValueTypes, AdvancedMmbOptions.Props, State> {
+    constructor(props: AdvancedMmbOptions.Props) {
         super(props);
 
         this.state = {
@@ -232,27 +231,7 @@ export class AdvancedMmbOptionsInner extends FormBlock<AdvancedMmbOptionsInner.P
     }
 }
 
-namespace AdvancedMmbOptionsInner {
-    export interface Props extends FormBlock.Props {
-        ctxData: MmbUtil.ContextData;
-    }
-}
-
-export class AdvancedMmbOptions extends FormBlock<AdvancedMmbOptions.Props> {
-    render() {
-        const CC = FCM.getContext(this.props.formId).Consumer;
-
-        return (
-            <CC>
-                {(data: MmbUtil.ContextData) =>
-                    <AdvancedMmbOptionsInner {...this.props} ctxData={data} />
-                }
-            </CC>
-        );
-    }
-}
-
 export namespace AdvancedMmbOptions {
-    export interface Props extends FormBlock.Props {
+    export interface Props extends FormBlock.Props<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, MmbUtil.ValueTypes> {
     }
 }

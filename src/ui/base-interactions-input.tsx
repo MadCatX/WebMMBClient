@@ -11,7 +11,6 @@ import { MmbInputUtil as MmbUtil, MMBFU } from './mmb-input-form-util';
 import { GComboBox } from './common/combo-box';
 import { ErrorBox } from './common/error-box';
 import { FormBlock } from './common/form-block';
-import { FormContextManager as FCM } from './common/form-context-manager';
 import { LabeledField, GLabeledField } from './common/labeled-field';
 import { PushButton } from './common/push-button';
 import { BaseInteraction } from '../model/base-interaction';
@@ -44,7 +43,7 @@ const VKeys: MmbUtil.ValueKeys[] = [
     'mol-in-bi-orientation',
 ];
 
-class BaseInteractionsInputInner extends FormBlock<BaseInteractionsInputInner.Props> {
+export class BaseInteractionsInput extends FormBlock<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, MmbUtil.ValueTypes, BaseInteractionsInput.Props> {
     private addBaseInteraction(data: MmbUtil.ContextData) {
         const chainOne = MMBFU.maybeGetScalar<string>(data, 'mol-in-bi-chain-one');
         const residueOne = MMBFU.maybeGetScalar<number>(data, 'mol-in-bi-res-no-one');
@@ -219,27 +218,7 @@ class BaseInteractionsInputInner extends FormBlock<BaseInteractionsInputInner.Pr
     }
 }
 
-namespace BaseInteractionsInputInner {
-    export interface Props extends FormBlock.Props {
-        ctxData: MmbUtil.ContextData;
-    }
-}
-
-export class BaseInteractionsInput extends FormBlock<BaseInteractionsInput.Props> {
-    render() {
-        const CC = FCM.getContext(this.props.formId).Consumer;
-
-        return (
-            <CC>
-                {(data: MmbUtil.ContextData) =>
-                    <BaseInteractionsInputInner {...this.props} ctxData={data} />
-                }
-            </CC>
-        );
-    }
-}
-
 export namespace BaseInteractionsInput {
-    export interface Props extends FormBlock.Props {
+    export interface Props extends FormBlock.Props<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, MmbUtil.ValueTypes> {
     }
 }

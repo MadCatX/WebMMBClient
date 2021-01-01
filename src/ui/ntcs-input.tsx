@@ -9,7 +9,6 @@
 import * as React from 'react';
 import { ErrorBox } from './common/error-box';
 import { MmbInputUtil as MmbUtil, MMBFU } from './mmb-input-form-util';
-import { FormContextManager as FCM } from './common/form-context-manager';
 import { LabeledField, GLabeledField } from './common/labeled-field';
 import { PushButton } from './common/push-button';
 import { Compound } from '../model/compound';
@@ -30,7 +29,7 @@ const VKeys: MmbUtil.ValueKeys[] = [
     'mol-in-ntcs-ntc'
 ];
 
-class NtCsInputInner extends FormBlock<NtCsInputInner.Props> {
+export class NtCsInput extends FormBlock<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, MmbUtil.ValueTypes, NtCsInput.Props> {
     private addNtC(data: MmbUtil.ContextData) {
         const chain = MMBFU.maybeGetScalar<string>(data, 'mol-in-ntcs-chain');
         const firstResNo = MMBFU.maybeGetScalar<number>(data, 'mol-in-ntcs-first-res-no');
@@ -189,27 +188,7 @@ class NtCsInputInner extends FormBlock<NtCsInputInner.Props> {
     }
 }
 
-export namespace NtCsInputInner {
-    export interface Props extends FormBlock.Props {
-        ctxData: MmbUtil.ContextData;
-    }
-}
-
-export class NtCsInput extends FormBlock<NtCsInput.Props> {
-    render() {
-        const CC = FCM.getContext(this.props.formId).Consumer;
-
-        return (
-            <CC>
-                {(data: MmbUtil.ContextData) =>
-                    <NtCsInputInner {...this.props} ctxData={data} />
-                }
-            </CC>
-        );
-    }
-}
-
 export namespace NtCsInput {
-    export interface Props extends FormBlock.Props {
+    export interface Props extends FormBlock.Props<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, MmbUtil.ValueTypes> {
     }
 }
