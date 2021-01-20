@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020 WebMMB contributors, licensed under MIT, See LICENSE file for details.
+ * Copyright (c) 2020-2021 WebMMB contributors, licensed under MIT, See LICENSE file for details.
  *
  * @author Michal Malý (michal.maly@ibt.cas.cz)
  * @author Samuel C. Flores (samuelfloresc@gmail.com)
@@ -7,7 +7,6 @@
  */
 
 import * as React from 'react';
-import { MmbInputUtil as MmbUtil, MMBFU } from './mmb-input-form-util';
 import { GComboBox } from './common/combo-box';
 import { ErrorBox } from './common/error-box';
 import { FormBlock } from './common/form-block';
@@ -15,13 +14,16 @@ import { LabeledField, GLabeledField } from './common/labeled-field';
 import { PushButton } from './common/push-button';
 import { Compound } from '../model/compound';
 import { DoubleHelix } from '../model/double-helix';
+import { MmbInputModel as MIM } from '../model/mmb-input-model';
+import { FormUtil } from '../model/common/form';
 import { Num } from '../util/num';
 
-const AddedTable = MmbUtil.TWDR<DoubleHelix[]>();
-const NumLabeledField = LabeledField<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, MmbUtil.Values, number>();
-const StrLabeledField = LabeledField<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, MmbUtil.Values, string>();
+const FU = new FormUtil<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes>();
+const AddedTable = MIM.TWDR<DoubleHelix[]>();
+const NumLabeledField = LabeledField<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes, number>();
+const StrLabeledField = LabeledField<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes, string>();
 
-const VKeys: MmbUtil.ValueKeys[] = [
+const VKeys: MIM.ValueKeys[] = [
     'mol-in-dh-chain-one',
     'mol-in-dh-first-res-no-one',
     'mol-in-dh-last-res-no-one',
@@ -29,13 +31,13 @@ const VKeys: MmbUtil.ValueKeys[] = [
     'mol-in-dh-first-res-no-two'
 ];
 
-export class DoubleHelicesInput extends FormBlock<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, MmbUtil.ValueTypes, DoubleHelicesInput.Props> {
-    private addDoubleHelix(data: MmbUtil.ContextData) {
-        const chainOne = MMBFU.maybeGetScalar<string>(data, 'mol-in-dh-chain-one');
-        const firstResNoOne = MMBFU.maybeGetScalar<number>(data, 'mol-in-dh-first-res-no-one');
-        const lastResNoOne = MMBFU.maybeGetScalar<number>(data, 'mol-in-dh-last-res-no-one');
-        const chainTwo = MMBFU.maybeGetScalar<string>(data, 'mol-in-dh-chain-two');
-        const firstResNoTwo = MMBFU.maybeGetScalar<number>(data, 'mol-in-dh-first-res-no-two');
+export class DoubleHelicesInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes, DoubleHelicesInput.Props> {
+    private addDoubleHelix(data: MIM.ContextData) {
+        const chainOne = FU.maybeGetScalar<string>(data, 'mol-in-dh-chain-one');
+        const firstResNoOne = FU.maybeGetScalar<number>(data, 'mol-in-dh-first-res-no-one');
+        const lastResNoOne = FU.maybeGetScalar<number>(data, 'mol-in-dh-last-res-no-one');
+        const chainTwo = FU.maybeGetScalar<string>(data, 'mol-in-dh-chain-two');
+        const firstResNoTwo = FU.maybeGetScalar<number>(data, 'mol-in-dh-first-res-no-two');
         const lastResNoTwo = this.lastResNoTwo(firstResNoOne, lastResNoOne, firstResNoTwo);
 
         if (chainOne === undefined || firstResNoOne === undefined || lastResNoOne === undefined ||
@@ -45,8 +47,8 @@ export class DoubleHelicesInput extends FormBlock<MmbUtil.ErrorKeys, MmbUtil.Val
         // Sanity checks
         const errors: string[] = [];
 
-        const compounds = MMBFU.getArray<Compound[]>(this.props.ctxData, 'mol-in-cp-added');
-        if (MmbUtil.getCompound(compounds, chainOne) === undefined || MmbUtil.getCompound(compounds, chainTwo) === undefined)
+        const compounds = FU.getArray<Compound[]>(this.props.ctxData, 'mol-in-cp-added');
+        if (MIM.getCompound(compounds, chainOne) === undefined || MIM.getCompound(compounds, chainTwo) === undefined)
             return; // Ignore if either of the compounds does not exist
 
         const [, lastAvail] = this.lastSelectableResidue(compounds, firstResNoOne, lastResNoOne, chainTwo);
@@ -65,21 +67,21 @@ export class DoubleHelicesInput extends FormBlock<MmbUtil.ErrorKeys, MmbUtil.Val
         }
 
         if (errors.length > 0) {
-            MMBFU.updateErrors(this.props.ctxData, { key: 'mol-in-dh-errors', errors });
+            FU.updateErrors(this.props.ctxData, { key: 'mol-in-dh-errors', errors });
             return;
         }
 
         const dh = new DoubleHelix(chainOne, firstResNoOne, lastResNoOne, chainTwo, firstResNoTwo, lastResNoTwo);
-        const value = MMBFU.getArray<DoubleHelix[]>(data, 'mol-in-dh-added');
+        const value = FU.getArray<DoubleHelix[]>(data, 'mol-in-dh-added');
 
-        if (value.find((e) => e.equals(dh)) !== undefined) {
+        if (value.find(e => e.equals(dh)) !== undefined) {
             errors.push('Such double helix already exists');
-            MMBFU.updateErrors(this.props.ctxData, { key: 'mol-in-dh-errors', errors });
+            FU.updateErrors(this.props.ctxData, { key: 'mol-in-dh-errors', errors });
             return;
         }
 
         value.push(dh);
-        MMBFU.updateErrorsAndValues(data, [{ key: 'mol-in-dh-errors', errors }], [{ key: 'mol-in-dh-added', value }]);
+        FU.updateErrorsAndValues(data, [{ key: 'mol-in-dh-errors', errors }], [{ key: 'mol-in-dh-added', value }]);
     }
 
     private clearAll() {
@@ -109,48 +111,48 @@ export class DoubleHelicesInput extends FormBlock<MmbUtil.ErrorKeys, MmbUtil.Val
     }
 
     componentDidUpdate() {
-        const compounds = MMBFU.getArray<Compound[]>(this.props.ctxData, 'mol-in-cp-added');
+        const compounds = FU.getArray<Compound[]>(this.props.ctxData, 'mol-in-cp-added');
         if (compounds.length === 0) {
             this.clearAll();
             return;
         }
 
-        const nv = MMBFU.emptyValues();
+        const nv = FU.emptyValues();
 
         // First chain params
-        let chainOne = MMBFU.maybeGetScalar<string>(this.props.ctxData, 'mol-in-dh-chain-one');
+        let chainOne = FU.maybeGetScalar<string>(this.props.ctxData, 'mol-in-dh-chain-one');
         if (chainOne === undefined) {
             chainOne = compounds[0].chain;
             nv.set('mol-in-dh-chain-one', chainOne);
         }
-        const c = MmbUtil.getCompound(compounds, chainOne);
+        const c = MIM.getCompound(compounds, chainOne);
         if (c === undefined)
             return;
 
-        const firstResNoOne = MMBFU.maybeGetScalar<number>(this.props.ctxData, 'mol-in-dh-first-res-no-one');
-        const lastResNoOne = MMBFU.maybeGetScalar<number>(this.props.ctxData, 'mol-in-dh-last-res-no-one');
+        const firstResNoOne = FU.maybeGetScalar<number>(this.props.ctxData, 'mol-in-dh-first-res-no-one');
+        const lastResNoOne = FU.maybeGetScalar<number>(this.props.ctxData, 'mol-in-dh-last-res-no-one');
         if (firstResNoOne !== undefined && firstResNoOne <= c.lastResidueNo && firstResNoOne >= c.firstResidueNo) {
             if (lastResNoOne === undefined || lastResNoOne < firstResNoOne || lastResNoOne > c.lastResidueNo)
                 nv.set('mol-in-dh-last-res-no-one', firstResNoOne);
         } else {
-            const def = MmbUtil.defaultFirstResNo(compounds, chainOne)!;
+            const def = MIM.defaultFirstResNo(compounds, chainOne)!;
             nv.set('mol-in-dh-first-res-no-one', def);
             nv.set('mol-in-dh-last-res-no-one', def);
         }
 
         // Second chain params
-        let chainTwo = MMBFU.maybeGetScalar<string>(this.props.ctxData, 'mol-in-dh-chain-two');
+        let chainTwo = FU.maybeGetScalar<string>(this.props.ctxData, 'mol-in-dh-chain-two');
         if (chainTwo === undefined) {
             chainTwo = compounds[0].chain;
             nv.set('mol-in-dh-chain-two', chainTwo);
         }
-        const firstResNoTwo = MMBFU.maybeGetScalar<number>(this.props.ctxData, 'mol-in-dh-first-res-no-two');
+        const firstResNoTwo = FU.maybeGetScalar<number>(this.props.ctxData, 'mol-in-dh-first-res-no-two');
         if (firstResNoTwo === undefined) {
-            const def = MmbUtil.defaultFirstResNoRev(compounds, chainTwo)!;
+            const def = MIM.defaultFirstResNoRev(compounds, chainTwo)!;
             nv.set('mol-in-dh-first-res-no-two', def);
         } else {
             const [lastSel, lastAvail] = this.lastSelectableResidue(compounds, firstResNoOne, lastResNoOne, chainTwo);
-            const secondOpts: GComboBox.Option[] = lastAvail ? MmbUtil.residueOptionsRev(compounds, chainTwo, undefined, lastSel) : [];
+            const secondOpts: GComboBox.Option[] = lastAvail ? MIM.residueOptionsRev(compounds, chainTwo, undefined, lastSel) : [];
             if (secondOpts.length > 0) {
                 const resno = parseInt(secondOpts[0].value);
                 if (resno < firstResNoTwo)
@@ -163,14 +165,14 @@ export class DoubleHelicesInput extends FormBlock<MmbUtil.ErrorKeys, MmbUtil.Val
     }
 
     render() {
-        const compounds = MMBFU.getArray<Compound[]>(this.props.ctxData, 'mol-in-cp-added');
-        const chainOne = MMBFU.getScalar<string>(this.props.ctxData, 'mol-in-dh-chain-one', '');
-        let   firstResNoOne = MMBFU.maybeGetScalar<number>(this.props.ctxData, 'mol-in-dh-first-res-no-one', MmbUtil.defaultFirstResNo(compounds, chainOne));
-        let   lastResNoOne = MMBFU.maybeGetScalar<number>(this.props.ctxData, 'mol-in-dh-last-res-no-one');
-        const chainTwo = MMBFU.getScalar<string>(this.props.ctxData, 'mol-in-dh-chain-two', '');
+        const compounds = FU.getArray<Compound[]>(this.props.ctxData, 'mol-in-cp-added');
+        const chainOne = FU.getScalar<string>(this.props.ctxData, 'mol-in-dh-chain-one', '');
+        let   firstResNoOne = FU.maybeGetScalar<number>(this.props.ctxData, 'mol-in-dh-first-res-no-one', MIM.defaultFirstResNo(compounds, chainOne));
+        let   lastResNoOne = FU.maybeGetScalar<number>(this.props.ctxData, 'mol-in-dh-last-res-no-one');
+        const chainTwo = FU.getScalar<string>(this.props.ctxData, 'mol-in-dh-chain-two', '');
 
         if (chainOne !== '') {
-            const c = MmbUtil.getCompound(compounds, chainOne);
+            const c = MIM.getCompound(compounds, chainOne);
             if (c !== undefined) {
                 /* Clamp first residue number to sensible values */
                 if (Num.isNum(firstResNoOne)) {
@@ -186,9 +188,9 @@ export class DoubleHelicesInput extends FormBlock<MmbUtil.ErrorKeys, MmbUtil.Val
             }
         }
 
-        let firstResNoTwo = MMBFU.maybeGetScalar<number>(this.props.ctxData, 'mol-in-dh-first-res-no-two', MmbUtil.defaultFirstResNoRev(compounds, chainTwo));
+        let firstResNoTwo = FU.maybeGetScalar<number>(this.props.ctxData, 'mol-in-dh-first-res-no-two', MIM.defaultFirstResNoRev(compounds, chainTwo));
         const [lastSel, lastAvail] = this.lastSelectableResidue(compounds, firstResNoOne, lastResNoOne, chainTwo);
-        const secondOpts: GComboBox.Option[] = lastAvail ? MmbUtil.residueOptionsRev(compounds, chainTwo, undefined, lastSel) : [];
+        const secondOpts: GComboBox.Option[] = lastAvail ? MIM.residueOptionsRev(compounds, chainTwo, undefined, lastSel) : [];
 
         let lastResNoTwo = 'N/A';
         if (secondOpts.length > 0 && Num.isNum(firstResNoTwo)) {
@@ -206,42 +208,42 @@ export class DoubleHelicesInput extends FormBlock<MmbUtil.ErrorKeys, MmbUtil.Val
                 <div className='mol-in-dh-input spaced-grid'>
                     <StrLabeledField
                         {...GLabeledField.tags('mol-in-dh-chain-one', this.props.formId, ['labeled-field'])}
-                        formId={this.props.formId}
                         label='Chain'
                         style='above'
                         inputType='combo-box'
-                        options={MmbUtil.chainOptions(this.props.ctxData)} />
+                        options={MIM.chainOptions(this.props.ctxData)}
+                        ctxData={this.props.ctxData} />
                     <NumLabeledField
                         {...GLabeledField.tags('mol-in-dh-first-res-no-one', this.props.formId, ['labeled-field'])}
-                        formId={this.props.formId}
                         label='First residue'
                         style='above'
                         inputType='combo-box'
                         converter={parseInt}
-                        options={MmbUtil.residueOptions(compounds, chainOne)} />
+                        options={MIM.residueOptions(compounds, chainOne)}
+                        ctxData={this.props.ctxData} />
                     <NumLabeledField
                         {...GLabeledField.tags('mol-in-dh-last-res-no-one', this.props.formId, ['labeled-field'])}
-                        formId={this.props.formId}
                         label='Last residue'
                         style='above'
                         inputType='combo-box'
                         converter={parseInt}
-                        options={MmbUtil.residueOptions(compounds, chainOne, firstResNoOne)} />
+                        options={MIM.residueOptions(compounds, chainOne, firstResNoOne)}
+                        ctxData={this.props.ctxData} />
                     <StrLabeledField
                         {...GLabeledField.tags('mol-in-dh-chain-two', this.props.formId, ['labeled-field'])}
-                        formId={this.props.formId}
                         label='Chain'
                         style='above'
                         inputType='combo-box'
-                        options={MmbUtil.chainOptions(this.props.ctxData)} />
+                        options={MIM.chainOptions(this.props.ctxData)}
+                        ctxData={this.props.ctxData} />
                     <NumLabeledField
                         {...GLabeledField.tags('mol-in-dh-first-res-no-two', this.props.formId, ['labeled-field'])}
-                        formId={this.props.formId}
                         label='First residue'
                         style='above'
                         inputType='combo-box'
                         converter={parseInt}
-                        options={secondOpts} />
+                        options={secondOpts}
+                        ctxData={this.props.ctxData} />
                     <div>
                         <div>Last residue</div>
                         <div>{lastResNoTwo}</div>
@@ -266,13 +268,14 @@ export class DoubleHelicesInput extends FormBlock<MmbUtil.ErrorKeys, MmbUtil.Val
                         {caption: 'Last residue', k: 'lastResidueNoOne'},
                         {caption: 'Chain', k: 'chainTwo'},
                         {caption: 'First residue', k: 'firstResidueNoTwo'},
-                        {caption: 'Last residue', k: 'lastResidueNoTwo'}]} />
+                        {caption: 'Last residue', k: 'lastResidueNoTwo'}]}
+                    ctxData={this.props.ctxData} />
             </div>
         );
     }
 }
 
 export namespace DoubleHelicesInput {
-    export interface Props extends FormBlock.Props<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, MmbUtil.ValueTypes> {
+    export interface Props extends FormBlock.Props<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes> {
     }
 }

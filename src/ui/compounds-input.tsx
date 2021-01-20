@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020 WebMMB contributors, licensed under MIT, See LICENSE file for details.
+ * Copyright (c) 2020-2021 WebMMB contributors, licensed under MIT, See LICENSE file for details.
  *
  * @author Michal Malý (michal.maly@ibt.cas.cz)
  * @author Samuel C. Flores (samuelfloresc@gmail.com)
@@ -7,7 +7,6 @@
  */
 
 import * as React from 'react';
-import { MmbInputUtil as MmbUtil, MMBFU } from './mmb-input-form-util';
 import { ErrorBox } from './common/error-box';
 import { FormBlock } from './common/form-block';
 import { LabeledField, GLabeledField } from './common/labeled-field';
@@ -15,24 +14,27 @@ import { PushButton } from './common/push-button';
 import { BaseInteraction } from '../model/base-interaction';
 import { Compound } from '../model/compound';
 import { DoubleHelix } from '../model/double-helix';
+import { MmbInputModel as MIM } from '../model/mmb-input-model';
 import { NtCConformation } from '../model/ntc-conformation';
+import { FormUtil } from '../model/common/form';
 import { Num } from '../util/num';
 
-const AddedTable = MmbUtil.TWDR<Compound[]>();
+const FU = new FormUtil<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes>();
+const AddedTable = MIM.TWDR<Compound[]>();
 
-const StrLabeledField = LabeledField<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, MmbUtil.Values, string>();
+const StrLabeledField = LabeledField<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes, string>();
 
-export class CompoundsInput extends FormBlock<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, MmbUtil.ValueTypes, CompoundsInput.Props> {
+export class CompoundsInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes, CompoundsInput.Props> {
     constructor(props: CompoundsInput.Props) {
         super(props);
 
         this.compoundRemoved = this.compoundRemoved.bind(this);
     }
 
-    private addSequence(data: MmbUtil.ContextData) {
-        const chain = MMBFU.getScalar(data, 'mol-in-cp-chain-id', '');
-        const firstResidueNo = Num.parseIntStrict(MMBFU.getScalar(data, 'mol-in-cp-first-res-no', ''));
-        const type = MMBFU.getScalar<Compound.Type>(data, 'mol-in-cp-compound-type', 'RNA');
+    private addSequence(data: MIM.ContextData) {
+        const chain = FU.getScalar(data, 'mol-in-cp-chain-id', '');
+        const firstResidueNo = Num.parseIntStrict(FU.getScalar(data, 'mol-in-cp-first-res-no', ''));
+        const type = FU.getScalar<Compound.Type>(data, 'mol-in-cp-compound-type', 'RNA');
 
         const errors: string[] = [];
         if (chain.length !== 1)
@@ -41,7 +43,7 @@ export class CompoundsInput extends FormBlock<MmbUtil.ErrorKeys, MmbUtil.ValueKe
             errors.push('First residue number value must be a number');
 
         try {
-            const input = MMBFU.maybeGetScalar<string>(data, 'mol-in-cp-sequence');
+            const input = FU.maybeGetScalar<string>(data, 'mol-in-cp-sequence');
             if (input === undefined)
                 throw new Error('Sequence is empty');
 
@@ -49,7 +51,7 @@ export class CompoundsInput extends FormBlock<MmbUtil.ErrorKeys, MmbUtil.ValueKe
             if (sequence.length < 1)
                 throw new Error('Sequence is empty');
 
-            const compounds = MMBFU.getArray<Compound[]>(data, 'mol-in-cp-added');
+            const compounds = FU.getArray<Compound[]>(data, 'mol-in-cp-added');
             compounds.forEach(c => {
                 if (c.chain === chain)
                     throw new Error(`Compound with chain ${chain} is already present`);
@@ -57,7 +59,7 @@ export class CompoundsInput extends FormBlock<MmbUtil.ErrorKeys, MmbUtil.ValueKe
 
             if (errors.length === 0) {
                 compounds.push(new Compound(chain, firstResidueNo, type, sequence));
-                MMBFU.updateErrorsAndValues(
+                FU.updateErrorsAndValues(
                     data,
                     [{ key: 'mol-in-cp-errors', errors }],
                     [{ key: 'mol-in-cp-added', value: compounds }],
@@ -69,22 +71,22 @@ export class CompoundsInput extends FormBlock<MmbUtil.ErrorKeys, MmbUtil.ValueKe
         }
 
         if (errors.length > 0)
-            MMBFU.updateErrors(data, { key: 'mol-in-cp-errors', errors });
+            FU.updateErrors(data, { key: 'mol-in-cp-errors', errors });
     }
 
     private compoundRemoved(c: Compound) {
         const chain = c.chain;
 
-        let doubleHelices = MMBFU.getArray<DoubleHelix[]>(this.props.ctxData, 'mol-in-dh-added');
+        let doubleHelices = FU.getArray<DoubleHelix[]>(this.props.ctxData, 'mol-in-dh-added');
         doubleHelices = doubleHelices.filter(e => e.chainOne !== chain && e.chainTwo !== chain);
 
-        let baseInteractions = MMBFU.getArray<BaseInteraction[]>(this.props.ctxData, 'mol-in-bi-added');
+        let baseInteractions = FU.getArray<BaseInteraction[]>(this.props.ctxData, 'mol-in-bi-added');
         baseInteractions = baseInteractions.filter(e => e.chainOne !== chain && e.chainTwo !== chain);
 
-        let ntcs = MMBFU.getArray<NtCConformation[]>(this.props.ctxData, 'mol-in-ntcs-added');
+        let ntcs = FU.getArray<NtCConformation[]>(this.props.ctxData, 'mol-in-ntcs-added');
         ntcs = ntcs.filter(e => e.chain !== chain);
 
-        MMBFU.updateValues(
+        FU.updateValues(
             this.props.ctxData,
             [
                 { key: 'mol-in-dh-added', value: doubleHelices },
@@ -101,21 +103,20 @@ export class CompoundsInput extends FormBlock<MmbUtil.ErrorKeys, MmbUtil.ValueKe
                 <div className='mol-in-cp-input spaced-grid'>
                     <StrLabeledField
                         {...GLabeledField.tags('mol-in-cp-chain-id', this.props.formId, ['labeled-field'])}
-                        formId={this.props.formId}
                         label='Chain'
                         style='above'
                         inputType='line-edit'
-                        options={[]} />
+                        options={[]}
+                        ctxData={this.props.ctxData} />
                     <StrLabeledField
                         {...GLabeledField.tags('mol-in-cp-first-res-no', this.props.formId, ['labeled-field'])}
-                        formId={this.props.formId}
                         label='First residue no.'
                         style='above'
                         inputType='line-edit'
-                        options={[]} />
+                        options={[]}
+                        ctxData={this.props.ctxData} />
                     <StrLabeledField
                         {...GLabeledField.tags('mol-in-cp-compound-type', this.props.formId, ['labeled-field'])}
-                        formId={this.props.formId}
                         label='Type'
                         style='above'
                         inputType='combo-box'
@@ -124,16 +125,17 @@ export class CompoundsInput extends FormBlock<MmbUtil.ErrorKeys, MmbUtil.ValueKe
                                 { value: 'RNA', caption: 'RNA' },
                                 { value: 'DNA', caption: 'DNA' },
                             ]
-                        } />
+                        }
+                        ctxData={this.props.ctxData} />
                     <StrLabeledField
                         {...GLabeledField.tags('mol-in-cp-sequence', this.props.formId, ['labeled-field'])}
-                        formId={this.props.formId}
                         label='Sequence'
                         style='above'
                         inputType='text-area'
                         hint='Enter sequence'
                         spellcheck={false}
-                        options={[]} />
+                        options={[]}
+                        ctxData={this.props.ctxData} />
                     <PushButton
                         className='pushbutton-common pushbutton-add'
                         value="+"
@@ -153,13 +155,14 @@ export class CompoundsInput extends FormBlock<MmbUtil.ErrorKeys, MmbUtil.ValueKe
                         { caption: 'Chain', k: 'chain' },
                         { caption: 'First residue no.', k: 'firstResidueNo' },
                         { caption: 'Type', k: 'type' },
-                        { caption: 'Sequence', k: 'sequence' }]} />
+                        { caption: 'Sequence', k: 'sequence' }]}
+                    ctxData={this.props.ctxData} />
             </div>
         );
     }
 }
 
 export namespace CompoundsInput {
-    export interface Props extends FormBlock.Props<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, MmbUtil.ValueTypes> {
+    export interface Props extends FormBlock.Props<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes> {
     }
 }

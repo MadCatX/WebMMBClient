@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020 WebMMB contributors, licensed under MIT, See LICENSE file for details.
+ * Copyright (c) 2020-2021 WebMMB contributors, licensed under MIT, See LICENSE file for details.
  *
  * @author Michal Malý (michal.maly@ibt.cas.cz)
  * @author Samuel C. Flores (samuelfloresc@gmail.com)
@@ -9,29 +9,29 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { AuthQuery } from './mmb/auth-query';
+import { LoginModel as LM } from './model/login-model';
 import { Form } from './ui/common/form';
 import { LabeledField, GLabeledField } from './ui/common/labeled-field';
-import { LoginFormUtil as LfUtil } from './ui/login-form-util';
 import { ErrorBox } from './ui/common/error-box';
 import { FormContextManager as FCM } from './ui/common/form-context-manager';
 import { PushButton } from './ui/common/push-button';
 import { Net } from './util/net';
 import { versionInfo } from './version';
 
-const StrLabeledField = LabeledField<LfUtil.ErrorKeys, LfUtil.ValueKeys, LfUtil.Values, string>();
+const StrLabeledField = LabeledField<LM.ErrorKeys, LM.ValueKeys, LM.ValueTypes, string>();
 
-export class Login extends Form<LfUtil.ErrorKeys, LfUtil.ValueKeys, LfUtil.ValueTypes, LfUtil.Props> {
+export class Login extends Form<LM.ErrorKeys, LM.ValueKeys, LM.ValueTypes, LM.Props> {
     private aborter: AbortController | null = null;
 
-    constructor(props: LfUtil.Props) {
+    constructor(props: LM.Props) {
         super(props);
 
-        FCM.registerContext<LfUtil.ErrorKeys, LfUtil.ValueKeys, LfUtil.ValueTypes>(props.id);
-
-        this.logIn = this.logIn.bind(this);
+        this.state = {
+            ...this.initialBaseState(),
+        };
     }
 
-    private logIn() {
+    private logIn = () => {
         const session_id = this.getScalar<string>(this.state, 'login-session-id', '');
 
         Net.abortFetch(this.aborter);
@@ -66,11 +66,10 @@ export class Login extends Form<LfUtil.ErrorKeys, LfUtil.ValueKeys, LfUtil.Value
 
     componentWillUnmount() {
         Net.abortFetch(this.aborter);
-        FCM.unregisterContext(this.props.id);
     }
 
     renderContent() {
-        const ctxData: LfUtil.ContextData = {
+        const ctxData: LM.ContextData = {
             ...this.state,
             clearErrors: this.clearErrors,
             clearValues: this.clearValues,
@@ -81,7 +80,7 @@ export class Login extends Form<LfUtil.ErrorKeys, LfUtil.ValueKeys, LfUtil.Value
         };
 
         const verinfo = versionInfo();
-        const Ctx = FCM.getContext(this.props.id);
+        const Ctx = FCM.makeContext<LM.ErrorKeys, LM.ValueKeys, LM.ValueTypes>();
 
         return (
             <>
@@ -94,12 +93,12 @@ export class Login extends Form<LfUtil.ErrorKeys, LfUtil.ValueKeys, LfUtil.Value
                         <div className='login-form-input'>
                             <StrLabeledField
                                 {...GLabeledField.tags('login-session-id', this.props.id, ['centered-horizontal', 'login-form-input'])}
-                                formId={this.props.id}
                                 label='Session ID'
                                 style='left'
                                 inputType='line-edit'
                                 hint='Enter session ID to restore session'
-                                options={[]} />
+                                options={[]}
+                                ctxData={ctxData} />
                         </div>
                         <ErrorBox
                             errors={this.getErrors(this.state, 'login-errors') ?? new Array<string>()} />
@@ -121,6 +120,6 @@ export class Login extends Form<LfUtil.ErrorKeys, LfUtil.ValueKeys, LfUtil.Value
 ReactDOM.render(
     <Login
         id='login-form'
-        initialValues={new Map<LfUtil.ValueKeys, LfUtil.Values>()} />,
+        initialValues={new Map<LM.ValueKeys, LM.Values>()} />,
     document.getElementById('app-login')
 );

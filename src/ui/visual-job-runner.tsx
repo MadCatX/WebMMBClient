@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020 WebMMB contributors, licensed under MIT, See LICENSE file for details.
+ * Copyright (c) 2020-2021 WebMMB contributors, licensed under MIT, See LICENSE file for details.
  *
  * @author Michal Malý (michal.maly@ibt.cas.cz)
  * @author Samuel C. Flores (samuelfloresc@gmail.com)
@@ -10,17 +10,19 @@ import * as React from 'react';
 import { JobControls } from './job-controls';
 import { JobStatus } from './job-status';
 import { MmbInputForm } from './mmb-input-form';
-import { MmbInputUtil as MmbUtil } from './mmb-input-form-util';
 import { Viewer } from './viewer';
 import { ErrorBox } from './common/error-box';
 import * as Api from '../mmb/api';
+import { ParameterNames } from '../mmb/available-parameters';
 import { JsonCommands } from '../mmb/commands';
 import { JobQuery } from '../mmb/job-query';
 import { Response } from '../mmb/response';
 import { ResponseDeserializers } from '../mmb/response-deserializers';
 import { JsonCommandsDeserializer } from '../mmb/commands-deserializer';
+import { MmbInputModel as MIM } from '../model/mmb-input-model';
+import { GlobalConfig } from '../model/global-config';
+import { Reporting } from '../model/reporting';
 import { Net } from '../util/net';
-import {ParameterNames} from '../mmb/available-parameters';
 
 const DefaultAutoRefreshEnabled = true;
 const DefaultAutoRefreshInterval = 10;
@@ -133,10 +135,18 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
     }
 
     private makeInitialValues(stages: number[], commands?: JsonCommands, name?: string) {
-        const map = new Map<MmbUtil.ValueKeys, MmbUtil.V<MmbUtil.ValueTypes>>();
+        const map = new Map<MIM.ValueKeys, MIM.V<MIM.ValueTypes>>();
 
-        if (commands === undefined || name === undefined)
+        if (commands === undefined || name === undefined) {
+            // Set default values
+            map.set('mol-in-gp-bisf', GlobalConfig.Defaults.baseInteractionScaleFactor);
+            map.set('mol-in-gp-temperature', GlobalConfig.Defaults.temperature);
+            map.set('mol-in-gp-reporting-interval', Reporting.Defaults.interval);
+            map.set('mol-in-gp-num-reports', Reporting.Defaults.count);
+            map.set('mol-in-gp-stage', 1);
+
             return map;
+        }
 
         const global = JsonCommandsDeserializer.toGlobal(commands);
         const stage = stages[stages.length - 1];

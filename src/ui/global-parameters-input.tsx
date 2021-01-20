@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020 WebMMB contributors, licensed under MIT, See LICENSE file for details.
+ * Copyright (c) 2020-2021 WebMMB contributors, licensed under MIT, See LICENSE file for details.
  *
  * @author Michal Malý (michal.maly@ibt.cas.cz)
  * @author Samuel C. Flores (samuelfloresc@gmail.com)
@@ -9,31 +9,12 @@
 import * as React from 'react';
 import { FormBlock } from './common/form-block';
 import { LabeledCheckBox, LabeledField, GLabeledField } from './common/labeled-field';
-import { MmbInputUtil as MmbUtil, MMBFU } from './mmb-input-form-util';
-import { GlobalConfig } from '../model/global-config';
-import { Reporting } from '../model/reporting';
+import { MmbInputModel as MIM } from '../model/mmb-input-model';
 
-const NumLabeledField = LabeledField<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, MmbUtil.Values, number>();
-const CheckBox = LabeledCheckBox<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, MmbUtil.Values>();
+const NumLabeledField = LabeledField<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes, number>();
+const CheckBox = LabeledCheckBox<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes>();
 
-export class GlobalParametersInput extends FormBlock<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, MmbUtil.ValueTypes, GlobalParametersInput.Props> {
-    componentDidMount() {
-        const bisf = MMBFU.getScalar(this.props.ctxData, 'mol-in-gp-bisf', GlobalConfig.Defaults.baseInteractionScaleFactor);
-        const temperature = MMBFU.getScalar(this.props.ctxData, 'mol-in-gp-temperature', GlobalConfig.Defaults.temperature);
-        const repInt = MMBFU.getScalar(this.props.ctxData, 'mol-in-gp-reporting-interval', Reporting.Defaults.interval);
-        const repCount = MMBFU.getScalar(this.props.ctxData, 'mol-in-gp-num-reports', Reporting.Defaults.count);
-        const stage = MMBFU.getScalar(this.props.ctxData, 'mol-in-gp-stage', 1);
-        MMBFU.updateValues(
-            this.props.ctxData,
-            [
-                { key: 'mol-in-gp-bisf', value: bisf },
-                { key: 'mol-in-gp-temperature', value: temperature },
-                { key: 'mol-in-gp-reporting-interval', value: repInt },
-                { key: 'mol-in-gp-num-reports', value: repCount },
-                { key: 'mol-in-gp-stage', value: stage },
-            ]);
-    }
-
+export class GlobalParametersInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes, GlobalParametersInput.Props> {
     render() {
         return (
             <div className='section'>
@@ -41,52 +22,52 @@ export class GlobalParametersInput extends FormBlock<MmbUtil.ErrorKeys, MmbUtil.
                 <div className='mol-in-gp-input'>
                     <NumLabeledField
                         {...GLabeledField.tags('mol-in-gp-bisf', this.props.formId, ['labeled-field-concise'])}
-                        formId={this.props.formId}
                         label='Interaction scale factor'
                         tooltip='baseInteractionScaleFactor'
                         style='above'
                         inputType='line-edit'
-                        options={[]} />
+                        options={[]}
+                        ctxData={this.props.ctxData} />
                     <NumLabeledField
                         {...GLabeledField.tags('mol-in-gp-reporting-interval', this.props.formId, ['labeled-field-concise'])}
-                        formId={this.props.formId}
                         label='Reporting interval'
                         tooltip='reportingInterval'
                         style='above'
                         inputType='line-edit'
-                        options={[]} />
+                        options={[]}
+                        ctxData={this.props.ctxData} />
                     <NumLabeledField
                         {...GLabeledField.tags('mol-in-gp-num-reports', this.props.formId, ['labeled-field-concise'])}
-                        formId={this.props.formId}
                         label='Number of reports'
                         tooltip='numReportingIntervals'
                         style='above'
                         inputType='line-edit'
-                        options={[]} />
+                        options={[]}
+                        ctxData={this.props.ctxData} />
                     <NumLabeledField
                         {...GLabeledField.tags('mol-in-gp-temperature', this.props.formId, ['labeled-field-concise'])}
-                        formId={this.props.formId}
                         label='Temperature'
                         tooltip='temperature'
                         style='above'
                         inputType='line-edit'
-                        options={[]} />
+                        options={[]}
+                        ctxData={this.props.ctxData} />
                     <NumLabeledField
                         {...GLabeledField.tags('mol-in-gp-stage', this.props.formId, ['labeled-field-concise'])}
-                        formId={this.props.formId}
                         label='Stage'
                         tooltip='firstStage, lastStage'
                         style='above'
                         inputType='combo-box'
-                        options={this.props.availableStages.map(n => { return{ caption: n.toString(), value: n.toString() }})} />
+                        options={this.props.availableStages.map(n => { return{ caption: n.toString(), value: n.toString() }})}
+                        ctxData={this.props.ctxData} />
                     <CheckBox
                         {...GLabeledField.tags('mol-in-gp-def-md-params', this.props.formId, ['labeled-field-concise'])}
-                        formId={this.props.formId}
                         label='Turn on electrostatic and Lennard-Jones forces'
                         tooltip='setDefaultMDParameters'
                         style='left'
                         inputType='check-box'
-                        options={[]} />
+                        options={[]}
+                        ctxData={this.props.ctxData} />
                 </div>
             </div>
         );
@@ -94,7 +75,7 @@ export class GlobalParametersInput extends FormBlock<MmbUtil.ErrorKeys, MmbUtil.
 }
 
 export namespace GlobalParametersInput {
-    export interface Props extends FormBlock.Props<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, MmbUtil.ValueTypes> {
+    export interface Props extends FormBlock.Props<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes> {
         availableStages: number[];
     }
 }

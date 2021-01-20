@@ -1,14 +1,22 @@
-import * as React from 'react';
-import { FormUtilClass } from './form';
+/**
+ * Copyright (c) 2020-2021 WebMMB contributors, licensed under MIT, See LICENSE file for details.
+ *
+ * @author Michal Malý (michal.maly@ibt.cas.cz)
+ * @author Samuel C. Flores (samuelfloresc@gmail.com)
+ * @author Jiří Černý (jiri.cerny@ibt.cas.cz)
+ */
 
-export abstract class FormField<KE, KV, T, P extends FormField.Props<KV>, S = any> extends React.Component<P, S> {
-    protected FU = new FormUtilClass<KE, KV, T>();
+import * as React from 'react';
+import { FormModel, FormUtil } from '../../model/common/form';
+
+export abstract class FormField<KE, KV, T, P extends FormField.Props<KE, KV, T>, S = any> extends React.Component<P, S> {
+    protected FU = new FormUtil<KE, KV, T>();
 }
 
 export namespace FormField {
-    export interface Props<KV> {
+    export interface Props<KE, KV, T> {
         keyId: KV;
-        formId: string;
+        ctxData: FormModel.ContextData<KE, KV, T>;
         id?: string;
     }
 }

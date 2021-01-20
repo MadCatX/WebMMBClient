@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020 WebMMB contributors, licensed under MIT, See LICENSE file for details.
+ * Copyright (c) 2020-2021 WebMMB contributors, licensed under MIT, See LICENSE file for details.
  *
  * @author Michal Malý (michal.maly@ibt.cas.cz)
  * @author Samuel C. Flores (samuelfloresc@gmail.com)
@@ -8,13 +8,16 @@
 
 import * as React from 'react';
 import { BooleanParameterField, IntegralParameterField, OptionsParameterField, RealParameterField, TextualParameterField } from './advanced-parameter-field';
-import { MmbInputUtil as MmbUtil, MMBFU } from './mmb-input-form-util';
+import { MmbInputModel as MIM } from '../model/mmb-input-model';
+import { FormUtil } from '../model/common/form';
 import { ErrorBox } from './common/error-box';
 import { FormBlock } from './common/form-block';
 import { PushButton } from './common/push-button';
 import { ParameterNames, Parameters } from '../mmb/available-parameters';
 import { Parameter as P } from '../model/parameter';
 import { Num } from '../util/num';
+
+const FU = new FormUtil<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes>();
 
 const IntParamField = IntegralParameterField<ParameterNames>();
 const RealParamField = RealParameterField<ParameterNames>();
@@ -27,7 +30,7 @@ interface State {
     description: string;
 }
 
-export class AdvancedMmbOptions extends FormBlock<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, MmbUtil.ValueTypes, AdvancedMmbOptions.Props, State> {
+export class AdvancedMmbOptions extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes, AdvancedMmbOptions.Props, State> {
     constructor(props: AdvancedMmbOptions.Props) {
         super(props);
 
@@ -43,7 +46,7 @@ export class AdvancedMmbOptions extends FormBlock<MmbUtil.ErrorKeys, MmbUtil.Val
     }
 
     private addParameter(name: ParameterNames) {
-        const values = MMBFU.getScalar(this.props.ctxData, 'mol-adv-params', new Map<ParameterNames, unknown>());
+        const values = FU.getScalar(this.props.ctxData, 'mol-adv-params', new Map<ParameterNames, unknown>());
 
         if (values.has(name))
             return;
@@ -51,15 +54,15 @@ export class AdvancedMmbOptions extends FormBlock<MmbUtil.ErrorKeys, MmbUtil.Val
         const param = Parameters.get(name)!;
         values.set(name, this.getDefault(param));
 
-        MMBFU.updateValue(this.props.ctxData, { key: 'mol-adv-params', value: values });
+        FU.updateValue(this.props.ctxData, { key: 'mol-adv-params', value: values });
     }
 
     private deleteParameter(name: ParameterNames) {
-        const values = MMBFU.getScalar(this.props.ctxData, 'mol-adv-params', new Map<ParameterNames, unknown>());
+        const values = FU.getScalar(this.props.ctxData, 'mol-adv-params', new Map<ParameterNames, unknown>());
 
         if (values.has(name)) {
             values.delete(name);
-            MMBFU.updateValue(this.props.ctxData, { key: 'mol-adv-params', value: values });
+            FU.updateValue(this.props.ctxData, { key: 'mol-adv-params', value: values });
         }
     }
 
@@ -79,28 +82,28 @@ export class AdvancedMmbOptions extends FormBlock<MmbUtil.ErrorKeys, MmbUtil.Val
     }
 
     private updateParameterBool(name: ParameterNames, value: boolean) {
-        const values = MMBFU.getScalar(this.props.ctxData, 'mol-adv-params', new Map<ParameterNames, unknown>());
+        const values = FU.getScalar(this.props.ctxData, 'mol-adv-params', new Map<ParameterNames, unknown>());
 
         values.set(name, value);
-        MMBFU.updateValue(this.props.ctxData, { key: 'mol-adv-params', value: values });
+        FU.updateValue(this.props.ctxData, { key: 'mol-adv-params', value: values });
     }
 
     private updateParameterNum(name: ParameterNames, value: number) {
-        const values = MMBFU.getScalar(this.props.ctxData, 'mol-adv-params', new Map<ParameterNames, unknown>());
+        const values = FU.getScalar(this.props.ctxData, 'mol-adv-params', new Map<ParameterNames, unknown>());
 
         values.set(name, value);
-        MMBFU.updateValue(this.props.ctxData, { key: 'mol-adv-params', value: values });
+        FU.updateValue(this.props.ctxData, { key: 'mol-adv-params', value: values });
     }
 
     private updateParameterStr(name: ParameterNames, value: string) {
-        const values = MMBFU.getScalar(this.props.ctxData, 'mol-adv-params', new Map<ParameterNames, unknown>());
+        const values = FU.getScalar(this.props.ctxData, 'mol-adv-params', new Map<ParameterNames, unknown>());
 
         values.set(name, value);
-        MMBFU.updateValue(this.props.ctxData, { key: 'mol-adv-params', value: values });
+        FU.updateValue(this.props.ctxData, { key: 'mol-adv-params', value: values });
     }
 
     private renderParameters() {
-        const values = MMBFU.getScalar(this.props.ctxData, 'mol-adv-params', new Map<ParameterNames, unknown>());
+        const values = FU.getScalar(this.props.ctxData, 'mol-adv-params', new Map<ParameterNames, unknown>());
 
         return (
             <div>
@@ -160,8 +163,8 @@ export class AdvancedMmbOptions extends FormBlock<MmbUtil.ErrorKeys, MmbUtil.Val
     }
 
     componentDidUpdate() {
-        const values = MMBFU.getScalar(this.props.ctxData, 'mol-adv-params', new Map<ParameterNames, unknown>());
-        const prevErrors = MMBFU.getErrors(this.props.ctxData, 'mol-adv-params');
+        const values = FU.getScalar(this.props.ctxData, 'mol-adv-params', new Map<ParameterNames, unknown>());
+        const prevErrors = FU.getErrors(this.props.ctxData, 'mol-adv-params');
 
         const errors = new Array<string>();
 
@@ -192,11 +195,11 @@ export class AdvancedMmbOptions extends FormBlock<MmbUtil.ErrorKeys, MmbUtil.Val
             return;
         }
 
-        MMBFU.updateErrors(this.props.ctxData, { key: 'mol-adv-params', errors });
+        FU.updateErrors(this.props.ctxData, { key: 'mol-adv-params', errors });
     }
 
     render() {
-        const errors = MMBFU.getErrors(this.props.ctxData, 'mol-adv-params');
+        const errors = FU.getErrors(this.props.ctxData, 'mol-adv-params');
 
         return (
             <div className='section'>
@@ -232,6 +235,6 @@ export class AdvancedMmbOptions extends FormBlock<MmbUtil.ErrorKeys, MmbUtil.Val
 }
 
 export namespace AdvancedMmbOptions {
-    export interface Props extends FormBlock.Props<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, MmbUtil.ValueTypes> {
+    export interface Props extends FormBlock.Props<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes> {
     }
 }

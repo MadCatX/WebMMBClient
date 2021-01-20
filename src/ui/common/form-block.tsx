@@ -1,12 +1,13 @@
 /**
- * Copyright (c) 2020 WebMMB contributors, licensed under MIT, See LICENSE file for details.
+ * Copyright (c) 2020-2021 WebMMB contributors, licensed under MIT, See LICENSE file for details.
  *
  * @author Michal Malý (michal.maly@ibt.cas.cz)
+ * @author Samuel C. Flores (samuelfloresc@gmail.com)
  * @author Jiří Černý (jiri.cerny@ibt.cas.cz)
  */
 
 import * as React from 'react';
-import { FormUtil } from './form'
+import { FormModel } from '../../model/common/form';
 
 export abstract class FormBlock<KE, KV, V, T extends FormBlock.Props<KE, KV, V>, S = {}> extends React.Component<T, S> {
 }
@@ -14,6 +15,6 @@ export abstract class FormBlock<KE, KV, V, T extends FormBlock.Props<KE, KV, V>,
 export namespace FormBlock {
     export interface Props<KE, KV, V> {
         formId: string;
-        ctxData: FormUtil.ContextData<KE, KV, V>;
+        ctxData: FormModel.ContextData<KE, KV, V>;
     }
 }

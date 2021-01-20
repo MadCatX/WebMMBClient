@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020 WebMMB contributors, licensed under MIT, See LICENSE file for details.
+ * Copyright (c) 2020-2021 WebMMB contributors, licensed under MIT, See LICENSE file for details.
  *
  * @author Michal Malý (michal.maly@ibt.cas.cz)
  * @author Samuel C. Flores (samuelfloresc@gmail.com)
@@ -9,7 +9,6 @@
 import * as React from 'react';
 import { AdvancedMmbOptions } from './advanced-mmb-options';
 import { FormContextManager as FCM } from './common/form-context-manager';
-import { MmbInputUtil as MmbUtil } from './mmb-input-form-util';
 import { Form } from './common/form';
 import { BaseInteractionsInput } from './base-interactions-input';
 import { CompoundsInput } from './compounds-input';
@@ -23,17 +22,20 @@ import { Reporting } from '../model/reporting';
 import { BaseInteraction } from '../model/base-interaction';
 import { Compound } from '../model/compound';
 import { DoubleHelix } from '../model/double-helix';
+import { MmbInputModel as MIM } from '../model/mmb-input-model';
 import { NtCConformation } from '../model/ntc-conformation';
 import { MdParameters } from '../model/md-parameters';
 import { JobNameInput } from './job-name-input';
 import { MmbCommands } from './mmb-commands';
 import { Num } from '../util/num';
 
-export class MmbInputForm extends Form<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, MmbUtil.ValueTypes, MmbInputForm.Props> {
+export class MmbInputForm extends Form<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes, MmbInputForm.Props> {
     constructor(props: MmbInputForm.Props) {
         super(props);
 
-        FCM.registerContext<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, MmbUtil.ValueTypes>(props.id);
+        this.state = {
+            ...this.initialBaseState(),
+        };
     }
 
     commandsToJob() {
@@ -87,10 +89,6 @@ export class MmbInputForm extends Form<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, Mmb
         }
     }
 
-    componentWillUnmount() {
-        FCM.unregisterContext(this.props.id);
-    }
-
     private makeParams(): CommandsSerializer.Parameters<ParameterNames> {
         let errors: string[] = [];
 
@@ -142,7 +140,7 @@ export class MmbInputForm extends Form<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, Mmb
     }
 
     protected renderContent() {
-        const ctxData: MmbUtil.ContextData = {
+        const ctxData: MIM.ContextData = {
             ...this.state,
             clearErrors: this.clearErrors,
             clearValues: this.clearValues,
@@ -152,7 +150,7 @@ export class MmbInputForm extends Form<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, Mmb
             setErrorsAndValues: this.setErrorsAndValues,
         };
 
-        const Ctx = FCM.getContext(this.props.id);
+        const Ctx = FCM.makeContext<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes>();
 
         return (
             <Ctx.Provider value={ctxData}>
@@ -172,7 +170,7 @@ export class MmbInputForm extends Form<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, Mmb
 }
 
 export namespace MmbInputForm {
-    export interface Props extends MmbUtil.Props {
+    export interface Props extends MIM.Props {
         availableStages: number[];
     }
 }

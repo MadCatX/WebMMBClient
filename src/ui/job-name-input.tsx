@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020 WebMMB contributors, licensed under MIT, See LICENSE file for details.
+ * Copyright (c) 2020-2021 WebMMB contributors, licensed under MIT, See LICENSE file for details.
  *
  * @author Michal Malý (michal.maly@ibt.cas.cz)
  * @author Samuel C. Flores (samuelfloresc@gmail.com)
@@ -9,23 +9,23 @@
 import * as React from 'react';
 import { FormBlock } from './common/form-block';
 import { GLabeledField, LabeledField } from './common/labeled-field';
-import { MmbInputUtil as MmbUtil } from './mmb-input-form-util';
 import { ErrorBox } from './common/error-box';
+import { MmbInputModel as MIM } from '../model/mmb-input-model';
 
-const StrLabeledField = LabeledField<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, MmbUtil.Values, string>();
+const StrLabeledField = LabeledField<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes, string>();
 
-export class JobNameInput extends FormBlock<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, MmbUtil.ValueTypes, JobNameInput.Props> {
+export class JobNameInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes, JobNameInput.Props> {
     renderName() {
         if (this.props.name === undefined) {
             return (
                 <>
                     <StrLabeledField
                         {...GLabeledField.tags('mol-in-job-name', this.props.formId, ['labeled-field'])}
-                        formId={this.props.formId}
                         style='left'
                         label='Job name'
                         inputType='line-edit'
-                        options={[]} />
+                        options={[]}
+                        ctxData={this.props.ctxData} />
                     <ErrorBox
                         errors={this.props.ctxData.errors.get('mol-in-no-name') ?? new Array<string>()} />
                 </>
@@ -48,7 +48,7 @@ export class JobNameInput extends FormBlock<MmbUtil.ErrorKeys, MmbUtil.ValueKeys
 }
 
 export namespace JobNameInput {
-    export interface Props extends FormBlock.Props<MmbUtil.ErrorKeys, MmbUtil.ValueKeys, MmbUtil.ValueTypes> {
+    export interface Props extends FormBlock.Props<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes> {
         name?: string;
     }
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020 WebMMB contributors, licensed under MIT, See LICENSE file for details.
+ * Copyright (c) 2020-2021 WebMMB contributors, licensed under MIT, See LICENSE file for details.
  *
  * @author Michal Malý (michal.maly@ibt.cas.cz)
  * @author Samuel C. Flores (samuelfloresc@gmail.com)
@@ -42,7 +42,7 @@ export namespace TooltippedField {
 
     export interface Props {
         position: Position;
-        renderContent: ContentRenderer; 
+        renderContent: ContentRenderer;
         text?: string;
     }
 }

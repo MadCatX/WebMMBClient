@@ -1,14 +1,21 @@
+/**
+ * Copyright (c) 2020-2021 WebMMB contributors, licensed under MIT, See LICENSE file for details.
+ *
+ * @author Michal Malý (michal.maly@ibt.cas.cz)
+ * @author Samuel C. Flores (samuelfloresc@gmail.com)
+ * @author Jiří Černý (jiri.cerny@ibt.cas.cz)
+ */
+
 import * as React from 'react';
-import { FormUtil, FormUtilClass } from './form';
-import { FormContextManager as FCM } from './form-context-manager';
+import { FormModel, FormUtil } from '../../model/common/form';
 import { PushButton } from './push-button';
 
 type ArrayType<T> = T extends (infer AT)[] ? AT : never;
 
-export class GTableWithDeletableRows<KE, KV, T, U extends T & Array<any>> extends React.Component<GTableWithDeletableRows.Props<KV, U>> {
-    private FU = new FormUtilClass<KE, KV, T>();
+export class GTableWithDeletableRows<KE, KV, T, U extends T & Array<any>> extends React.Component<GTableWithDeletableRows.Props<KE, KV, T, U>> {
+    private FU = new FormUtil<KE, KV, T>();
 
-    removeRow = (index: number, data: FormUtil.ContextData<KE, KV, T>) => {
+    removeRow = (index: number, data: FormModel.ContextData<KE, KV, T>) => {
         const rows = data.values.get(this.props.valuesKey) as U;
         const item: ArrayType<U> = rows[index];
         rows.splice(index, 1);
@@ -18,45 +25,38 @@ export class GTableWithDeletableRows<KE, KV, T, U extends T & Array<any>> extend
     }
 
     render() {
-        const CtxConsumer = FCM.getContext(this.props.formId).Consumer;
+        const values = this.FU.getArray<U>(this.props.ctxData, this.props.valuesKey);
 
         return (
-            <CtxConsumer>
-                {(data: FormUtil.ContextData<KE, KV, T>) => {
-                    const values = this.FU.getArray<U>(data, this.props.valuesKey);
+            <div className={this.props.className} key='top'>
+                {this.props.columns.map((col, n) => {
+                    const key = `col-${n}`;
+                    return (<div key={key} className='column-header'>{col.caption}</div>);
+                })}
+                <div className='column-header' key='entries'></div>
+                {values.map((v, index) => {
                     return (
-                        <div className={this.props.className} key='top'>
+                        <React.Fragment key={`row-item-${index}`}>
                             {this.props.columns.map((col, n) => {
-                                const key = `col-${n}`;
-                                return (<div key={key} className='column-header'>{col.caption}</div>);
+                                const key = `col-item-${index}-${n}`
+                                if (col.stringify !== undefined)
+                                    return (<div className='column-item' key={key}>{col.stringify(v[col.k])}</div>);
+                                else
+                                    return (<div className='column-item' key={key}>{v[col.k]}</div>);
                             })}
-                            <div className='column-header' key='entries'></div>
-                            {values.map((v, index) => {
-                                return (
-                                    <React.Fragment key={`row-item-${index}`}>
-                                        {this.props.columns.map((col, n) => {
-                                            const key = `col-item-${index}-${n}`
-                                            if (col.stringify !== undefined)
-                                                return (<div className='column-item' key={key}>{col.stringify(v[col.k])}</div>);
-                                            else
-                                                return (<div className='column-item' key={key}>{v[col.k]}</div>);
-                                        })}
-                                        <PushButton
-                                            className='pushbutton-common pushbutton-delete'
-                                            key={`delbtn-${index}`}
-                                            value='-'
-                                            onClick={(e) => {
-                                                e.preventDefault();
-                                                this.removeRow(index, data);
-                                            }} />
-                                    </React.Fragment>
-                                );
-                            })
-                            }
-                        </div>
+                            <PushButton
+                                className='pushbutton-common pushbutton-delete'
+                                key={`delbtn-${index}`}
+                                value='-'
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    this.removeRow(index, this.props.ctxData);
+                                }} />
+                        </React.Fragment>
                     );
-                }}
-            </CtxConsumer>
+                })
+                }
+            </div>
         );
     }
 }
@@ -68,19 +68,20 @@ export namespace GTableWithDeletableRows {
         (item: ArrayType<T>): void;
     }
 
-    export interface Props<KV, T> {
+    export interface Props<KE, KV, T, U> {
+        ctxData: FormModel.ContextData<KE, KV, T>;
         className: string;
         formId: string;
         columns: {
             caption: string;
-            k: keyof ArrayType<T>;
-            stringify?: (v: ValueOf<ArrayType<T>>) => string;
+            k: keyof ArrayType<U>;
+            stringify?: (v: ValueOf<ArrayType<U>>) => string;
         }[];
         valuesKey: KV;
-        deleter?: Deleter<T>;
+        deleter?: Deleter<U>;
     }
 }
 
 export function TableWithDeletableRows<KE, KV, T, U extends T & Array<any>>() {
-    return GTableWithDeletableRows as new(props: GTableWithDeletableRows.Props<KV, T>) => GTableWithDeletableRows<KE, KV, T, U>;
+    return GTableWithDeletableRows as new(props: GTableWithDeletableRows.Props<KE, KV, T, U>) => GTableWithDeletableRows<KE, KV, T, U>;
 }
