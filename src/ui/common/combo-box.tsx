@@ -9,12 +9,12 @@
 import * as React from 'react';
 import { FormModel } from '../../model/common/form';
 import { FormField } from './form-field';
-import { UiUtil } from './util';
+import { Util } from './util';
 
 export class GComboBox<KE, KV extends string, T, U extends FormModel.V<T>> extends FormField<KE, KV, T, GComboBox.Props<KE, KV, T, U>> {
     private getValue() {
         const value = this.props.ctxData.values.get(this.props.keyId);
-        return UiUtil.toString(value);
+        return Util.toString(value);
     }
 
     private updateValue(value: string) {

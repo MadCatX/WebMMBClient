@@ -9,7 +9,7 @@
 import * as React from 'react';
 import { ErrorBox } from './common/error-box';
 import { FormBlock } from './common/form-block';
-import { LabeledField, GLabeledField } from './common/labeled-field';
+import { LabeledField } from './common/controlled/labeled-field';
 import { PushButton } from './common/push-button';
 import { BaseInteraction } from '../model/base-interaction';
 import { Compound } from '../model/compound';
@@ -21,60 +21,78 @@ import { Num } from '../util/num';
 
 const FU = new FormUtil<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes>();
 const AddedTable = MIM.TWDR<Compound[]>();
+const CpTypeLField = LabeledField.ComboBox<Compound.Type>();
+const StrLField = LabeledField.LineEdit<string>();
+const SeqLField = LabeledField.TextArea<string>();
 
-const StrLabeledField = LabeledField<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes, string>();
+function isSequenceValid(type: Compound.Type, input: string) {
+    try {
+        const seq = Compound.stringToSequence(input);
+        switch (type) {
+        case 'DNA':
+            return Compound.isDna(seq);
+        case 'RNA':
+            return Compound.isRna(seq);
+        }
+    } catch (e) {
+        return false;
+    }
+}
 
-export class CompoundsInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes, CompoundsInput.Props> {
+interface State {
+    chain: string;
+    firstResidueNo: string;
+    compoundType: Compound.Type;
+    sequence: string;
+    errors: string[];
+}
+
+export class CompoundsInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes, CompoundsInput.Props, State> {
     constructor(props: CompoundsInput.Props) {
         super(props);
 
-        this.compoundRemoved = this.compoundRemoved.bind(this);
+        this.state = {
+            chain: '',
+            firstResidueNo: '1',
+            compoundType: 'RNA',
+            sequence: '',
+            errors: new Array<string>(),
+        };
     }
 
     private addSequence(data: MIM.ContextData) {
-        const chain = FU.getScalar(data, 'mol-in-cp-chain-id', '');
-        const firstResidueNo = Num.parseIntStrict(FU.getScalar(data, 'mol-in-cp-first-res-no', ''));
-        const type = FU.getScalar<Compound.Type>(data, 'mol-in-cp-compound-type', 'RNA');
-
-        const errors: string[] = [];
-        if (chain.length !== 1)
+        const errors = new Array<string>();
+        if (this.state.chain.length !== 1)
             errors.push('Chain must be a single character string');
-        if (isNaN(firstResidueNo))
+        const resNo = Num.parseIntStrict(this.state.firstResidueNo);
+        if (isNaN(resNo))
             errors.push('First residue number value must be a number');
 
-        try {
-            const input = FU.maybeGetScalar<string>(data, 'mol-in-cp-sequence');
-            if (input === undefined)
-                throw new Error('Sequence is empty');
+        if (this.state.sequence.length < 1)
+            errors.push('Sequence is empty');
+        else if (!isSequenceValid(this.state.compoundType, this.state.sequence))
+            errors.push('Sequence is invalid');
 
-            const sequence = Compound.stringToSequence(input);
-            if (sequence.length < 1)
-                throw new Error('Sequence is empty');
-
-            const compounds = FU.getArray<Compound[]>(data, 'mol-in-cp-added');
-            compounds.forEach(c => {
-                if (c.chain === chain)
-                    throw new Error(`Compound with chain ${chain} is already present`);
-            });
-
-            if (errors.length === 0) {
-                compounds.push(new Compound(chain, firstResidueNo, type, sequence));
-                FU.updateErrorsAndValues(
-                    data,
-                    [{ key: 'mol-in-cp-errors', errors }],
-                    [{ key: 'mol-in-cp-added', value: compounds }],
-                );
-                return;
-            }
-        } catch (e) {
-            errors.push(e.toString());
+        if (errors.length > 0) {
+            this.setState({ ...this.state, errors });
+            return;
         }
 
-        if (errors.length > 0)
-            FU.updateErrors(data, { key: 'mol-in-cp-errors', errors });
+        const compounds = FU.getArray<Compound[]>(data, 'mol-in-cp-added');
+        for (let idx = 0; idx < compounds.length; idx++) {
+            if (compounds[idx].chain === this.state.chain) {
+                errors.push(`Compound with chain ${this.state.chain} is already present`);
+                this.setState({ ...this.state, errors });
+                return;
+            }
+        }
+
+        compounds.push(new Compound(this.state.chain, resNo, this.state.compoundType, Compound.stringToSequence(this.state.sequence)));
+        this.setState({ ...this.state, errors: [] });
+        FU.updateValues(data, [{ key: 'mol-in-cp-added', value: compounds }]);
     }
 
-    private compoundRemoved(c: Compound) {
+    private compoundRemoved = (c: Compound) => {
         const chain = c.chain;
 
         let doubleHelices = FU.getArray<DoubleHelix[]>(this.props.ctxData, 'mol-in-dh-added');
@@ -101,41 +119,43 @@ export class CompoundsInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM.
             <div className='section'>
                 <div className='section-caption'>Compound definiton</div>
                 <div className='mol-in-cp-input spaced-grid'>
-                    <StrLabeledField
-                        {...GLabeledField.tags('mol-in-cp-chain-id', this.props.formId, ['labeled-field'])}
+                    <StrLField
                         label='Chain'
                         style='above'
-                        inputType='line-edit'
-                        options={[]}
-                        ctxData={this.props.ctxData} />
-                    <StrLabeledField
-                        {...GLabeledField.tags('mol-in-cp-first-res-no', this.props.formId, ['labeled-field'])}
+                        id='chain-id'
+                        value={this.state.chain}
+                        updateNotifier={v => this.setState({ ...this.state, chain: v })}
+                        validator={v => v.length <= 1}
+                        className='line-edit fit-width-input' />
+                    <StrLField
                         label='First residue no.'
                         style='above'
-                        inputType='line-edit'
-                        options={[]}
-                        ctxData={this.props.ctxData} />
-                    <StrLabeledField
-                        {...GLabeledField.tags('mol-in-cp-compound-type', this.props.formId, ['labeled-field'])}
+                        id='residue-no'
+                        value={this.state.firstResidueNo.toString()}
+                        validator={v => !isNaN(Num.parseIntStrict(v)) || v.length === 0}
+                        updateNotifier={v => this.setState({ ...this.state, firstResidueNo: v })}
+                        className='line-edit fit-width-input' />
+                    <CpTypeLField
                         label='Type'
                         style='above'
-                        inputType='combo-box'
-                        options={
-                            [
+                        id='compound-type'
+                        value={this.state.compoundType}
+                        updateNotifier={v => this.setState({ ...this.state, compoundType: v })}
+                        options={[
                                 { value: 'RNA', caption: 'RNA' },
                                 { value: 'DNA', caption: 'DNA' },
-                            ]
-                        }
-                        ctxData={this.props.ctxData} />
-                    <StrLabeledField
-                        {...GLabeledField.tags('mol-in-cp-sequence', this.props.formId, ['labeled-field'])}
+                        ]}
+                        className='combo-box fit-width-input' />
+                    <SeqLField
                         label='Sequence'
                         style='above'
-                        inputType='text-area'
+                        id='sequence'
+                        value={this.state.sequence}
+                        validator={v => isSequenceValid(this.state.compoundType, v) || v.length < this.state.sequence.length}
+                        updateNotifier={v => this.setState({ ...this.state, sequence: v })}
                         hint='Enter sequence'
                         spellcheck={false}
-                        options={[]}
-                        ctxData={this.props.ctxData} />
+                        className='text-area fit-width-input' />
                     <PushButton
                         className='pushbutton-common pushbutton-add'
                         value="+"
@@ -145,7 +165,7 @@ export class CompoundsInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM.
                         }} />
                 </div>
                 <ErrorBox
-                    errors={this.props.ctxData.errors.get('mol-in-cp-errors') ?? new Array<string>()} />
+                    errors={this.state.errors} />
                 <AddedTable
                     formId={this.props.formId}
                     className='mol-in-cp-added spaced-grid'

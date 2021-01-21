@@ -7,85 +7,97 @@
  */
 
 import * as React from 'react';
-import { GComboBox } from './common/combo-box';
 import { ErrorBox } from './common/error-box';
 import { FormBlock } from './common/form-block';
-import { LabeledField, GLabeledField } from './common/labeled-field';
+import { LabeledField } from './common/controlled/labeled-field';
 import { PushButton } from './common/push-button';
+import { Util } from './common/util';
 import { Compound } from '../model/compound';
 import { DoubleHelix } from '../model/double-helix';
 import { MmbInputModel as MIM } from '../model/mmb-input-model';
 import { FormUtil } from '../model/common/form';
+import { Manip } from '../util/manip';
 import { Num } from '../util/num';
 
 const FU = new FormUtil<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes>();
 const AddedTable = MIM.TWDR<DoubleHelix[]>();
-const NumLabeledField = LabeledField<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes, number>();
-const StrLabeledField = LabeledField<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes, string>();
+const ChainLField = LabeledField.ComboBox<string>();
+const ResidueLField = LabeledField.ComboBox<number>();
 
-const VKeys: MIM.ValueKeys[] = [
-    'mol-in-dh-chain-one',
-    'mol-in-dh-first-res-no-one',
-    'mol-in-dh-last-res-no-one',
-    'mol-in-dh-chain-two',
-    'mol-in-dh-first-res-no-two'
-];
+interface State {
+    chainOne?: string;
+    firstResNoOne?: number;
+    lastResNoOne?: number;
+    chainTwo?: string;
+    firstResNoTwo?: number;
+    errors: string[];
+}
 
-export class DoubleHelicesInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes, DoubleHelicesInput.Props> {
-    private addDoubleHelix(data: MIM.ContextData) {
-        const chainOne = FU.maybeGetScalar<string>(data, 'mol-in-dh-chain-one');
-        const firstResNoOne = FU.maybeGetScalar<number>(data, 'mol-in-dh-first-res-no-one');
-        const lastResNoOne = FU.maybeGetScalar<number>(data, 'mol-in-dh-last-res-no-one');
-        const chainTwo = FU.maybeGetScalar<string>(data, 'mol-in-dh-chain-two');
-        const firstResNoTwo = FU.maybeGetScalar<number>(data, 'mol-in-dh-first-res-no-two');
-        const lastResNoTwo = this.lastResNoTwo(firstResNoOne, lastResNoOne, firstResNoTwo);
-
-        if (chainOne === undefined || firstResNoOne === undefined || lastResNoOne === undefined ||
-            chainTwo === undefined || firstResNoTwo === undefined || lastResNoTwo === undefined)
-            throw new Error('Incomplete double helix definition');
-
-        // Sanity checks
-        const errors: string[] = [];
+export class DoubleHelicesInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes, DoubleHelicesInput.Props, State> {
+    constructor(props: DoubleHelicesInput.Props) {
+        super(props);
 
         const compounds = FU.getArray<Compound[]>(this.props.ctxData, 'mol-in-cp-added');
-        if (MIM.getCompound(compounds, chainOne) === undefined || MIM.getCompound(compounds, chainTwo) === undefined)
-            return; // Ignore if either of the compounds does not exist
 
-        const [, lastAvail] = this.lastSelectableResidue(compounds, firstResNoOne, lastResNoOne, chainTwo);
-        if (lastAvail === false)
-            errors.push('No second residue');
-
-        if (firstResNoOne > lastResNoOne)
-            errors.push('Last residue number on the first chain cannot be smaller than first residue number');
-        if (firstResNoTwo < lastResNoTwo)
-            errors.push('Last residue number on the second chain cannot be greater than first residue number');
-        if (lastResNoOne - firstResNoOne !== firstResNoTwo - lastResNoTwo)
-            errors.push('Paried sections must have the same length');
-        if (chainOne === chainTwo) {
-            if (lastResNoOne >= lastResNoTwo)
-                errors.push('Paired residues on the same chain cannot overlap');
-        }
-
-        if (errors.length > 0) {
-            FU.updateErrors(this.props.ctxData, { key: 'mol-in-dh-errors', errors });
-            return;
-        }
-
-        const dh = new DoubleHelix(chainOne, firstResNoOne, lastResNoOne, chainTwo, firstResNoTwo, lastResNoTwo);
-        const value = FU.getArray<DoubleHelix[]>(data, 'mol-in-dh-added');
-
-        if (value.find(e => e.equals(dh)) !== undefined) {
-            errors.push('Such double helix already exists');
-            FU.updateErrors(this.props.ctxData, { key: 'mol-in-dh-errors', errors });
-            return;
-        }
-
-        value.push(dh);
-        FU.updateErrorsAndValues(data, [{ key: 'mol-in-dh-errors', errors }], [{ key: 'mol-in-dh-added', value }]);
+        this.state = {
+            errors: new Array<string>(),
+            chainOne: compounds.length > 0 ? compounds[0].chain : undefined,
+            chainTwo: compounds.length > 0 ? compounds[0].chain : undefined,
+        };
     }
 
-    private clearAll() {
-        this.props.ctxData.clearErrorsAndValues(['mol-in-dh-errors'], VKeys);
+    private addDoubleHelix() {
+        const compounds = FU.getArray<Compound[]>(this.props.ctxData, 'mol-in-cp-added');
+        let cA = undefined;
+        let cB = undefined;
+
+        const errors = new Array<string>();
+
+        // Sanity checks
+        if (this.state.chainOne === undefined || (cA = compounds.find(c => c.chain === this.state.chainOne)) === undefined)
+            errors.push('Invalid first chain');
+        if (this.state.firstResNoOne === undefined)
+            errors.push('First residue on first chain is not set');
+        if (this.state.lastResNoOne === undefined)
+            errors.push('Last residue on first chain is not set');
+
+        if (this.state.chainTwo === undefined || (cB = compounds.find(c => c.chain === this.state.chainTwo)) === undefined)
+            errors.push('Invalid second chain');
+        if (this.state.firstResNoTwo === undefined)
+            errors.push('First residue on second chain is not set');
+
+        if (errors.length > 0) {
+            this.setState({ ...this.state, errors });
+            return;
+        }
+
+        const firstOne = this.state.firstResNoOne!;
+        const lastOne = this.state.lastResNoOne!;
+        if (firstOne > lastOne || firstOne > cA!.lastResidueNo)
+            errors.push('Invalid residues on first chain')
+
+        const firstTwo = this.state.firstResNoTwo!;
+        const lastTwo = firstTwo - (lastOne - firstOne);
+        if (firstTwo > cB!.lastResidueNo || lastTwo < cB!.firstResidueNo)
+            errors.push('Invalid residues on second chain');
+        if (this.state.chainOne! === this.state.chainTwo! && lastOne >= lastTwo)
+                errors.push('Paired residues on the same chain cannot overlap');
+
+        if (errors.length > 0) {
+            this.setState({ ...this.state, errors });
+            return;
+        }
+
+        const dh = new DoubleHelix(this.state.chainOne!, firstOne, lastOne, this.state.chainTwo!, firstTwo, lastTwo);
+        const helices = FU.getArray<DoubleHelix[]>(this.props.ctxData, 'mol-in-dh-added');
+        if (helices.find(e => e.equals(dh)) !== undefined) {
+            errors.push('Such double helix already exists');
+            this.setState({ ...this.state, errors });
+        } else {
+            helices.push(dh);
+            this.setState({ ...this.state, errors: [] });
+            FU.updateValues(this.props.ctxData, [{ key: 'mol-in-dh-added', value: helices }]);
+        }
     }
 
     private lastResNoTwo(firstResNoOne?: number, lastResNoOne?: number, firstResNoTwo?: number) {
@@ -112,152 +124,146 @@ export class DoubleHelicesInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, 
 
     componentDidUpdate() {
         const compounds = FU.getArray<Compound[]>(this.props.ctxData, 'mol-in-cp-added');
-        if (compounds.length === 0) {
-            this.clearAll();
+
+        if (compounds.length < 1 && this.state.chainOne === undefined && this.state.chainTwo === undefined)
+            return; // Do fuck all;
+
+        if ((compounds.length < 1 ||
+             compounds.find(c => c.chain === this.state.chainOne) === undefined ||
+             compounds.find(c => c.chain === this.state.chainTwo) === undefined) &&
+            (this.state.chainOne !== undefined && this.state.chainTwo !== undefined)) {
+            // Revert to empty state
+            this.setState({
+                ...this.state,
+                chainOne: undefined,
+                firstResNoOne: undefined,
+                lastResNoOne: undefined,
+                chainTwo: undefined,
+                firstResNoTwo: undefined,
+                errors: new Array<string>(),
+            });
             return;
         }
 
-        const nv = FU.emptyValues();
+        let update: Partial<State> = {};
 
-        // First chain params
-        let chainOne = FU.maybeGetScalar<string>(this.props.ctxData, 'mol-in-dh-chain-one');
-        if (chainOne === undefined) {
-            chainOne = compounds[0].chain;
-            nv.set('mol-in-dh-chain-one', chainOne);
-        }
-        const c = MIM.getCompound(compounds, chainOne);
-        if (c === undefined)
-            return;
+        if (this.state.chainOne === undefined)
+            update = { ...update, chainOne: compounds[0].chain };
+        if (this.state.chainTwo === undefined)
+            update = { ...update, chainTwo: compounds[0].chain };
 
-        const firstResNoOne = FU.maybeGetScalar<number>(this.props.ctxData, 'mol-in-dh-first-res-no-one');
-        const lastResNoOne = FU.maybeGetScalar<number>(this.props.ctxData, 'mol-in-dh-last-res-no-one');
-        if (firstResNoOne !== undefined && firstResNoOne <= c.lastResidueNo && firstResNoOne >= c.firstResidueNo) {
-            if (lastResNoOne === undefined || lastResNoOne < firstResNoOne || lastResNoOne > c.lastResidueNo)
-                nv.set('mol-in-dh-last-res-no-one', firstResNoOne);
-        } else {
-            const def = MIM.defaultFirstResNo(compounds, chainOne)!;
-            nv.set('mol-in-dh-first-res-no-one', def);
-            nv.set('mol-in-dh-last-res-no-one', def);
+        if (this.state.chainOne !== undefined && (this.state.firstResNoOne === undefined || this.state.lastResNoOne === undefined)) {
+            const def = MIM.defaultFirstResNo(compounds, this.state.chainOne);
+            update = {
+                ...update,
+                firstResNoOne: def,
+                lastResNoOne: def,
+            };
         }
 
-        // Second chain params
-        let chainTwo = FU.maybeGetScalar<string>(this.props.ctxData, 'mol-in-dh-chain-two');
-        if (chainTwo === undefined) {
-            chainTwo = compounds[0].chain;
-            nv.set('mol-in-dh-chain-two', chainTwo);
-        }
-        const firstResNoTwo = FU.maybeGetScalar<number>(this.props.ctxData, 'mol-in-dh-first-res-no-two');
-        if (firstResNoTwo === undefined) {
-            const def = MIM.defaultFirstResNoRev(compounds, chainTwo)!;
-            nv.set('mol-in-dh-first-res-no-two', def);
-        } else {
-            const [lastSel, lastAvail] = this.lastSelectableResidue(compounds, firstResNoOne, lastResNoOne, chainTwo);
-            const secondOpts: GComboBox.Option[] = lastAvail ? MIM.residueOptionsRev(compounds, chainTwo, undefined, lastSel) : [];
-            if (secondOpts.length > 0) {
-                const resno = parseInt(secondOpts[0].value);
-                if (resno < firstResNoTwo)
-                    nv.set('mol-in-dh-first-res-no-two', resno);
-            }
+        if (this.state.chainTwo !== undefined && this.state.firstResNoTwo === undefined) {
+            const def = MIM.defaultFirstResNoRev(compounds, this.state.chainTwo);
+            update = {
+                ...update,
+                firstResNoTwo: def,
+            };
         }
 
-        if (nv.size > 0)
-            this.props.ctxData.setValues(nv);
+        if (Manip.hasDefined(update))
+            this.setState({ ...this.state, ...update });
     }
 
     render() {
+        const chains = MIM.chainOptions(this.props.ctxData);
         const compounds = FU.getArray<Compound[]>(this.props.ctxData, 'mol-in-cp-added');
-        const chainOne = FU.getScalar<string>(this.props.ctxData, 'mol-in-dh-chain-one', '');
-        let   firstResNoOne = FU.maybeGetScalar<number>(this.props.ctxData, 'mol-in-dh-first-res-no-one', MIM.defaultFirstResNo(compounds, chainOne));
-        let   lastResNoOne = FU.maybeGetScalar<number>(this.props.ctxData, 'mol-in-dh-last-res-no-one');
-        const chainTwo = FU.getScalar<string>(this.props.ctxData, 'mol-in-dh-chain-two', '');
+        const [lastSel, lastAvail] = this.lastSelectableResidue(compounds, this.state.firstResNoOne, this.state.lastResNoOne, this.state.chainTwo);
+        const secondOpts = (this.state.chainTwo !== undefined) ? (lastAvail ? MIM.residueOptionsRev(compounds, this.state.chainTwo, undefined, lastSel) : []) : [];
+        let lastResNoTwo = this.lastResNoTwo(this.state.firstResNoOne, this.state.lastResNoOne, this.state.firstResNoTwo);
 
-        if (chainOne !== '') {
-            const c = MIM.getCompound(compounds, chainOne);
-            if (c !== undefined) {
-                /* Clamp first residue number to sensible values */
-                if (Num.isNum(firstResNoOne)) {
-                    if (firstResNoOne > c.lastResidueNo || firstResNoOne < c.firstResidueNo)
-                        firstResNoOne = c.firstResidueNo;
-
-                    /* Clamp last residue to sensible values */
-                    if (Num.isNum(lastResNoOne)) {
-                        if (lastResNoOne > c.lastResidueNo || lastResNoOne < firstResNoOne)
-                            lastResNoOne = c.lastResidueNo;
-                    }
-                }
-            }
-        }
-
-        let firstResNoTwo = FU.maybeGetScalar<number>(this.props.ctxData, 'mol-in-dh-first-res-no-two', MIM.defaultFirstResNoRev(compounds, chainTwo));
-        const [lastSel, lastAvail] = this.lastSelectableResidue(compounds, firstResNoOne, lastResNoOne, chainTwo);
-        const secondOpts: GComboBox.Option[] = lastAvail ? MIM.residueOptionsRev(compounds, chainTwo, undefined, lastSel) : [];
-
-        let lastResNoTwo = 'N/A';
-        if (secondOpts.length > 0 && Num.isNum(firstResNoTwo)) {
-            /* Mind the greatest -> smallest ordering */
-            const lastAvail = parseInt(secondOpts[0].value);
-            const firstAvail = parseInt(secondOpts[secondOpts.length-1].value);
-            if (firstResNoTwo > lastAvail || firstResNoTwo < firstAvail)
-                firstResNoTwo = lastAvail;
-            lastResNoTwo = (this.lastResNoTwo(firstResNoOne, lastResNoOne, firstResNoTwo) ?? 'N/A').toString();
+        let cTwo: Compound | undefined;
+        if (this.state.chainTwo !== undefined && lastResNoTwo !== undefined && (cTwo = compounds.find(c => c.chain === this.state.chainTwo)) !== undefined) {
+            if (lastResNoTwo < cTwo.firstResidueNo)
+                lastResNoTwo = undefined;
         }
 
         return (
             <div className='section'>
                 <div className='section-caption'>Double helices</div>
                 <div className='mol-in-dh-input spaced-grid'>
-                    <StrLabeledField
-                        {...GLabeledField.tags('mol-in-dh-chain-one', this.props.formId, ['labeled-field'])}
+                    <ChainLField
+                        id='first-res-one'
                         label='Chain'
                         style='above'
-                        inputType='combo-box'
-                        options={MIM.chainOptions(this.props.ctxData)}
-                        ctxData={this.props.ctxData} />
-                    <NumLabeledField
-                        {...GLabeledField.tags('mol-in-dh-first-res-no-one', this.props.formId, ['labeled-field'])}
+                        value={this.state.chainOne}
+                        updateNotifier={v => {
+                            let update: Partial<State> = { chainOne: v };
+                            const c = compounds.find(c => c.chain === v);
+                            if (c === undefined)
+                                update = { ...update, firstResNoOne: undefined, lastResNoOne: undefined };
+                            else {
+                                if (this.state.firstResNoOne !== undefined && !Num.within(c.firstResidueNo, c.lastResidueNo, this.state.firstResNoOne))
+                                    update = { ...update, firstResNoOne: c.firstResidueNo };
+                                if (this.state.lastResNoOne !== undefined && !Num.within(c.firstResidueNo, c.lastResidueNo, this.state.lastResNoOne))
+                                    update = { ...update, lastResNoOne: c.firstResidueNo };
+                            }
+                            this.setState({ ...this.state, ...update });
+                        }}
+                        options={chains}  />
+                    <ResidueLField
+                        id='first-res-one'
                         label='First residue'
                         style='above'
-                        inputType='combo-box'
-                        converter={parseInt}
-                        options={MIM.residueOptions(compounds, chainOne)}
-                        ctxData={this.props.ctxData} />
-                    <NumLabeledField
-                        {...GLabeledField.tags('mol-in-dh-last-res-no-one', this.props.formId, ['labeled-field'])}
+                        value={this.state.firstResNoOne}
+                        stringifier={Util.nToS}
+                        updateNotifier={v => this.setState({ ...this.state, firstResNoOne: v })}
+                        options={MIM.residueOptions(compounds, this.state.chainOne)} />
+                    <ResidueLField
+                        id='last-res-one'
                         label='Last residue'
                         style='above'
-                        inputType='combo-box'
-                        converter={parseInt}
-                        options={MIM.residueOptions(compounds, chainOne, firstResNoOne)}
-                        ctxData={this.props.ctxData} />
-                    <StrLabeledField
-                        {...GLabeledField.tags('mol-in-dh-chain-two', this.props.formId, ['labeled-field'])}
+                        value={this.state.lastResNoOne}
+                        updateNotifier={v => this.setState({ ...this.state, lastResNoOne: v })}
+                        stringifier={Util.nToS}
+                        options={MIM.residueOptions(compounds, this.state.chainOne, this.state.firstResNoOne)} />
+                    <ChainLField
+                        id='chain-two'
                         label='Chain'
                         style='above'
-                        inputType='combo-box'
-                        options={MIM.chainOptions(this.props.ctxData)}
-                        ctxData={this.props.ctxData} />
-                    <NumLabeledField
-                        {...GLabeledField.tags('mol-in-dh-first-res-no-two', this.props.formId, ['labeled-field'])}
+                        value={this.state.chainTwo}
+                        updateNotifier={v => {
+                            let update: Partial<State> = { chainTwo: v };
+                            const c = compounds.find(c => c.chain === v);
+                            if (c === undefined)
+                                update = { ...update, firstResNoTwo: undefined };
+                            else {
+                                if (this.state.firstResNoTwo !== undefined && !Num.within(c.firstResidueNo, c.lastResidueNo, this.state.firstResNoTwo))
+                                    update = { ...update, firstResNoTwo: c.lastResidueNo };
+                            }
+                            this.setState({ ...this.state, ...update });
+                        }}
+                        options={MIM.chainOptions(this.props.ctxData)} />
+                    <ResidueLField
+                        id={'last-res-two'}
                         label='First residue'
                         style='above'
-                        inputType='combo-box'
-                        converter={parseInt}
-                        options={secondOpts}
-                        ctxData={this.props.ctxData} />
+                        value={this.state.firstResNoTwo}
+                        updateNotifier={v => this.setState({ ...this.state, firstResNoTwo: v })}
+                        stringifier={Util.nToS}
+                        options={secondOpts} />
                     <div>
                         <div>Last residue</div>
-                        <div>{lastResNoTwo}</div>
+                        <div>{lastResNoTwo ? lastResNoTwo : 'N/A'}</div>
                     </div>
                     <PushButton
                         className='pushbutton-common pushbutton-add'
                         value="+"
-                        onClick={(e) => {
+                        onClick={e => {
                             e.preventDefault();
-                            this.addDoubleHelix(this.props.ctxData);
+                            this.addDoubleHelix();
                         }} />
                 </div>
                 <ErrorBox
-                    errors={this.props.ctxData.errors.get('mol-in-dh-errors') ?? new Array<string>()} />
+                    errors={this.state.errors} />
                 <AddedTable
                     formId={this.props.formId}
                     className='mol-in-dh-added spaced-grid'

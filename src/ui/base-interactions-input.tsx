@@ -10,14 +10,17 @@ import * as React from 'react';
 import { GComboBox } from './common/combo-box';
 import { ErrorBox } from './common/error-box';
 import { FormBlock } from './common/form-block';
-import { LabeledField, GLabeledField } from './common/labeled-field';
+import { LabeledField } from './common/controlled/labeled-field';
 import { PushButton } from './common/push-button';
+import { Util } from './common/util';
 import { BaseInteraction } from '../model/base-interaction';
 import { Compound } from '../model/compound';
 import { EdgeInteraction } from '../model/edge-interaction';
 import { MmbInputModel as MIM } from '../model/mmb-input-model';
 import { Orientation } from '../model/orientation';
 import { FormUtil } from '../model/common/form';
+import { Manip } from '../util/manip';
+import { Num } from '../util/num';
 
 const EdgeOptions = EdgeInteraction.Edges.map((e) => {
     const o: GComboBox.Option = {value: e, caption: EdgeInteraction.toString(e)};
@@ -31,178 +34,211 @@ const OrientationOptions = Orientation.Orientations.map((v) => {
 const FU = new FormUtil<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes>();
 const AddedTable = MIM.TWDR<BaseInteraction[]>();
 
-const NumLabeledField = LabeledField<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes, number>();
-const EdgeLabeledField = LabeledField<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes, EdgeInteraction.Edge>();
-const OrientLabeledField = LabeledField<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes, Orientation.Orientation>();
+const ChainLField = LabeledField.ComboBox<string>();
+const ResidueLField = LabeledField.ComboBox<number>();
+const EdgeLField = LabeledField.ComboBox<EdgeInteraction.Edge>();
+const OrientLField = LabeledField.ComboBox<Orientation.Orientation>();
 
-const VKeys: MIM.ValueKeys[] = [
-    'mol-in-bi-chain-one',
-    'mol-in-bi-res-no-one',
-    'mol-in-bi-edge-one',
-    'mol-in-bi-chain-two',
-    'mol-in-bi-res-no-two',
-    'mol-in-bi-edge-two',
-    'mol-in-bi-orientation',
-];
+interface State {
+    chainOne?: string;
+    residueOne?: number;
+    edgeOne?: EdgeInteraction.Edge;
+    chainTwo?: string;
+    residueTwo?: number;
+    edgeTwo?: EdgeInteraction.Edge;
+    orientation?: Orientation.Orientation;
+    errors: string[];
+}
 
-export class BaseInteractionsInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes, BaseInteractionsInput.Props> {
-    private addBaseInteraction(data: MIM.ContextData) {
-        const chainOne = FU.maybeGetScalar<string>(data, 'mol-in-bi-chain-one');
-        const residueOne = FU.maybeGetScalar<number>(data, 'mol-in-bi-res-no-one');
-        const edgeOne = FU.maybeGetScalar<EdgeInteraction.Edge>(data, 'mol-in-bi-edge-one');
-        const chainTwo = FU.maybeGetScalar<string>(data, 'mol-in-bi-chain-two');
-        const residueTwo = FU.maybeGetScalar<number>(data, 'mol-in-bi-res-no-two');
-        const edgeTwo = FU.maybeGetScalar<EdgeInteraction.Edge>(data, 'mol-in-bi-edge-two');
-        const orientation = FU.maybeGetScalar<Orientation.Orientation>(data, 'mol-in-bi-orientation');
+export class BaseInteractionsInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes, BaseInteractionsInput.Props, State> {
+    constructor(props: BaseInteractionsInput.Props) {
+        super(props);
 
-        if (chainOne === undefined || residueOne === undefined || edgeOne === undefined ||
-            chainTwo === undefined || residueTwo === undefined || edgeTwo === undefined ||
-            orientation === undefined)
-            throw new Error('Incomplete base interaction definition');
-
-        // Sanity checks
-        const errors: string[] = [];
         const compounds = FU.getArray<Compound[]>(this.props.ctxData, 'mol-in-cp-added');
-        if (MIM.getCompound(compounds, chainOne) === undefined || MIM.getCompound(compounds, chainTwo) === undefined)
-            return; // Ignore if either of the compounds does not exist
 
-        if (residueOne === residueTwo && chainOne === chainTwo)
-            errors.push('Residue cannot interact with itself');
-
-        if (errors.length > 0) {
-            FU.updateErrors(this.props.ctxData, { key: 'mol-in-bi-errors', errors });
-            return;
-        }
-
-        const value = FU.getArray<BaseInteraction[]>(data, 'mol-in-bi-added');
-        const bi = new BaseInteraction(chainOne, residueOne, edgeOne, chainTwo, residueTwo, edgeTwo, orientation);
-
-        if (value.find(e => e.equals(bi)) !== undefined) {
-            errors.push('Such base interaction already exists');
-            FU.updateErrors(this.props.ctxData, { key: 'mol-in-bi-errors', errors });
-            return;
-        }
-
-        value.push(bi);
-        FU.updateErrorsAndValues(data, [{ key: 'mol-in-bi-errors', errors }], [{ key: 'mol-in-bi-added', value }]);
+        this.state = {
+            chainOne: compounds.length > 0 ? compounds[0].chain : undefined,
+            chainTwo: compounds.length > 0 ? compounds[0].chain : undefined,
+            edgeOne: 'Watson-Crick',
+            edgeTwo: 'Watson-Crick',
+            orientation: 'Cis',
+            errors: new Array<string>(),
+        };
     }
 
-    private clearAll() {
-        this.props.ctxData.clearErrorsAndValues(['mol-in-bi-errors'], VKeys);
+    private addBaseInteraction() {
+        if (this.state.chainOne === undefined || this.state.residueOne === undefined || this.state.edgeOne === undefined ||
+            this.state.chainTwo === undefined || this.state.residueTwo === undefined || this.state.edgeTwo === undefined ||
+            this.state.orientation === undefined)
+            throw new Error('Incomplete base interaction definition');
+
+        const compounds = FU.getArray<Compound[]>(this.props.ctxData, 'mol-in-cp-added');
+        if (compounds.find(c => c.chain === this.state.chainOne) === undefined || compounds.find(c => c.chain === this.state.chainTwo) === undefined)
+            throw new Error('Invalid chains');
+
+        const errors = new Array<string>();
+        if (this.state.residueOne === this.state.residueTwo && this.state.chainOne === this.state.chainTwo) {
+            errors.push('Residue cannot interact with itself');
+            this.setState({ ...this.state, errors });
+            return;
+        }
+
+        const interactions = FU.getArray<BaseInteraction[]>(this.props.ctxData, 'mol-in-bi-added');
+        const bi = new BaseInteraction(
+            this.state.chainOne,
+            this.state.residueOne,
+            this.state.edgeOne,
+            this.state.chainTwo,
+            this.state.residueTwo,
+            this.state.edgeTwo,
+            this.state.orientation
+        );
+
+        if (interactions.find(e => e.equals(bi)) !== undefined)
+            errors.push('Such base interaction already exists');
+
+        if (errors.length > 0)
+            this.setState({ ...this.state, errors });
+        else {
+            interactions.push(bi);
+            this.setState({ ...this.state, errors: [] });
+            FU.updateValues(this.props.ctxData, [{ key: 'mol-in-bi-added', value: interactions }]);
+        }
     }
 
     componentDidUpdate() {
         const compounds = FU.getArray<Compound[]>(this.props.ctxData, 'mol-in-cp-added');
-        if (compounds.length === 0) {
-            this.clearAll();
+
+        if (compounds.length < 1 && this.state.chainOne === undefined && this.state.chainTwo === undefined)
+            return; // Do fuck all;
+
+        if (compounds.length < 1 ||
+            (compounds.find(c => c.chain === this.state.chainOne) === undefined ||
+             compounds.find(c => c.chain === this.state.chainTwo) === undefined) &&
+             (this.state.chainOne !== undefined || this.state.chainTwo !== undefined)
+           ) {
+            // Revert to empty statae
+            this.setState({
+                ...this.state,
+                chainOne: undefined,
+                residueOne: undefined,
+                chainTwo: undefined,
+                residueTwo: undefined,
+                errors: new Array<string>(),
+            });
             return;
         }
 
-        const nv = FU.emptyValues();
+        let update: Partial<State> =  {};
 
-        // First chain params
-        let chainOne = FU.maybeGetScalar<string>(this.props.ctxData, 'mol-in-bi-chain-one');
-        if (chainOne === undefined) {
-            chainOne = compounds[0].chain;
-            nv.set('mol-in-bi-chain-one', chainOne);
+        if (this.state.chainOne === undefined)
+            update = { ...update, chainOne: compounds[0].chain };
+        if (this.state.chainTwo === undefined)
+            update = { ...update, chainTwo: compounds[0].chain };
+
+        if (this.state.chainOne !== undefined && this.state.residueOne === undefined) {
+            const def = MIM.defaultFirstResNo(compounds, this.state.chainOne);
+            update = { ...update, residueOne: def };
         }
-        const resNoOne = FU.maybeGetScalar<number>(this.props.ctxData, 'mol-in-bi-res-no-one');
-        if (resNoOne === undefined)
-            nv.set('mol-in-bi-res-no-one', MIM.defaultFirstResNo(compounds, chainOne)!);
-        const edgeOne = FU.maybeGetScalar<EdgeInteraction.Edge>(this.props.ctxData, 'mol-in-bi-edge-one');
-        if (edgeOne === undefined)
-            nv.set('mol-in-bi-edge-one', EdgeOptions[0].value);
-
-        // Second chain params
-        let chainTwo = FU.maybeGetScalar<string>(this.props.ctxData, 'mol-in-bi-chain-two');
-        if (chainTwo === undefined) {
-            chainTwo = compounds[0].chain;
-            nv.set('mol-in-bi-chain-two', chainTwo);
+        if (this.state.chainTwo !== undefined && this.state.residueTwo === undefined) {
+            const def = MIM.defaultFirstResNo(compounds, this.state.chainTwo);
+            update = { ...update, residueTwo: def };
         }
-        const resNoTwo = FU.maybeGetScalar<number>(this.props.ctxData, 'mol-in-bi-res-no-two');
-        if (resNoTwo === undefined)
-            nv.set('mol-in-bi-res-no-two', MIM.defaultFirstResNo(compounds, chainTwo)!);
-        const edgeTwo = FU.maybeGetScalar<EdgeInteraction.Edge>(this.props.ctxData, 'mol-in-bi-edge-two');
-        if (edgeTwo === undefined)
-            nv.set('mol-in-bi-edge-two', EdgeOptions[0].value);
 
-        if (FU.maybeGetScalar<Orientation.Orientation>(this.props.ctxData, 'mol-in-bi-orientation') === undefined)
-            nv.set('mol-in-bi-orientation', OrientationOptions[0].value);
-
-        if (nv.size > 0)
-            this.props.ctxData.setValues(nv);
+        if (Manip.hasDefined(update))
+            this.setState({ ...this.state, ...update });
     }
 
     render() {
         const compounds = FU.getArray<Compound[]>(this.props.ctxData, 'mol-in-cp-added');
-        const chainOne = FU.getScalar(this.props.ctxData, 'mol-in-bi-chain-one', '');
-        const chainTwo = FU.getScalar(this.props.ctxData, 'mol-in-bi-chain-two', '');
 
         return (
             <div className='section'>
                 <div className='section-caption'>Base interactions</div>
                 <div className='mol-in-bi-input spaced-grid'>
-                    <NumLabeledField
-                        {...GLabeledField.tags('mol-in-bi-chain-one', this.props.formId, ['labeled-field'])}
-                        label="Chain"
+                    <ChainLField
+                        id='mol-in-bi-chain-one'
+                        label='Chain'
                         style='above'
-                        inputType='combo-box'
-                        options={MIM.chainOptions(this.props.ctxData)}
-                        ctxData={this.props.ctxData} />
-                    <NumLabeledField
-                        {...GLabeledField.tags('mol-in-bi-res-no-one', this.props.formId, ['labeled-field'])}
-                        label="Residue"
+                        value={this.state.chainOne}
+                        updateNotifier={v => {
+                            let update: Partial<State> = { chainOne: v };
+                            const c = compounds.find(c => c.chain === v);
+                            if (c === undefined)
+                                update = { ...update, residueOne: undefined }
+                            else {
+                                if (this.state.residueOne === undefined || !Num.within(c.firstResidueNo, c.lastResidueNo, this.state.residueOne))
+                                    update = { ...update, residueOne: c.firstResidueNo, };
+                            }
+
+                            this.setState({ ...this.state, ...update });
+                        }}
+                        options={MIM.chainOptions(this.props.ctxData)} />
+                    <ResidueLField
+                        id='mol-in-bi-res-no-one'
+                        label='Residue'
                         style='above'
-                        inputType='combo-box'
-                        converter={parseInt}
-                        options={MIM.residueOptions(compounds, chainOne)}
-                        ctxData={this.props.ctxData} />
-                    <EdgeLabeledField
-                        {...GLabeledField.tags('mol-in-bi-edge-one', this.props.formId, ['labeled-field'])}
-                        label="Edge"
+                        value={this.state.residueOne}
+                        updateNotifier={v => this.setState({ ...this.state, residueOne: v })}
+                        stringifier={Util.nToS}
+                        options={MIM.residueOptions(compounds, this.state.chainOne)} />
+                    <EdgeLField
+                        id='mol-in-bi-edge-one'
+                        label='Edge'
                         style='above'
-                        inputType='combo-box'
-                        options={EdgeOptions}
-                        ctxData={this.props.ctxData} />
-                    <NumLabeledField
-                        {...GLabeledField.tags('mol-in-bi-chain-two', this.props.formId, ['labeled-field'])}
-                        label="Chain"
+                        value={this.state.edgeOne}
+                        updateNotifier={v => this.setState({ ...this.state, edgeOne: v })}
+                        options={EdgeOptions} />
+                    <ChainLField
+                        id='mol-in-bi-chain-two'
+                        label='Chain'
                         style='above'
-                        inputType='combo-box'
-                        options={MIM.chainOptions(this.props.ctxData)}
-                        ctxData={this.props.ctxData} />
-                    <NumLabeledField
-                        {...GLabeledField.tags('mol-in-bi-res-no-two', this.props.formId, ['labeled-field'])}
-                        label="Residue"
+                        value={this.state.chainTwo}
+                        updateNotifier={v => {
+                            let update: Partial<State> = { chainTwo: v };
+                            const c = compounds.find(c => c.chain === v);
+                            if (c === undefined)
+                                update = { ...update, residueTwo: undefined }
+                            else {
+                                if (this.state.residueTwo === undefined || !Num.within(c.firstResidueNo, c.lastResidueNo, this.state.residueTwo))
+                                    update = { ...update, residueTwo: c.firstResidueNo, };
+                            }
+
+                            this.setState({ ...this.state, ...update });
+                        }}
+                        options={MIM.chainOptions(this.props.ctxData)} />
+                    <ResidueLField
+                        id='mol-in-bi-res-no-two'
+                        label='Residue'
                         style='above'
-                        inputType='combo-box'
-                        converter={parseInt}
-                        options={MIM.residueOptions(compounds, chainTwo)}
-                        ctxData={this.props.ctxData} />
-                    <EdgeLabeledField
-                        {...GLabeledField.tags('mol-in-bi-edge-two', this.props.formId, ['labeled-field'])}
-                        label="Edge"
+                        value={this.state.residueTwo}
+                        updateNotifier={v => this.setState({ ...this.state, residueTwo: v })}
+                        stringifier={Util.nToS}
+                        options={MIM.residueOptions(compounds, this.state.chainTwo)} />
+                    <EdgeLField
+                        id='mol-in-bi-edge-two'
+                        label='Edge'
                         style='above'
-                        inputType='combo-box'
-                        options={EdgeOptions}
-                        ctxData={this.props.ctxData} />
-                    <OrientLabeledField
-                        {...GLabeledField.tags('mol-in-bi-orientation', this.props.formId, ['labeled-field'])}
-                        label="Orientation"
+                        value={this.state.edgeTwo}
+                        updateNotifier={v => this.setState({ ...this.state, edgeTwo: v })}
+                        options={EdgeOptions} />
+                    <OrientLField
+                        id='mol-in-bi-orientation'
+                        label='Orientation'
                         style='above'
-                        inputType='combo-box'
-                        options={OrientationOptions}
-                        ctxData={this.props.ctxData} />
+                        value={this.state.orientation}
+                        updateNotifier={v => this.setState({ ...this.state, orientation: v })}
+                        options={OrientationOptions} />
                     <PushButton
                         className="pushbutton-common pushbutton-add"
                         value="+"
                         onClick={(e) => {
                             e.preventDefault();
-                            this.addBaseInteraction(this.props.ctxData);
+                            this.addBaseInteraction();
                         }} />
                 </div>
                 <ErrorBox
-                    errors={this.props.ctxData.errors.get('mol-in-bi-errors') ?? new Array<string>()} />
+                    errors={this.state.errors} />
                 <AddedTable
                     formId={this.props.formId}
                     className='mol-in-bi-added spaced-grid'

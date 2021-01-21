@@ -69,4 +69,8 @@ export namespace Num {
 
         return parseInt(s);
     }
+
+    export function within(min: number, max: number, v: number) {
+        return min <= v && v <= max;
+    }
 }

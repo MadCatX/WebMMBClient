@@ -27,19 +27,17 @@
     margin-bottom: 2em;
 }
 
-input {
-    -moz-appearance: none;
-    -webkit-appearance: none;
-    appearance: none;
-
-    background: none;
-    border: 0.1em solid black;
-    height: 1.5em;
-    min-width: 1em;
-    padding: 0.2em;
+.adv-param-field-grid {
+    display: grid;
+    grid-template-columns: 12em 30em auto;
+    margin-top: 0.6em;
 }
 
-input.checkbox {
+.bold {
+    font-weight: bold;
+}
+
+.check-box {
     -moz-appearance: none;
     -webkit-appearance: none;
     appearance: none;
@@ -52,37 +50,20 @@ input.checkbox {
     height: 1em;
 }
 
-input.checkbox:checked {
+.check-box:checked {
     background-color: black;
 }
 
-select {
+.combo-box {
     -moz-appearance: none;
     -webkit-appearance: none;
     appearance: none;
 
     background: none;
+    background: url(imgs/down_arrow.svg) no-repeat right transparent;
     border: 0.1em solid black;
-    height: 2.0em;
-    padding: 0.2em;
-}
-
-textarea {
-    -moz-appearance: none;
-    -webkit-appearance: none;
-    appearance: none;
-
-    border: 0.1em solid black;
-}
-
-.adv-param-field-grid {
-    display: grid;
-    grid-template-columns: 12em 30em auto;
-    margin-top: 0.6em;
-}
-
-.bold {
-    font-weight: bold;
+    border-radius: 0;
+    padding: 0.2em 0.8em 0.2em 0.2em;
 }
 
 .centered-text {
@@ -140,7 +121,7 @@ textarea {
     transition: opacity 0.1s;
 }
 
-input.fit-width-lineedit {
+.fit-width-input {
     margin: 0.2em;
     width: calc(100% - 0.8em);
 }
@@ -229,6 +210,18 @@ input.fit-width-lineedit {
 
 .labeled-field-concise {
     margin-bottom: 0.4em;
+}
+
+.line-edit {
+    -moz-appearance: none;
+    -webkit-appearance: none;
+    appearance: none;
+
+    background: none;
+    border: 0.1em solid black;
+    border-radius: 0;
+    min-width: 1em;
+    padding: 0.2em;
 }
 
 .linkbutton-text {
@@ -489,6 +482,15 @@ input.fit-width-lineedit {
 
 .tabs-bar {
     display: flex;
+}
+
+.text-area {
+    -moz-appearance: none;
+    -webkit-appearance: none;
+    appearance: none;
+
+    border: 0.1em solid black;
+    border-radius: 0;
 }
 
 .tooltip-container {

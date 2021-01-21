@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020 WebMMB contributors, licensed under MIT, See LICENSE file for details.
+ * Copyright (c) 2020-2021 WebMMB 2020-2021 contributors, licensed under MIT, See LICENSE file for details.
  *
  * @author Michal Malý (michal.maly@ibt.cas.cz)
  * @author Samuel C. Flores (samuelfloresc@gmail.com)
@@ -10,7 +10,7 @@ function HasOwnProperty<X extends {}, Y extends PropertyKey>(obj: X, prop: Y): o
     return obj.hasOwnProperty(prop);
 }
 
-export namespace UiUtil {
+export namespace Util {
     export function toString(value: any) {
         if (value === undefined)
             return '';
@@ -21,5 +21,11 @@ export namespace UiUtil {
         if (typeof value === 'object' && HasOwnProperty(value, 'toString') && typeof value.toString === 'function')
             return value.toString();
         return '';
+    }
+
+    export function nToS(v?: number) {
+        if (v === undefined)
+            return '';
+        return v.toString();
     }
 }

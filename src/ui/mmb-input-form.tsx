@@ -30,12 +30,16 @@ import { MmbCommands } from './mmb-commands';
 import { Num } from '../util/num';
 
 export class MmbInputForm extends Form<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes, MmbInputForm.Props> {
+    private Ctx: React.Context<MIM.ContextData>;
+
     constructor(props: MmbInputForm.Props) {
         super(props);
 
         this.state = {
             ...this.initialBaseState(),
         };
+
+        this.Ctx = FCM.makeContext();
     }
 
     commandsToJob() {
@@ -150,10 +154,8 @@ export class MmbInputForm extends Form<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTy
             setErrorsAndValues: this.setErrorsAndValues,
         };
 
-        const Ctx = FCM.makeContext<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes>();
-
         return (
-            <Ctx.Provider value={ctxData}>
+            <this.Ctx.Provider value={ctxData}>
                 <form>
                     <JobNameInput formId={this.props.id} ctxData={ctxData} name={this.props.jobName} />
                     <CompoundsInput formId={this.props.id} ctxData={ctxData} />
@@ -164,7 +166,7 @@ export class MmbInputForm extends Form<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTy
                     <AdvancedMmbOptions formId={this.props.id} ctxData={ctxData} />
                     {this.makeMmbCommands()}
                 </form>
-            </Ctx.Provider>
+            </this.Ctx.Provider>
         );
     }
 }

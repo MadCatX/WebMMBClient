@@ -8,127 +8,144 @@
 
 import * as React from 'react';
 import { ErrorBox } from './common/error-box';
-import { LabeledField, GLabeledField } from './common/labeled-field';
+import { ComboBox } from './common/controlled/combo-box';
+import { LabeledField } from './common/controlled/labeled-field';
 import { PushButton } from './common/push-button';
+import { Util } from './common/util';
 import { Compound } from '../model/compound';
 import { MmbInputModel as MIM } from '../model/mmb-input-model';
 import { NtC } from '../model/ntc';
 import { NtCConformation } from '../model/ntc-conformation';
 import { FormUtil } from '../model/common/form';
-import { GComboBox } from './common/combo-box';
 import { FormBlock } from './common/form-block';
+import { Manip } from '../util/manip';
 
 const FU = new FormUtil<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes>();
 const AddedTable = MIM.TWDR<NtCConformation[]>();
-const StrLabeledField = LabeledField<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes, string>();
-const NumLabeledField = LabeledField<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes, number>();
-const NtCLabeledField = LabeledField<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes, NtC.Conformer>();
+const ChainLField = LabeledField.ComboBox<string>();
+const ResidueLField = LabeledField.ComboBox<number>();
+const NtCLField = LabeledField.ComboBox<NtC.Conformer>();
 
-const VKeys: MIM.ValueKeys[] = [
-    'mol-in-ntcs-chain',
-    'mol-in-ntcs-first-res-no',
-    'mol-in-ntcs-last-res-no',
-    'mol-in-ntcs-ntc'
-];
+interface State {
+    chain?: string;
+    firstResNo?: number;
+    lastResNo?: number;
+    cfrm?: NtC.Conformer;
+    errors: string[];
+}
 
-export class NtCsInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes, NtCsInput.Props> {
-    private addNtC(data: MIM.ContextData) {
-        const chain = FU.maybeGetScalar<string>(data, 'mol-in-ntcs-chain');
-        const firstResNo = FU.maybeGetScalar<number>(data, 'mol-in-ntcs-first-res-no');
-        const lastResNo = FU.maybeGetScalar<number>(data, 'mol-in-ntcs-last-res-no');
-        const cfrm = FU.maybeGetScalar<NtC.Conformer>(data, 'mol-in-ntcs-ntc');
+export class NtCsInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes, NtCsInput.Props, State> {
+    constructor(props: NtCsInput.Props) {
+        super(props);
 
-        if (chain === undefined || firstResNo === undefined || lastResNo === undefined || cfrm === undefined)
-            return;
+        const viable = FU.getArray<Compound[]>(this.props.ctxData, 'mol-in-cp-added').filter(c => c.residueCount > 1);
 
-        const compounds = FU.getArray<Compound[]>(this.props.ctxData, 'mol-in-cp-added');
-        if (MIM.getCompound(compounds, chain) === undefined)
-            return; // Ignore if either of the compounds does not exist
-
-        const ntc = new NtCConformation(chain, firstResNo, lastResNo, cfrm);
-        const ntcs = FU.getArray<NtCConformation[]>(data, 'mol-in-ntcs-added');
-
-        if (isNaN(firstResNo) || isNaN(lastResNo)) {
-            FU.updateErrors(this.props.ctxData, { key: 'mol-in-ntcs-errors', errors: [ 'Invalid residue numbers' ] });
-            return;
-        }
-        if (lastResNo <= firstResNo) {
-            FU.updateErrors(this.props.ctxData, { key: 'mol-in-ntcs-errors', errors: [ 'Invalid last residue number' ] });
-            return;
-        }
-        if (ntcs.find((e) => e.equals(ntc)) !== undefined) {
-            FU.updateErrors(this.props.ctxData, { key: 'mol-in-ntcs-errors', errors: [ 'Such NtC configuration already exists' ] });
-            return;
-        }
-
-        ntcs.push(new NtCConformation(chain, firstResNo, lastResNo, cfrm));
-        FU.updateErrorsAndValues(data, [{ key: 'mol-in-ntcs-errors', errors: [] }], [{ key: 'mol-in-ntcs-added', value: ntcs }]);
+        this.state = {
+            chain: viable.length > 0 ? viable[0].chain : undefined,
+            firstResNo: viable.length > 0 ? viable[0].firstResidueNo : undefined,
+            lastResNo: viable.length > 0 ? viable[0].firstResidueNo + 1 : undefined,
+            errors: new Array<string>(),
+        };
     }
 
-    private clearAll() {
-        this.props.ctxData.clearErrorsAndValues(['mol-in-ntcs-errors'], VKeys);
+    private addNtC() {
+        const errors = new Array<string>();
+        if (this.state.chain === undefined || this.state.firstResNo === undefined || this.state.lastResNo === undefined || this.state.cfrm === undefined) {
+            errors.push('Incomplete NtC definition');
+            this.setState({ ...this.state, errors });
+            return;
+        }
+
+        const compounds = FU.getArray<Compound[]>(this.props.ctxData, 'mol-in-cp-added');
+        if (MIM.getCompound(compounds, this.state.chain) === undefined)
+            throw new Error('Invalid chain');
+
+        const ntc = new NtCConformation(this.state.chain, this.state.firstResNo, this.state.lastResNo, this.state.cfrm);
+        const ntcs = FU.getArray<NtCConformation[]>(this.props.ctxData, 'mol-in-ntcs-added');
+
+        if (this.state.lastResNo <= this.state.firstResNo)
+            throw new Error('Invalid residue numbers');
+
+        if (ntcs.find((e) => e.equals(ntc)) !== undefined) {
+            errors.push('Such NtC configuration already exists');
+            this.setState({ ...this.state, errors });
+        } else {
+            ntcs.push(new NtCConformation(this.state.chain, this.state.firstResNo, this.state.lastResNo, this.state.cfrm));
+            this.setState({ ...this.state, errors: [] });
+            FU.updateValues(this.props.ctxData, [{ key: 'mol-in-ntcs-added', value: ntcs }]);
+        }
     }
 
     componentDidUpdate() {
         const compounds = FU.getArray<Compound[]>(this.props.ctxData, 'mol-in-cp-added');
-        if (compounds.length === 0) {
-            this.clearAll();
+        if (compounds.some(c => c.residueCount > 1) === false && this.state.chain !== undefined) {
+            this.setState({
+                ...this.state,
+                chain: undefined,
+                firstResNo: undefined,
+                lastResNo: undefined,
+                cfrm: undefined,
+                errors: new Array<string>(),
+            });
             return;
         }
 
-        const nv = FU.emptyValues();
-
-        let chain = FU.maybeGetScalar<string>(this.props.ctxData, 'mol-in-ntcs-chain');
-        if (chain === undefined) {
-            chain = compounds[0].chain;
-            nv.set('mol-in-ntcs-chain', chain);
-        }
-        const c = MIM.getCompound(compounds, chain);
-        if (c === undefined || c.residueCount < 2) {
-            const firstResNo = FU.maybeGetScalar<number>(this.props.ctxData, 'mol-in-ntcs-first-res-no') ?? NaN;
-            const lastResNo = FU.maybeGetScalar<number>(this.props.ctxData, 'mol-in-ntcs-last-res-no') ?? NaN;
-            if (isNaN(firstResNo) && isNaN(lastResNo))
+        if (this.state.chain !== undefined) {
+            const c = compounds.find(c => c.chain === this.state.chain);
+            if (c === undefined) {
+                this.setState({
+                    ...this.state,
+                    chain: undefined,
+                    firstResNo: undefined,
+                    lastResNo: undefined,
+                    cfrm: undefined,
+                    errors: new Array<string>(),
+                });
                 return;
-            nv.set('mol-in-ntcs-first-res-no', NaN);
-            nv.set('mol-in-ntcs-last-res-no', NaN);
-            this.props.ctxData.setValues(nv);
-            return;
-        }
+            }
 
-        const firstResNo = FU.maybeGetScalar<number>(this.props.ctxData, 'mol-in-ntcs-first-res-no') ?? NaN;
-        const lastResNo = FU.maybeGetScalar<number>(this.props.ctxData, 'mol-in-ntcs-last-res-no') ?? NaN;
-        if (!isNaN(firstResNo) && firstResNo >= c.firstResidueNo && firstResNo <= c.lastResidueNo) {
-            if (isNaN(lastResNo) || lastResNo <= firstResNo || lastResNo > c.lastResidueNo)
-                nv.set('mol-in-ntcs-last-res-no', firstResNo + 1);
+            let update: Partial<State> = {};
+            if (this.state.firstResNo === undefined || this.state.firstResNo >= c.lastResidueNo)
+                update = { ...update, firstResNo: c.firstResidueNo };
+            if (this.state.lastResNo === undefined || this.state.lastResNo > c.lastResidueNo)
+                update = { ...update, lastResNo: c.firstResidueNo + 1 };
+
+            if (Manip.hasDefined(update))
+                this.setState({ ...this.state, ...update });
         } else {
-            const def = MIM.defaultFirstResNo(compounds, chain)!;
-            nv.set('mol-in-ntcs-first-res-no', def);
-            nv.set('mol-in-ntcs-last-res-no', def + 1);
+            for (let idx = 0; idx < compounds.length; idx++) {
+                const c = compounds[idx];
+                if (c.residueCount < 2)
+                    continue;
+
+                let update: Partial<State> = {
+                    chain: c.chain,
+                    firstResNo: c.firstResidueNo,
+                    lastResNo: c.firstResidueNo + 1,
+                    cfrm: 'AA00',
+                };
+                this.setState({ ...this.state, ...update });
+                return;
+            }
         }
-
-        if (FU.maybeGetScalar<NtC.Conformer>(this.props.ctxData, 'mol-in-ntcs-ntc') === undefined)
-            nv.set('mol-in-ntcs-ntc', MIM.AllNtCsOptions[0].value);
-
-        if (nv.size > 0)
-            this.props.ctxData.setValues(nv);
     }
 
     render() {
         const compounds = FU.getArray<Compound[]>(this.props.ctxData, 'mol-in-cp-added');
-        const chain = FU.maybeGetScalar<string>(this.props.ctxData, 'mol-in-ntcs-chain');
+        const chains = MIM.chainOptions(this.props.ctxData).filter(o => compounds.find(c => c.chain === o.value)!.residueCount > 1);
 
-        let firstResOpts: GComboBox.Option[] = [];
-        let lastResOpts: GComboBox.Option[] = [];
-        if (chain !== undefined) {
-            const c = MIM.getCompound(compounds, chain);
+        let firstResOpts = new Array<ComboBox.Option<number>>();
+        let lastResOpts = new Array<ComboBox.Option<number>>();
+        if (this.state.chain !== undefined) {
+            const c = MIM.getCompound(compounds, this.state.chain);
+            if (c !== undefined) {
 
-            if (c !== undefined && c.residueCount > 1) {
-                firstResOpts = MIM.residueOptions(compounds, chain, c.firstResidueNo, c.lastResidueNo - 1);
-                const firstResNo = FU.maybeGetScalar<number>(this.props.ctxData, 'mol-in-ntcs-first-res-no') ?? NaN;
+                firstResOpts = MIM.residueOptions(compounds, this.state.chain, c.firstResidueNo, c.lastResidueNo - 1);
+                const firstResNo = this.state.firstResNo ?? NaN;
                 if (!isNaN(firstResNo) && firstResNo >= c.firstResidueNo && firstResNo <= c.lastResidueNo)
-                    lastResOpts = MIM.residueOptions(compounds, chain, firstResNo + 1);
+                    lastResOpts = MIM.residueOptions(compounds, this.state.chain, firstResNo + 1);
                 else
-                    lastResOpts = MIM.residueOptions(compounds, chain, c.firstResidueNo + 1);
+                    lastResOpts = MIM.residueOptions(compounds, this.state.chain, c.firstResidueNo + 1);
             }
         }
 
@@ -136,46 +153,56 @@ export class NtCsInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM.Value
             <div className='section'>
                 <div className='section-caption'>NtCs</div>
                 <div className='mol-in-ntcs-input spaced-grid'>
-                    <StrLabeledField
-                        {...GLabeledField.tags('mol-in-ntcs-chain', this.props.formId, ['labeled-field'])}
+                    <ChainLField
+                        id='mol-in-ntcs-chain'
                         label='Chain'
                         style='above'
-                        inputType='combo-box'
-                        options={MIM.chainOptions(this.props.ctxData)}
-                        ctxData={this.props.ctxData} />
-                    <NumLabeledField
-                        {...GLabeledField.tags('mol-in-ntcs-first-res-no', this.props.formId, ['labeled-field'])}
+                        value={this.state.chain}
+                        updateNotifier={v => this.setState({ ...this.state, chain: v })}
+                        options={chains} />
+                    <ResidueLField
+                        id='mol-in-ntcs-first-res-no'
                         label='First residue'
                         style='above'
-                        inputType='combo-box'
-                        converter={parseInt}
-                        options={firstResOpts}
-                        ctxData={this.props.ctxData} />
-                    <NumLabeledField
-                        {...GLabeledField.tags('mol-in-ntcs-last-res-no', this.props.formId, ['labeled-field'])}
-                        label="Last residue"
+                        value={this.state.firstResNo}
+                        updateNotifier={v => {
+                            const c = compounds.find(c => c.chain === this.state.chain);
+                            if (c === undefined)
+                                throw new Error(`Compound with chain ${this.state.chain} does not exist`);
+
+                            let update: Partial<State> = { firstResNo: v };
+                            if (this.state.lastResNo === undefined || this.state.lastResNo <= v)
+                                update = { ...update, lastResNo: v + 1 };
+
+                            this.setState({ ...this.state, ...update })}
+                        }
+                        stringifier={Util.nToS}
+                        options={firstResOpts} />
+                    <ResidueLField
+                        id='mol-in-ntcs-last-res-no'
+                        label='Last residue'
                         style='above'
-                        inputType='combo-box'
-                        converter={parseInt}
-                        options={lastResOpts}
-                        ctxData={this.props.ctxData} />
-                    <NtCLabeledField
-                        {...GLabeledField.tags('mol-in-ntcs-ntc', this.props.formId, ['labeled-field'])}
+                        value={this.state.lastResNo}
+                        updateNotifier={v => this.setState({ ...this.state, lastResNo: v })}
+                        stringifier={Util.nToS}
+                        options={lastResOpts} />
+                    <NtCLField
+                        id='mol-in-ntcs-ntc'
                         label='NtC'
                         style='above'
-                        inputType='combo-box'
-                        options={MIM.AllNtCsOptions}
-                        ctxData={this.props.ctxData} />
+                        value={this.state.cfrm}
+                        updateNotifier={v => this.setState({ ...this.state, cfrm: v })}
+                        options={MIM.AllNtCsOptions} />
                     <PushButton
                         className="pushbutton-common pushbutton-add"
                         value="+"
                         onClick={(e) => {
                             e.preventDefault();
-                            this.addNtC(this.props.ctxData);
+                            this.addNtC();
                         }} />
                 </div>
                 <ErrorBox
-                    errors={this.props.ctxData.errors.get('mol-in-ntcs-errors') ?? new Array<string>()} />
+                    errors={this.state.errors} />
                 <AddedTable
                     formId={this.props.formId}
                     className='mol-in-ntcs-added spaced-grid'

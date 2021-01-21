@@ -8,12 +8,12 @@
 
 import * as React from 'react';
 import { FormField } from './form-field';
-import { UiUtil } from './util';
+import { Util } from './util';
 
 export class GLineEdit<KE, KV extends string, T> extends FormField<KE, KV, T, GLineEdit.Props<KE, KV, T>> {
     private getValue() {
         const value = this.props.ctxData.values.get(this.props.keyId)!;
-        return UiUtil.toString(value);
+        return Util.toString(value);
     }
 
     private setValue(v: string) {
