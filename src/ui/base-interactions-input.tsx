@@ -10,7 +10,6 @@ import * as React from 'react';
 import { ErrorBox } from './common/error-box';
 import { PushButton } from './common/push-button';
 import { LabeledField } from './common/controlled/labeled-field';
-import { GComboBox } from './common/form/combo-box';
 import { FormBlock } from './common/form/form-block';
 import { Util } from './common/util';
 import { BaseInteraction } from '../model/base-interaction';
@@ -18,17 +17,16 @@ import { Compound } from '../model/compound';
 import { EdgeInteraction } from '../model/edge-interaction';
 import { MmbInputModel as MIM } from '../model/mmb-input-model';
 import { Orientation } from '../model/orientation';
+import { ComboBox as ComboBoxModel } from '../model/common/combo-box';
 import { FormUtil } from '../model/common/form';
 import { Manip } from '../util/manip';
 import { Num } from '../util/num';
 
-const EdgeOptions = EdgeInteraction.Edges.map((e) => {
-    const o: GComboBox.Option = {value: e, caption: EdgeInteraction.toString(e)};
-    return o;
+const EdgeOptions = EdgeInteraction.Edges.map(e => {
+    return { value: e, caption: EdgeInteraction.toString(e) } as ComboBoxModel.Option<EdgeInteraction.Edge>;
 });
-const OrientationOptions = Orientation.Orientations.map((v) => {
-    const o: GComboBox.Option = {value: v, caption: v};
-    return o;
+const OrientationOptions = Orientation.Orientations.map(v => {
+    return { value: v, caption: v } as ComboBoxModel.Option<Orientation.Orientation>;
 });
 
 const FU = new FormUtil<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes>();

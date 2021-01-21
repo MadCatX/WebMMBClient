@@ -9,67 +9,68 @@
 import * as React from 'react';
 import { FormModel } from '../../../model/common/form';
 import { FormField } from './form-field';
+import { ComboBox as Model } from '../../../model/common/combo-box';
 import { Util } from '../util';
 
-export class GComboBox<KE, KV extends string, T, U extends FormModel.V<T>> extends FormField<KE, KV, T, GComboBox.Props<KE, KV, T, U>> {
+function defStrfr<T>(v?: T) {
+    if (v === undefined)
+        return '';
+    return v as unknown as string;
+}
+
+export class FComboBox<KE, KV extends string, T, U extends FormModel.V<T>> extends FormField<KE, KV, T, ComboBox.Props<KE, KV, T, U>> {
     private getValue() {
         const value = this.props.ctxData.values.get(this.props.keyId);
         return Util.toString(value);
     }
 
-    private updateValue(value: string) {
-        const cv = this.props.converter === undefined ? value : this.props.converter(value);
-        this.FU.updateValue(this.props.ctxData, { key: this.props.keyId, value: cv});
+    private updateValue(value: U) {
+        this.FU.updateValue(this.props.ctxData, { key: this.props.keyId, value });
     }
 
     render() {
-        const value = this.props.forcedValue ?? this.getValue();
-
         return (
             <select
                 id={this.props.id}
                 name={this.props.id}
-                value={value}
+                value={this.getValue()}
                 onChange={
                     (e: React.ChangeEvent<HTMLSelectElement>) => {
-                        this.updateValue(e.currentTarget.value);
-                    }
-                }
-                onBlur={
-                    (e: React.FocusEvent<HTMLSelectElement>) => {
-                        this.updateValue(e.currentTarget.value);
+                        const v = e.currentTarget.value;
+                        const actualValue = this.props.options.find(o => {
+                            const s = this.props.stringifier ? this.props.stringifier(o.value) : defStrfr(o.value);
+                            return v === s;
+                        });
+
+                        if (actualValue !== undefined)
+                            this.updateValue(actualValue.value);
                     }
                 }
                 className={this.props.className}
             >
-                {this.props.options.map((opt) =>
-                    (
+                {this.props.options.map(o => {
+                    const v = this.props.stringifier ? this.props.stringifier(o.value) : defStrfr(o.value);
+                    return (
                         <option
-                            key={opt.value}
-                            value={opt.value}
-                        >{opt.caption}</option>
-                    ))
-                }
+                            key={v}
+                            value={v}
+                        >{o.caption}</option>
+                    );
+                })}
             </select>
         );
     }
 }
 
-export namespace GComboBox {
-    export type Option = {
-        caption: string,
-        value: string,
-    }
-
+export namespace ComboBox {
     export interface Props<KE, KV, T, U extends FormModel.V<T>> extends FormField.Props<KE, KV, T> {
-        options: Option[];
-        converter?: (s: string) => U;
+        options: Model.Option<U>[];
+        stringifier?: Model.Stringifier<U>;
         className?: string;
-        selected?: string;
-        forcedValue?: string;
+    }
+
+    export function Spec<KE, KV extends string, T, U extends FormModel.V<T>>() {
+        return FComboBox as new(props: ComboBox.Props<KE, KV, T, U>) => FComboBox<KE, KV, T, U>;
     }
 }
 
-export function ComboBox<KE, KV extends string, T, U extends FormModel.V<T>>() {
-    return GComboBox as new(props: GComboBox.Props<KE, KV, T, U>) => GComboBox<KE, KV, T, U>;
-}

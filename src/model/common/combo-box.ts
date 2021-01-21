@@ -11,4 +11,8 @@ export namespace ComboBox {
         value: T;
         caption: string;
     }
+
+    export interface Stringifier<T> {
+        (v?: T): string;
+    }
 }

@@ -73,7 +73,8 @@ abstract class NumInputParameterField<K extends (string extends K ? never : stri
                         this.setState({...this.state, value });
                         this.props.updater(this.props.parameter.name, num);
                     }
-                }} />
+                }}
+                className='line-edit' />
         );
     }
 }
@@ -94,7 +95,8 @@ export class GTextualParameterField<K extends (string extends K ? never : string
             <input
                 type='text'
                 value={this.props.value}
-                onChange={e => this.props.updater(this.props.parameter.name, e.currentTarget.value) } />
+                onChange={e => this.props.updater(this.props.parameter.name, e.currentTarget.value) }
+                className='line-edit' />
         );
     }
 }
@@ -107,10 +109,10 @@ export class GBooleanParameterField<K extends (string extends K ? never : string
     renderInner() {
         return (
             <input
-                className='checkbox'
                 type='checkbox'
                 checked={this.props.value}
-                onChange={e => { this.props.updater(this.props.parameter.name, e.currentTarget.checked) }} />
+                onChange={e => { this.props.updater(this.props.parameter.name, e.currentTarget.checked) }}
+                className='check-box' />
         );
     }
 }
@@ -132,6 +134,7 @@ export class GOptionsParameterField<K extends (string extends K ? never : string
                 onChange={e => this.props.updater(this.props.parameter.name, e.currentTarget.value)}
                 onBlur={e => this.props.updater(this.props.parameter.name, e.currentTarget.value)}
                 value={this.props.value}
+                className='combo-box'
             >
                 {this.props.parameter.options()!.map(o => {
                     return (

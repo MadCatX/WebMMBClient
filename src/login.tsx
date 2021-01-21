@@ -11,14 +11,14 @@ import * as ReactDOM from 'react-dom';
 import { AuthQuery } from './mmb/auth-query';
 import { LoginModel as LM } from './model/login-model';
 import { Form } from './ui/common/form/form';
-import { LabeledField, GLabeledField } from './ui/common/form/labeled-field';
+import { LabeledField } from './ui/common/form/labeled-field';
 import { ErrorBox } from './ui/common/error-box';
 import { FormContextManager as FCM } from './ui/common/form-context-manager';
 import { PushButton } from './ui/common/push-button';
 import { Net } from './util/net';
 import { versionInfo } from './version';
 
-const StrLabeledField = LabeledField<LM.ErrorKeys, LM.ValueKeys, LM.ValueTypes, string>();
+const StrLField = LabeledField.LineEdit<LM.ErrorKeys, LM.ValueKeys, LM.ValueTypes>();
 
 export class Login extends Form<LM.ErrorKeys, LM.ValueKeys, LM.ValueTypes, LM.Props> {
     private aborter: AbortController | null = null;
@@ -91,13 +91,12 @@ export class Login extends Form<LM.ErrorKeys, LM.ValueKeys, LM.ValueTypes, LM.Pr
                             <div className='version-info-text'>{`Version: ${verinfo.date} (${verinfo.rev})`}</div>
                         </div>
                         <div className='login-form-input'>
-                            <StrLabeledField
-                                {...GLabeledField.tags('login-session-id', this.props.id, ['centered-horizontal', 'login-form-input'])}
+                            <StrLField
+                                id='login-session-id'
+                                keyId='login-session-id'
                                 label='Session ID'
                                 style='left'
-                                inputType='line-edit'
                                 hint='Enter session ID to restore session'
-                                options={[]}
                                 ctxData={ctxData} />
                         </div>
                         <ErrorBox

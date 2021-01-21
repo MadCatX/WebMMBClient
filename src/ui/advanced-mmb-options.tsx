@@ -214,6 +214,7 @@ export class AdvancedMmbOptions extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, 
                             name: e.currentTarget.value as ParameterNames,
                             description: Parameters.get(e.currentTarget.value as ParameterNames)!.description
                         })}
+                        className='combo-box'
                     >
                         {Array.from(Parameters.values()).sort().map(o => (<option key={o.name} value={o.name}>{o.name}</option>))}
                     </select>

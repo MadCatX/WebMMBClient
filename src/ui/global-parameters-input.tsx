@@ -8,11 +8,12 @@
 
 import * as React from 'react';
 import { FormBlock } from './common/form/form-block';
-import { LabeledCheckBox, LabeledField, GLabeledField } from './common/form/labeled-field';
+import { LabeledField } from './common/form/labeled-field';
 import { MmbInputModel as MIM } from '../model/mmb-input-model';
 
-const NumLabeledField = LabeledField<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes, number>();
-const CheckBox = LabeledCheckBox<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes>();
+const NumLField = LabeledField.LineEdit<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes>();
+const StagesLField = LabeledField.ComboBox<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes, number>();
+const CHLField = LabeledField.CheckBox<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes>();
 
 export class GlobalParametersInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes, GlobalParametersInput.Props> {
     render() {
@@ -20,54 +21,55 @@ export class GlobalParametersInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKey
             <div className='section'>
                 <div className='section-caption'>Global parameters</div>
                 <div className='mol-in-gp-input'>
-                    <NumLabeledField
-                        {...GLabeledField.tags('mol-in-gp-bisf', this.props.formId, ['labeled-field-concise'])}
+                    <NumLField
+                        id='mol-in-gp-bisf'
+                        keyId='mol-in-gp-bisf'
                         label='Interaction scale factor'
                         tooltip='baseInteractionScaleFactor'
                         style='above'
-                        inputType='line-edit'
-                        options={[]}
-                        ctxData={this.props.ctxData} />
-                    <NumLabeledField
-                        {...GLabeledField.tags('mol-in-gp-reporting-interval', this.props.formId, ['labeled-field-concise'])}
+                        ctxData={this.props.ctxData}
+                        className='line-edit labeled-field-concise' />
+                    <NumLField
+                        id='mol-in-gp-reporting-interval'
+                        keyId='mol-in-gp-reporting-interval'
                         label='Reporting interval'
                         tooltip='reportingInterval'
                         style='above'
-                        inputType='line-edit'
-                        options={[]}
-                        ctxData={this.props.ctxData} />
-                    <NumLabeledField
-                        {...GLabeledField.tags('mol-in-gp-num-reports', this.props.formId, ['labeled-field-concise'])}
+                        ctxData={this.props.ctxData}
+                        className='line-edit labeled-field-concise' />
+                    <NumLField
+                        id='mol-in-gp-num-reports'
+                        keyId='mol-in-gp-num-reports'
                         label='Number of reports'
                         tooltip='numReportingIntervals'
                         style='above'
-                        inputType='line-edit'
-                        options={[]}
-                        ctxData={this.props.ctxData} />
-                    <NumLabeledField
-                        {...GLabeledField.tags('mol-in-gp-temperature', this.props.formId, ['labeled-field-concise'])}
+                        ctxData={this.props.ctxData}
+                        className='line-edit labeled-field-concise' />
+                    <NumLField
+                        id='mol-in-gp-temperature'
+                        keyId='mol-in-gp-temperature'
                         label='Temperature'
                         tooltip='temperature'
                         style='above'
-                        inputType='line-edit'
-                        options={[]}
-                        ctxData={this.props.ctxData} />
-                    <NumLabeledField
-                        {...GLabeledField.tags('mol-in-gp-stage', this.props.formId, ['labeled-field-concise'])}
+                        ctxData={this.props.ctxData}
+                        className='line-edit labeled-field-concise' />
+                    <StagesLField
+                        id='mol-in-gp-stage'
+                        keyId='mol-in-gp-stage'
                         label='Stage'
                         tooltip='firstStage, lastStage'
                         style='above'
-                        inputType='combo-box'
-                        options={this.props.availableStages.map(n => { return{ caption: n.toString(), value: n.toString() }})}
-                        ctxData={this.props.ctxData} />
-                    <CheckBox
-                        {...GLabeledField.tags('mol-in-gp-def-md-params', this.props.formId, ['labeled-field-concise'])}
+                        options={this.props.availableStages.map(n => { return { caption: n.toString(), value: n }})}
+                        ctxData={this.props.ctxData}
+                        className='combo-box labeled-field-concise' />
+                    <CHLField
+                        id='mol-in-gp-def-md-params'
+                        keyId='mol-in-gp-def-md-params'
                         label='Turn on electrostatic and Lennard-Jones forces'
                         tooltip='setDefaultMDParameters'
                         style='left'
-                        inputType='check-box'
-                        options={[]}
-                        ctxData={this.props.ctxData} />
+                        ctxData={this.props.ctxData}
+                        className='check-box labeled-field-concise' />
                 </div>
             </div>
         );

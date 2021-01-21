@@ -9,62 +9,31 @@
 import * as React from 'react';
 import { FormModel } from '../../../model/common/form';
 import { FormField } from './form-field';
-import { CheckBox, GCheckBox } from './check-box';
-import { ComboBox, GComboBox } from './combo-box';
-import { LineEdit, GLineEdit } from './line-edit';
-import { TextArea, GTextArea } from './text-area';
+import { CheckBox } from './check-box';
+import { ComboBox } from './combo-box';
+import { LineEdit } from './line-edit';
+import { TextArea } from './text-area';
 import { TooltippedField } from '../tooltipped-field';
 
-export class GLabeledField<KE, KV extends string, T, U extends FormModel.V<T>> extends FormField<KE, KV, T, GLabeledField.Props<KE, KV, T, U>> {
-    /*static defaultProps = {
-        ...GLineEdit.defaultProps,
-        //  ...GTextArea.defaultProps,
-    }*/ // Revisit this later
-
-    private CheckBox = CheckBox<KE, KV, T>();
-    private ComboBox = ComboBox<KE, KV, T, U>();
-    private LineEdit = LineEdit<KE, KV, T>();
-    private TextArea = TextArea<KE, KV, T>();
-
-    constructor(props: GLabeledField.Props<KE, KV, T, U>) {
-        super(props);
-
-        this.renderLabel = this.renderLabel.bind(this);
-    }
-
-    private inputField(pos: GLabeledField.LabelStyle) {
-        let cname = (pos === 'above') ? 'form-field-input-above' :
-                                        (this.props.inputType === 'check-box') ? 'form-field-input-left-noflex checkbox' : 'form-field-input-left';
-        cname = `${cname} ${this.props.className}`;
-
-        switch (this.props.inputType) {
-        case 'check-box':
-            return (<this.CheckBox {...this.props} className={cname} />);
-        case 'combo-box':
-            return (<this.ComboBox {...this.props} className={cname} />);
-        case 'line-edit':
-            return (<this.LineEdit {...this.props} className={cname} />);
-        case 'text-area':
-            return (<this.TextArea {...this.props} className={cname} />);
-        }
-    }
-
-    private renderLabel(left: boolean) {
+abstract class FBaseLabeledField<KE, KV extends string, T, U extends FormModel.V<T>, P extends FBaseLabeledField.Props<KE, KV, T>> extends FormField<KE, KV, T, P> {
+    private renderLabel = (left: boolean) => {
         const cls = left ? 'form-field-label-left' : 'form-field-label';
         return (<label className={cls} htmlFor={`${this.props.id}`}>{this.props.label}</label>);
     }
+
+    abstract renderWidget(): React.ReactFragment;
 
     render() {
         switch (this.props.style) {
         case 'above':
             return (
-                <div className={this.props.className}>
+                <div>
                     <TooltippedField
                         position='above'
                         text={this.props.tooltip}
                         renderContent={() => this.renderLabel(false)} />
                     <div>
-                        {this.inputField(this.props.style)}
+                        {this.renderWidget()}
                     </div>
                 </div>
             );
@@ -75,7 +44,7 @@ export class GLabeledField<KE, KV extends string, T, U extends FormModel.V<T>> e
                         position='left'
                         text={this.props.tooltip}
                         renderContent={() => this.renderLabel(true)} />
-                    {this.inputField(this.props.style)}
+                    {this.renderWidget()}
                 </div>
             );
         case 'left-grid':
@@ -85,42 +54,97 @@ export class GLabeledField<KE, KV extends string, T, U extends FormModel.V<T>> e
                         position='left'
                         text={this.props.tooltip}
                         renderContent={() => this.renderLabel(true)} />
-                    {this.inputField(this.props.style)}
+                    {this.renderWidget()}
                 </>
             );
         }
     }
 }
 
-export namespace GLabeledField {
-    export type LabelStyle = 'left' | 'above' | 'left-grid';
-    export type InputType = 'line-edit' | 'combo-box' | 'text-area' | 'check-box';
-
-    export interface Props<KE, KV extends string, T, U extends FormModel.V<T>> extends
-                                       GLineEdit.Props<KE, KV, T>,
-                                       GComboBox.Props<KE, KV, T, U>,
-                                       GTextArea.Props<KE, KV, T>,
-                                       GCheckBox.Props<KE, KV, T> {
+namespace FBaseLabeledField {
+    export interface Props<KE, KV extends string, T> extends FormField.Props<KE, KV, T> {
         label: string;
-        style: LabelStyle;
-        inputType: InputType;
-        className?: string;
+        style: LabeledField.LabelPlacing;
         tooltip?: string;
     }
+}
 
-    export function tags<KV extends string>(base: KV, suffix: string, cn?: string[]) {
-        return {
-            id: `${base}-${suffix}`,
-            className: cn ? cn.reduce((a, b) => `${a} ${b}`) : base,
-            keyId: base,
-        };
+export namespace LabeledField {
+    export type LabelPlacing = 'left' | 'above' | 'left-grid';
+
+    export interface CHProps<KE, KV extends string, T> extends
+        FBaseLabeledField.Props<KE, KV, T>,
+        CheckBox.Props<KE, KV, T> {
+    }
+
+    export interface CBProps<KE, KV extends string, T, U extends FormModel.V<T>> extends
+        FBaseLabeledField.Props<KE, KV, T>,
+        ComboBox.Props<KE, KV, T, U> {
+    }
+
+    export interface LEProps<KE, KV extends string, T> extends
+        FBaseLabeledField.Props<KE, KV, T>,
+        LineEdit.Props<KE, KV, T> {
+    }
+
+    export interface TAProps<KE, KV extends string, T> extends
+        FBaseLabeledField.Props<KE, KV, T>,
+        TextArea.Props<KE, KV, T> {
+    }
+
+    export function CheckBox<KE, KV extends string, T>() {
+        return LabeledCheckBox as new(props: CHProps<KE, KV, T>) => LabeledCheckBox<KE, KV, T>;
+    }
+
+    export function ComboBox<KE, KV extends string, T, U extends FormModel.V<T>>() {
+        return LabeledComboBox as new(props: CBProps<KE, KV, T, U>) => LabeledComboBox<KE, KV, T, U>;
+    }
+
+    export function LineEdit<KE, KV extends string, T>() {
+        return LabeledLineEdit as new(props: LEProps<KE, KV, T>) => LabeledLineEdit<KE, KV, T>;
+    }
+
+    export function TextArea<KE, KV extends string, T>() {
+        return LabeledTextArea as new(props: TAProps<KE, KV, T>) => LabeledTextArea<KE, KV, T>;
     }
 }
 
-export function LabeledField<KE, KV extends string, T, U extends FormModel.V<T>>() {
-    return GLabeledField as new(props: GLabeledField.Props<KE, KV, T, U>) => GLabeledField<KE, KV, T, U>;
+export class LabeledCheckBox<KE, KV extends string, T> extends FBaseLabeledField<KE, KV, T, T, LabeledField.CHProps<KE, KV, T>> {
+    private Widget = CheckBox.Spec<KE, KV, T>();
+
+    renderWidget() {
+        return (
+            <this.Widget {...this.props} />
+        );
+    }
 }
 
-export function LabeledCheckBox<KE, KV extends string, T>() {
-    return GLabeledField as new(props: GLabeledField.Props<KE, KV, T, boolean>) => GLabeledField<KE, KV, T, boolean>;
+export class LabeledComboBox<KE, KV extends string, T, U extends FormModel.V<T>> extends FBaseLabeledField<KE, KV, T, U, LabeledField.CBProps<KE, KV, T, U>> {
+    private Widget = ComboBox.Spec<KE, KV, T, U>();
+
+    renderWidget() {
+        return (
+            <this.Widget {...this.props} />
+        );
+    }
+}
+
+export class LabeledLineEdit<KE, KV extends string, T> extends FBaseLabeledField<KE, KV, T, T, LabeledField.LEProps<KE, KV, T>> {
+    private Widget = LineEdit.Spec<KE, KV, T>();
+
+    renderWidget() {
+        return (
+            <this.Widget {...this.props} />
+        );
+    }
+}
+
+export class LabeledTextArea<KE, KV extends string, T> extends FBaseLabeledField<KE, KV, T, T, LabeledField.TAProps<KE, KV, T>> {
+    private Widget = TextArea.Spec<KE, KV, T>();
+
+    renderWidget() {
+        return (
+            <this.Widget {...this.props} />
+        );
+    }
 }

@@ -9,22 +9,21 @@
 import * as React from 'react';
 import { ErrorBox } from './common/error-box';
 import { FormBlock } from './common/form/form-block';
-import { GLabeledField, LabeledField } from './common/form/labeled-field';
+import { LabeledField } from './common/form/labeled-field';
 import { MmbInputModel as MIM } from '../model/mmb-input-model';
 
-const StrLabeledField = LabeledField<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes, string>();
+const StrLField = LabeledField.LineEdit<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes>();
 
 export class JobNameInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes, JobNameInput.Props> {
     renderName() {
         if (this.props.name === undefined) {
             return (
                 <>
-                    <StrLabeledField
-                        {...GLabeledField.tags('mol-in-job-name', this.props.formId, ['labeled-field'])}
+                    <StrLField
+                        id='mol-in-job-name'
+                        keyId='mol-in-job-name'
                         style='left'
                         label='Job name'
-                        inputType='line-edit'
-                        options={[]}
                         ctxData={this.props.ctxData} />
                     <ErrorBox
                         errors={this.props.ctxData.errors.get('mol-in-no-name') ?? new Array<string>()} />

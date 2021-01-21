@@ -9,7 +9,7 @@
 import * as React from 'react';
 import { FormField } from './form-field';
 
-export class GCheckBox<KE, KV, T> extends FormField<KE, KV, T, GCheckBox.Props<KE, KV, T>> {
+export class FCheckBox<KE, KV extends string, T> extends FormField<KE, KV, T, CheckBox.Props<KE, KV, T>> {
     private isChecked() {
         return (this.props.ctxData.values.get(this.props.keyId) ?? false) as boolean;
     }
@@ -23,7 +23,7 @@ export class GCheckBox<KE, KV, T> extends FormField<KE, KV, T, GCheckBox.Props<K
 
         return (
             <input
-                className={this.props.className ?? 'checkbox'}
+                className={this.props.className ?? 'check-box'}
                 type='checkbox'
                 id={this.props.id}
                 name={this.props.id}
@@ -33,12 +33,12 @@ export class GCheckBox<KE, KV, T> extends FormField<KE, KV, T, GCheckBox.Props<K
     }
 }
 
-export namespace GCheckBox {
-    export interface Props<KE, KV, T> extends FormField.Props<KE, KV, T> {
+export namespace CheckBox {
+    export interface Props<KE, KV extends string, T> extends FormField.Props<KE, KV, T> {
         className?: string,
     }
-}
 
-export function CheckBox<KE, KV, T>() {
-    return GCheckBox as new(props: GCheckBox.Props<KE, KV, T>) => GCheckBox<KE, KV, T>;
+    export function Spec<KE, KV extends string, T>() {
+        return FCheckBox as new(props: CheckBox.Props<KE, KV, T>) => FCheckBox<KE, KV, T>;
+    }
 }

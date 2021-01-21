@@ -38,7 +38,7 @@ export class ComboBox<T> extends CtrldComponent<T, ComboBox.Props<T>> {
                 }
                 className={this.props.className ?? 'combo-box'}
             >
-                {this.props.options.map((o) => {
+                {this.props.options.map(o => {
                     const v = this.props.stringifier ? this.props.stringifier(o.value) : defStrfr(o.value);
                     return (
                         <option
@@ -53,13 +53,9 @@ export class ComboBox<T> extends CtrldComponent<T, ComboBox.Props<T>> {
 }
 
 export namespace ComboBox {
-    export interface Stringifier<T> {
-        (v?: T): string;
-    }
-
     export interface Props<T> extends CtrldComponent.Props<T> {
         options: Model.Option<T>[];
-        stringifier?: Stringifier<T>;
+        stringifier?: Model.Stringifier<T>;
         className?: string;
     }
 

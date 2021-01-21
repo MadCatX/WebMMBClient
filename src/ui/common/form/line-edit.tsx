@@ -8,25 +8,13 @@
 
 import * as React from 'react';
 import { FormField } from './form-field';
-import { Util } from '../util';
 
-export class GLineEdit<KE, KV extends string, T> extends FormField<KE, KV, T, GLineEdit.Props<KE, KV, T>> {
+export class FLineEdit<KE, KV extends string, T> extends FormField<KE, KV, T, LineEdit.Props<KE, KV, T>> {
     private getValue() {
-        const value = this.props.ctxData.values.get(this.props.keyId)!;
-        return Util.toString(value);
+        return this.props.ctxData.values.get(this.props.keyId) as string ?? '';
     }
 
     private setValue(v: string) {
-        if (v === '') {
-            this.props.ctxData.clearValues([this.props.keyId]);
-            return;
-        }
-
-        if (this.props.validator !== undefined) {
-            if (this.props.validator(v) === false)
-                return;
-        }
-
         const nv = this.FU.emptyValues();
         nv.set(this.props.keyId, v);
         this.props.ctxData.setValues(nv);
@@ -37,22 +25,27 @@ export class GLineEdit<KE, KV extends string, T> extends FormField<KE, KV, T, GL
             <input
                 name={this.props.id}
                 type='text'
-                onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
-                    if (this.props.modifier)
-                        this.setValue(this.props.modifier(e.currentTarget.value));
-                }}
-                onChange={
-                    (e: React.ChangeEvent<HTMLInputElement>) => this.setValue(e.currentTarget.value)
-                }
                 value={this.getValue()}
+                onChange={
+                    (e: React.ChangeEvent<HTMLInputElement>) => {
+                        let v = e.currentTarget.value;
+                        v = this.props.modifier ? this.props.modifier(v) : v;
+
+                        if (this.props.validator) {
+                            if (this.props.validator(v))
+                                this.setValue(v)
+                        } else
+                            this.setValue(v);
+                    }
+                }
                 placeholder={this.props.hint}
                 disabled={this.props.disabled}
-                className={this.props.className} />
+                className={this.props.className ?? 'line-edit'} />
         );
     }
 }
 
-export namespace GLineEdit {
+export namespace LineEdit {
     export interface Modifier {
         (v: string): string;
     }
@@ -68,8 +61,8 @@ export namespace GLineEdit {
         className?: string,
         disabled?: boolean,
     }
-}
 
-export function LineEdit<KE, KV extends string, T>() {
-    return GLineEdit as new(props: GLineEdit.Props<KE, KV, T>) => GLineEdit<KE, KV, T>;
+    export function Spec<KE, KV extends string, T>() {
+        return FLineEdit as new(props: LineEdit.Props<KE, KV, T>) => FLineEdit<KE, KV, T>;
+    }
 }
