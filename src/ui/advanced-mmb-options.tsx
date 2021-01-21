@@ -11,8 +11,8 @@ import { BooleanParameterField, IntegralParameterField, OptionsParameterField, R
 import { MmbInputModel as MIM } from '../model/mmb-input-model';
 import { FormUtil } from '../model/common/form';
 import { ErrorBox } from './common/error-box';
-import { FormBlock } from './common/form-block';
 import { PushButton } from './common/push-button';
+import { FormBlock } from './common/form/form-block';
 import { ParameterNames, Parameters } from '../mmb/available-parameters';
 import { Parameter as P } from '../model/parameter';
 import { Num } from '../util/num';

@@ -7,11 +7,11 @@
  */
 
 import * as React from 'react';
-import { GComboBox } from './common/combo-box';
 import { ErrorBox } from './common/error-box';
-import { FormBlock } from './common/form-block';
-import { LabeledField } from './common/controlled/labeled-field';
 import { PushButton } from './common/push-button';
+import { LabeledField } from './common/controlled/labeled-field';
+import { GComboBox } from './common/form/combo-box';
+import { FormBlock } from './common/form/form-block';
 import { Util } from './common/util';
 import { BaseInteraction } from '../model/base-interaction';
 import { Compound } from '../model/compound';

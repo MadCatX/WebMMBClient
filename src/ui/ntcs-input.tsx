@@ -8,16 +8,16 @@
 
 import * as React from 'react';
 import { ErrorBox } from './common/error-box';
-import { ComboBox } from './common/controlled/combo-box';
-import { LabeledField } from './common/controlled/labeled-field';
 import { PushButton } from './common/push-button';
 import { Util } from './common/util';
+import { LabeledField } from './common/controlled/labeled-field';
+import { FormBlock } from './common/form/form-block';
 import { Compound } from '../model/compound';
 import { MmbInputModel as MIM } from '../model/mmb-input-model';
 import { NtC } from '../model/ntc';
 import { NtCConformation } from '../model/ntc-conformation';
 import { FormUtil } from '../model/common/form';
-import { FormBlock } from './common/form-block';
+import { ComboBox as ComboBoxModel } from '../model/common/combo-box';
 import { Manip } from '../util/manip';
 
 const FU = new FormUtil<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes>();
@@ -134,8 +134,8 @@ export class NtCsInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM.Value
         const compounds = FU.getArray<Compound[]>(this.props.ctxData, 'mol-in-cp-added');
         const chains = MIM.chainOptions(this.props.ctxData).filter(o => compounds.find(c => c.chain === o.value)!.residueCount > 1);
 
-        let firstResOpts = new Array<ComboBox.Option<number>>();
-        let lastResOpts = new Array<ComboBox.Option<number>>();
+        let firstResOpts = new Array<ComboBoxModel.Option<number>>();
+        let lastResOpts = new Array<ComboBoxModel.Option<number>>();
         if (this.state.chain !== undefined) {
             const c = MIM.getCompound(compounds, this.state.chain);
             if (c !== undefined) {

@@ -8,10 +8,10 @@
 
 import * as React from 'react';
 import { ErrorBox } from './common/error-box';
-import { FormBlock } from './common/form-block';
 import { LabeledField } from './common/controlled/labeled-field';
 import { PushButton } from './common/push-button';
 import { Util } from './common/util';
+import { FormBlock } from './common/form/form-block';
 import { Compound } from '../model/compound';
 import { DoubleHelix } from '../model/double-helix';
 import { MmbInputModel as MIM } from '../model/mmb-input-model';

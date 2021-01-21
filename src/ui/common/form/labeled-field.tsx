@@ -7,13 +7,13 @@
  */
 
 import * as React from 'react';
-import { FormModel } from '../../model/common/form';
+import { FormModel } from '../../../model/common/form';
 import { FormField } from './form-field';
 import { CheckBox, GCheckBox } from './check-box';
 import { ComboBox, GComboBox } from './combo-box';
 import { LineEdit, GLineEdit } from './line-edit';
 import { TextArea, GTextArea } from './text-area';
-import { TooltippedField } from './tooltipped-field';
+import { TooltippedField } from '../tooltipped-field';
 
 export class GLabeledField<KE, KV extends string, T, U extends FormModel.V<T>> extends FormField<KE, KV, T, GLabeledField.Props<KE, KV, T, U>> {
     /*static defaultProps = {

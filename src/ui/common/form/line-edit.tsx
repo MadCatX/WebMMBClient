@@ -8,7 +8,7 @@
 
 import * as React from 'react';
 import { FormField } from './form-field';
-import { Util } from './util';
+import { Util } from '../util';
 
 export class GLineEdit<KE, KV extends string, T> extends FormField<KE, KV, T, GLineEdit.Props<KE, KV, T>> {
     private getValue() {

@@ -7,9 +7,9 @@
  */
 
 import * as React from 'react';
-import { FormBlock } from './common/form-block';
-import { GLabeledField, LabeledField } from './common/labeled-field';
 import { ErrorBox } from './common/error-box';
+import { FormBlock } from './common/form/form-block';
+import { GLabeledField, LabeledField } from './common/form/labeled-field';
 import { MmbInputModel as MIM } from '../model/mmb-input-model';
 
 const StrLabeledField = LabeledField<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes, string>();

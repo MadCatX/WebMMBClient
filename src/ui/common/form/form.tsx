@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { FormModel, FormUtil } from '../../model/common/form';
+import { FormModel, FormUtil } from '../../../model/common/form';
 
 export abstract class Form<KE, KV, T, PE extends FormModel.Props<KV, T>, SE extends FormModel.State<KE, KV, T> = FormModel.State<KE, KV, T>> extends React.Component<PE, SE> {
     protected handleOnSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {

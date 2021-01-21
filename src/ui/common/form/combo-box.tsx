@@ -7,9 +7,9 @@
  */
 
 import * as React from 'react';
-import { FormModel } from '../../model/common/form';
+import { FormModel } from '../../../model/common/form';
 import { FormField } from './form-field';
-import { Util } from './util';
+import { Util } from '../util';
 
 export class GComboBox<KE, KV extends string, T, U extends FormModel.V<T>> extends FormField<KE, KV, T, GComboBox.Props<KE, KV, T, U>> {
     private getValue() {

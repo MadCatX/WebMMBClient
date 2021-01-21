@@ -8,8 +8,7 @@
 
 import { FormModel } from '../model/common/form';
 import { TableWithDeletableRows } from '../ui/common/table-with-deletable-rows';
-import { GComboBox } from '../ui/common/combo-box';
-import { ComboBox } from '../ui/common/controlled/combo-box';
+import { ComboBox } from '../model/common/combo-box';
 import * as AVP from '../mmb/available-parameters';
 import { BaseInteraction } from '../model/base-interaction';
 import { Compound } from '../model/compound';
@@ -43,8 +42,7 @@ export namespace MmbInputModel {
     }
 
     export const AllNtCsOptions = NtC.Conformers.map(c => {
-        const s = NtC.conformerAsString(c);
-        const o: GComboBox.Option = { value: s, caption: s };
+        const o: ComboBox.Option<NtC.Conformer> = { value: c, caption: c };
         return o;
     });
 

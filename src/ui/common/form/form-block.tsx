@@ -7,7 +7,7 @@
  */
 
 import * as React from 'react';
-import { FormModel } from '../../model/common/form';
+import { FormModel } from '../../../model/common/form';
 
 export abstract class FormBlock<KE, KV, V, T extends FormBlock.Props<KE, KV, V>, S = {}> extends React.Component<T, S> {
 }

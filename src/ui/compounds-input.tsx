@@ -8,15 +8,15 @@
 
 import * as React from 'react';
 import { ErrorBox } from './common/error-box';
-import { FormBlock } from './common/form-block';
-import { LabeledField } from './common/controlled/labeled-field';
+import { FormBlock } from './common/form/form-block';
 import { PushButton } from './common/push-button';
+import { LabeledField } from './common/controlled/labeled-field';
+import { FormUtil } from '../model/common/form';
 import { BaseInteraction } from '../model/base-interaction';
 import { Compound } from '../model/compound';
 import { DoubleHelix } from '../model/double-helix';
 import { MmbInputModel as MIM } from '../model/mmb-input-model';
 import { NtCConformation } from '../model/ntc-conformation';
-import { FormUtil } from '../model/common/form';
 import { Num } from '../util/num';
 
 const FU = new FormUtil<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes>();

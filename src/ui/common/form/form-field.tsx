@@ -7,7 +7,7 @@
  */
 
 import * as React from 'react';
-import { FormModel, FormUtil } from '../../model/common/form';
+import { FormModel, FormUtil } from '../../../model/common/form';
 
 export abstract class FormField<KE, KV, T, P extends FormField.Props<KE, KV, T>, S = any> extends React.Component<P, S> {
     protected FU = new FormUtil<KE, KV, T>();

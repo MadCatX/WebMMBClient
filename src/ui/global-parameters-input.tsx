@@ -7,8 +7,8 @@
  */
 
 import * as React from 'react';
-import { FormBlock } from './common/form-block';
-import { LabeledCheckBox, LabeledField, GLabeledField } from './common/labeled-field';
+import { FormBlock } from './common/form/form-block';
+import { LabeledCheckBox, LabeledField, GLabeledField } from './common/form/labeled-field';
 import { MmbInputModel as MIM } from '../model/mmb-input-model';
 
 const NumLabeledField = LabeledField<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes, number>();
