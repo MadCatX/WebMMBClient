@@ -238,7 +238,6 @@ export class BaseInteractionsInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKey
                 <ErrorBox
                     errors={this.state.errors} />
                 <AddedTable
-                    formId={this.props.formId}
                     className='mol-in-bi-added spaced-grid'
                     valuesKey='mol-in-bi-added'
                     columns={[

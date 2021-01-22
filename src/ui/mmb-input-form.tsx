@@ -157,13 +157,13 @@ export class MmbInputForm extends Form<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTy
         return (
             <this.Ctx.Provider value={ctxData}>
                 <form>
-                    <JobNameInput formId={this.props.id} ctxData={ctxData} name={this.props.jobName} />
-                    <CompoundsInput formId={this.props.id} ctxData={ctxData} />
-                    <DoubleHelicesInput formId={this.props.id} ctxData={ctxData} />
-                    <BaseInteractionsInput formId={this.props.id} ctxData={ctxData} />
-                    <NtCsInput formId={this.props.id} ctxData={ctxData} />
-                    <GlobalParametersInput formId={this.props.id} ctxData={ctxData} availableStages={this.props.availableStages} />
-                    <AdvancedMmbOptions formId={this.props.id} ctxData={ctxData} />
+                    <JobNameInput ctxData={ctxData} name={this.props.jobName} />
+                    <CompoundsInput ctxData={ctxData} />
+                    <DoubleHelicesInput ctxData={ctxData} />
+                    <BaseInteractionsInput ctxData={ctxData} />
+                    <NtCsInput ctxData={ctxData} />
+                    <GlobalParametersInput ctxData={ctxData} availableStages={this.props.availableStages} />
+                    <AdvancedMmbOptions ctxData={ctxData} />
                     {this.makeMmbCommands()}
                 </form>
             </this.Ctx.Provider>

@@ -14,7 +14,6 @@ export abstract class FormBlock<KE, KV, V, T extends FormBlock.Props<KE, KV, V>,
 
 export namespace FormBlock {
     export interface Props<KE, KV, V> {
-        formId: string;
         ctxData: FormModel.ContextData<KE, KV, V>;
     }
 }

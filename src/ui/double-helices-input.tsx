@@ -265,7 +265,6 @@ export class DoubleHelicesInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, 
                 <ErrorBox
                     errors={this.state.errors} />
                 <AddedTable
-                    formId={this.props.formId}
                     className='mol-in-dh-added spaced-grid'
                     valuesKey='mol-in-dh-added'
                     columns={[

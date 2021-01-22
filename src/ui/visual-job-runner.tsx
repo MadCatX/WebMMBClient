@@ -199,7 +199,6 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
             return (
                 <MmbInputForm
                     ref={this.mmbInputFormRef}
-                    id='molecule-input'
                     jobName={this.props.info?.name}
                     availableStages={stages}
                     initialValues={initVals} />

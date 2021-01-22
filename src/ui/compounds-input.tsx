@@ -167,7 +167,6 @@ export class CompoundsInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM.
                 <ErrorBox
                     errors={this.state.errors} />
                 <AddedTable
-                    formId={this.props.formId}
                     className='mol-in-cp-added spaced-grid'
                     valuesKey='mol-in-cp-added'
                     deleter={this.compoundRemoved}

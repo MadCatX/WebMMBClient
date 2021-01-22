@@ -27,7 +27,6 @@ export namespace FormModel {
     }
 
     export interface Props<KV, T> {
-        id: string;
         initialValues: Values<KV, V<T>>;
         onSubmitted?: (arg0: Values<KV, T>) => void;
     }

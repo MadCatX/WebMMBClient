@@ -121,7 +121,6 @@ export class Login extends Form<LM.ErrorKeys, LM.ValueKeys, LM.ValueTypes, LM.Pr
 
 ReactDOM.render(
     <Login
-        id='login-form'
         initialValues={new Map<LM.ValueKeys, LM.Values>()} />,
     document.getElementById('app-login')
 );

@@ -204,7 +204,6 @@ export class NtCsInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM.Value
                 <ErrorBox
                     errors={this.state.errors} />
                 <AddedTable
-                    formId={this.props.formId}
                     className='mol-in-ntcs-added spaced-grid'
                     valuesKey='mol-in-ntcs-added'
                     columns={[

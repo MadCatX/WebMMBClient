@@ -71,7 +71,6 @@ export namespace GTableWithDeletableRows {
     export interface Props<KE, KV, T, U> {
         ctxData: FormModel.ContextData<KE, KV, T>;
         className: string;
-        formId: string;
         columns: {
             caption: string;
             k: keyof ArrayType<U>;
