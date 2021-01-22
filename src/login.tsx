@@ -13,7 +13,7 @@ import { LoginModel as LM } from './model/login-model';
 import { Form } from './ui/common/form/form';
 import { LabeledField } from './ui/common/form/labeled-field';
 import { ErrorBox } from './ui/common/error-box';
-import { FormContextManager as FCM } from './ui/common/form-context-manager';
+import { FormContextManager as FCM } from './model/common/form-context-manager';
 import { PushButton } from './ui/common/push-button';
 import { Net } from './util/net';
 import { versionInfo } from './version';

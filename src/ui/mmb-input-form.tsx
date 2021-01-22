@@ -8,7 +8,7 @@
 
 import * as React from 'react';
 import { AdvancedMmbOptions } from './advanced-mmb-options';
-import { FormContextManager as FCM } from './common/form-context-manager';
+import { FormContextManager as FCM } from '../model/common/form-context-manager';
 import { Form } from './common/form/form';
 import { BaseInteractionsInput } from './base-interactions-input';
 import { CompoundsInput } from './compounds-input';

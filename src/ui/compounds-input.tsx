@@ -117,7 +117,7 @@ export class CompoundsInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM.
     render() {
         return (
             <div className='section'>
-                <div className='section-caption'>Compound definiton</div>
+                <div className='section-caption'>Compound definition</div>
                 <div className='mol-in-cp-input spaced-grid'>
                     <StrLField
                         label='Chain'
