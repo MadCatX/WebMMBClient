@@ -22,6 +22,7 @@ const StrLField = LabeledField.LineEdit<LM.ErrorKeys, LM.ValueKeys, LM.ValueType
 
 export class Login extends Form<LM.ErrorKeys, LM.ValueKeys, LM.ValueTypes, LM.Props> {
     private aborter: AbortController | null = null;
+    private Ctx: React.Context<LM.ContextData>;
 
     constructor(props: LM.Props) {
         super(props);
@@ -29,6 +30,8 @@ export class Login extends Form<LM.ErrorKeys, LM.ValueKeys, LM.ValueTypes, LM.Pr
         this.state = {
             ...this.initialBaseState(),
         };
+
+        this.Ctx = FCM.makeContext();
     }
 
     private logIn = () => {
@@ -80,11 +83,10 @@ export class Login extends Form<LM.ErrorKeys, LM.ValueKeys, LM.ValueTypes, LM.Pr
         };
 
         const verinfo = versionInfo();
-        const Ctx = FCM.makeContext<LM.ErrorKeys, LM.ValueKeys, LM.ValueTypes>();
 
         return (
             <>
-                <Ctx.Provider value={ctxData}>
+                <this.Ctx.Provider value={ctxData}>
                     <div className='login-form-container'>
                         <div className='login-form-caption'>WebMMB alpha</div>
                         <div className='login-form-version-info'>
@@ -97,6 +99,7 @@ export class Login extends Form<LM.ErrorKeys, LM.ValueKeys, LM.ValueTypes, LM.Pr
                                 label='Session ID'
                                 style='left'
                                 hint='Enter session ID to restore session'
+                                className='line-edit fit-width-input'
                                 ctxData={ctxData} />
                         </div>
                         <ErrorBox
@@ -106,7 +109,7 @@ export class Login extends Form<LM.ErrorKeys, LM.ValueKeys, LM.ValueTypes, LM.Pr
                             className='pushbutton-common pushbutton-clr-default pushbutton-hclr-green'
                             onClick={() => this.logIn()} />
                     </div>
-                </Ctx.Provider>
+                </this.Ctx.Provider>
                 <div className='cookie-notice'>
                     <span className='bold'>Privacy notice:&nbsp;</span>
                     This site uses cookies to keep track of your session. By logging into WebMMB, you agree to have cookies stored in your browser cache.
