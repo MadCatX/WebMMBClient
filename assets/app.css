@@ -1,3 +1,7 @@
+body {
+    font-family: sans-serif;
+}
+
 #app-login {
     position: relative;
     height: 90vh;
@@ -44,6 +48,7 @@
 
     background: none;
     border: none;
+    margin: auto 0 auto 0;
     outline: black solid 0.1em;
     outline-offset: 0.2em;
     width: 1em;
@@ -131,6 +136,10 @@
     width: 100%;
 }
 
+.form-field-left-container-plain {
+    display: flex;
+}
+
 .form-field-input-above {
     width: 100%;
 }
@@ -145,7 +154,7 @@
 }
 
 .form-field-label-left {
-    margin: auto;
+    margin: auto 0.6em auto auto;
 }
 
 .footer {
@@ -582,7 +591,14 @@
     min-width: 35em;
 }
 
-.viewer-controls {
+.viewer-buttons {
     display: flex;
-    width: 100%
+    margin-bottom: 1em;
+    width: 100%;
+}
+
+.viewer-setup {
+    column-gap: 1em;
+    display: flex;
+    width: 100%;
 }

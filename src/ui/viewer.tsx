@@ -10,9 +10,14 @@ import * as React from 'react';
 import { ErrorBox } from './common/error-box';
 import { LinkButton } from './common/link-button';
 import { PushButton } from './common/push-button';
-import { TooltippedField } from './common/tooltipped-field';
+import { LabeledField } from './common/controlled/labeled-field';
+import { Num } from '../util/num';
 
 declare let WebMmbViewer: any;
+
+const StageLField = LabeledField.ComboBox<number>();
+const TimeLField = LabeledField.LineEdit<string>();
+const ChkLField = LabeledField.CheckBox();
 
 function forceResize() {
     const elem = document.getElementById('viewer');
@@ -24,8 +29,8 @@ function forceResize() {
 
 interface State {
     autoRefreshEnabled: boolean;
-    autoRefreshInterval: number | null;
-    selectedStage?: string
+    autoRefreshInterval: number;
+    selectedStage?: number;
 }
 
 export class Viewer extends React.Component<Viewer.Props, State> {
@@ -97,6 +102,10 @@ export class Viewer extends React.Component<Viewer.Props, State> {
                  this.state.selectedStage !== prevState.selectedStage)
             this.load();
 
+        if (this.state.autoRefreshInterval !== prevState.autoRefreshInterval ||
+            this.state.autoRefreshEnabled !== prevState.autoRefreshEnabled)
+            this.props.autoRefreshChanged(this.state.autoRefreshEnabled, this.state.autoRefreshInterval);
+
         const mmbOutput = document.getElementById('mmb-output-item');
         if (mmbOutput !== null)
             mmbOutput.scrollTo(0, mmbOutput.scrollHeight);
@@ -105,7 +114,7 @@ export class Viewer extends React.Component<Viewer.Props, State> {
     }
 
     render() {
-        const stageOptions = this.props.availableStages.map(n => { return{ caption: n.toString(), value: n.toString() }} );
+        const stageOptions = this.props.availableStages.map(n => { return { caption: n.toString(), value: n }} );
         const stageValue = (() => {
             if (this.state.selectedStage)
                 return this.state.selectedStage;
@@ -118,7 +127,7 @@ export class Viewer extends React.Component<Viewer.Props, State> {
         return (
             <div className='viewer-container'>
                 <div id='viewer'></div>
-                <div className='viewer-controls'>
+                <div className='viewer-buttons'>
                     <PushButton
                         className='pushbutton-common pushbutton-flex pushbutton-clr-default pushbutton-hclr-default'
                         value='Ball-and-stick'
@@ -134,57 +143,39 @@ export class Viewer extends React.Component<Viewer.Props, State> {
                         url={this.url()}
                         downloadAs={`${this.props.structureName}.${this.state.selectedStage ?? 1}.pdb`} />
                 </div>
-                <div className='padded'>
-                    <TooltippedField
-                        position='above'
-                        text='Select which stage of simulation to display'
-                        renderContent={() => (<span className='padded'>Show stage:</span>)} />
-                    <select
+                <div className='viewer-setup'>
+                    <StageLField
+                        id='mv-stage'
+                        label='Show stage'
+                        style='left'
+                        tooltip='Select which stage of simulation to display'
+                        tooltipPosition='above'
                         value={stageValue}
-                        onChange={e => this.setState({...this.state, selectedStage: e.currentTarget.value}) }
-                    >
-                        {stageOptions.map(o => (<option key={o.value}>{o.caption}</option>))}
-                    </select>
-                    <TooltippedField
-                        position='above'
-                        text='Query the server for job status automatically every N seconds'
-                        renderContent={() => (<span className='padded'>Refresh rate (sec):</span>)} />
-                    <input
-                        type='text'
-                        onChange={
-                            e => {
-                                const val = (() => {
-                                    const v = e.currentTarget.value;
-                                    if (v.length === 0)
-                                        return null;
-                                    const i = parseInt(v);
-                                    if (i <= 0)
-                                        throw new Error('Invalid interval value');
-                                    return i;
-                                })();
-                                this.setState({...this.state, autoRefreshInterval: val});
-                                if (val !== null)
-                                    this.props.autoRefreshChanged(this.state.autoRefreshEnabled, val);
-                            }
-                        }
-                        value={this.state.autoRefreshInterval === null ? '' : this.state.autoRefreshInterval}
-                        className='padded' />
-                    <TooltippedField
-                        position='above'
-                        text='Enable/disable automatic refresh'
-                        renderContent={() => (<span className='padded'>Auto:</span>)} />
-                    <input
-                        type='checkbox'
-                        onChange={
-                            e => {
-                                const chk = e.currentTarget.checked;
-                                this.setState({...this.state, autoRefreshEnabled: chk});
-                                if (this.state.autoRefreshInterval !== null)
-                                    this.props.autoRefreshChanged(chk, this.state.autoRefreshInterval);
-                            }
-                        }
-                        checked={this.state.autoRefreshEnabled}
-                        className='padded checkbox' />
+                        options={stageOptions}
+                        updateNotifier={v => this.setState({ ...this.state, selectedStage: v })}
+                        containerClass='form-field-left-container-narrow' />
+                    <TimeLField
+                        id='mv-refresh-rate'
+                        label='Refesh rate (sec):'
+                        style='left'
+                        tooltip='Query the server for job status automatically every N seconds'
+                        tooltipPosition='above'
+                        value={this.state.autoRefreshInterval?.toString() ?? ''}
+                        validator={v => !isNaN(Num.parseFloatStrict(v)) || v.length === 0}
+                        updateNotifier={v => {
+                            if (v.length !== 0)
+                                this.setState({ ...this.state, autoRefreshInterval: parseFloat(v) });
+                        }}
+                        containerClass='form-field-left-container-narrow' />
+                    <ChkLField
+                        id='mv-toggle-autorefresh'
+                        label='Auto:'
+                        style='left'
+                        tooltip='Enable/disable automatic refresh'
+                        tooltipPosition='above'
+                        value={this.state.autoRefreshEnabled}
+                        updateNotifier={v => this.setState({ ...this.state, autoRefreshEnabled: v })}
+                        containerClass='form-field-left-container-narrow' />
                 </div>
                 {this.renderMmbOutput()}
             </div>

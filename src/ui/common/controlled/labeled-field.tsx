@@ -8,6 +8,7 @@
 
 import * as React from 'react';
 import { ComboBox } from './combo-box';
+import { CheckBox } from './check-box';
 import { LineEdit } from './line-edit';
 import { TextArea } from './text-area';
 import { TooltippedField } from '../tooltipped-field';
@@ -36,9 +37,9 @@ abstract class BaseLabeledField<P extends BaseLabeledField.Props> extends React.
         switch (this.props.style) {
         case 'above':
             return (
-                <div>
+                <div className={this.props.containerClass}>
                     <TooltippedField
-                        position='above'
+                        position={this.props.tooltipPosition ?? 'above'}
                         text={this.props.tooltip}
                         renderContent={() => this.renderLabel(false)} />
                     <div>
@@ -48,9 +49,9 @@ abstract class BaseLabeledField<P extends BaseLabeledField.Props> extends React.
             );
         case 'left':
             return (
-                <div className='form-field-left-container'>
+                <div className={this.props.containerClass ?? 'form-field-left-container'}>
                     <TooltippedField
-                        position='left'
+                        position={this.props.tooltipPosition ?? 'left'}
                         text={this.props.tooltip}
                         renderContent={() => this.renderLabel(true)} />
                     {this.renderWidget()}
@@ -60,7 +61,7 @@ abstract class BaseLabeledField<P extends BaseLabeledField.Props> extends React.
             return (
                 <>
                     <TooltippedField
-                        position='left'
+                        position={this.props.tooltipPosition ?? 'left'}
                         text={this.props.tooltip}
                         renderContent={() => this.renderLabel(true)} />
                     {this.renderWidget()}
@@ -75,7 +76,9 @@ namespace BaseLabeledField {
         id: string;
         label: string;
         style: LabeledField.LabelPlacing;
+        containerClass?: string;
         tooltip?: string;
+        tooltipPosition?: TooltippedField.Position;
     }
 }
 
@@ -83,6 +86,9 @@ export namespace LabeledField {
     export type LabelPlacing = 'left' | 'above' | 'left-grid';
 
     export interface CBProps<T> extends BaseLabeledField.Props, ComboBox.Props<T> {
+    }
+
+    export interface CHProps extends BaseLabeledField.Props, CheckBox.Props {
     }
 
     export interface LEProps<T> extends BaseLabeledField.Props, LineEdit.Props<T> {
@@ -93,6 +99,10 @@ export namespace LabeledField {
 
     export function ComboBox<T>() {
         return LabeledComboBox as new(props: CBProps<T>) => LabeledComboBox<T>;
+    }
+
+    export function CheckBox() {
+        return LabeledCheckBox as new(props: CHProps) => LabeledCheckBox;
     }
 
     export function LineEdit<T extends string>() {
@@ -110,6 +120,14 @@ export class LabeledComboBox<T> extends BaseLabeledField<LabeledField.CBProps<T>
     renderWidget() {
         return (
             <this.Widget {...this.props} />
+        );
+    }
+}
+
+export class LabeledCheckBox extends BaseLabeledField<LabeledField.CHProps> {
+    renderWidget() {
+        return (
+            <CheckBox {...this.props} />
         );
     }
 }
