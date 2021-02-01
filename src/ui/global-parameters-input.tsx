@@ -27,32 +27,28 @@ export class GlobalParametersInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKey
                         label='Interaction scale factor'
                         tooltip='baseInteractionScaleFactor'
                         style='above'
-                        ctxData={this.props.ctxData}
-                        className='line-edit labeled-field-concise' />
+                        ctxData={this.props.ctxData} />
                     <NumLField
                         id='mol-in-gp-reporting-interval'
                         keyId='mol-in-gp-reporting-interval'
                         label='Reporting interval'
                         tooltip='reportingInterval'
                         style='above'
-                        ctxData={this.props.ctxData}
-                        className='line-edit labeled-field-concise' />
+                        ctxData={this.props.ctxData} />
                     <NumLField
                         id='mol-in-gp-num-reports'
                         keyId='mol-in-gp-num-reports'
                         label='Number of reports'
                         tooltip='numReportingIntervals'
                         style='above'
-                        ctxData={this.props.ctxData}
-                        className='line-edit labeled-field-concise' />
+                        ctxData={this.props.ctxData} />
                     <NumLField
                         id='mol-in-gp-temperature'
                         keyId='mol-in-gp-temperature'
                         label='Temperature'
                         tooltip='temperature'
                         style='above'
-                        ctxData={this.props.ctxData}
-                        className='line-edit labeled-field-concise' />
+                        ctxData={this.props.ctxData} />
                     <StagesLField
                         id='mol-in-gp-stage'
                         keyId='mol-in-gp-stage'
@@ -61,16 +57,14 @@ export class GlobalParametersInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKey
                         style='above'
                         options={this.props.availableStages.map(n => { return { caption: n.toString(), value: n }})}
                         stringifier={v => v?.toString() ?? ''}
-                        ctxData={this.props.ctxData}
-                        className='combo-box labeled-field-concise' />
+                        ctxData={this.props.ctxData} />
                     <CHLField
                         id='mol-in-gp-def-md-params'
                         keyId='mol-in-gp-def-md-params'
                         label='Turn on electrostatic and Lennard-Jones forces'
                         tooltip='setDefaultMDParameters'
                         style='left'
-                        ctxData={this.props.ctxData}
-                        className='check-box labeled-field-concise' />
+                        ctxData={this.props.ctxData} />
                 </div>
             </div>
         );

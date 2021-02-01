@@ -152,8 +152,7 @@ export class Viewer extends React.Component<Viewer.Props, State> {
                         tooltipPosition='above'
                         value={stageValue}
                         options={stageOptions}
-                        updateNotifier={v => this.setState({ ...this.state, selectedStage: v })}
-                        containerClass='form-field-left-container-narrow' />
+                        updateNotifier={v => this.setState({ ...this.state, selectedStage: v })} />
                     <TimeLField
                         id='mv-refresh-rate'
                         label='Refesh rate (sec):'
@@ -165,8 +164,7 @@ export class Viewer extends React.Component<Viewer.Props, State> {
                         updateNotifier={v => {
                             if (v.length !== 0)
                                 this.setState({ ...this.state, autoRefreshInterval: parseFloat(v) });
-                        }}
-                        containerClass='form-field-left-container-narrow' />
+                        }} />
                     <ChkLField
                         id='mv-toggle-autorefresh'
                         label='Auto:'
@@ -174,8 +172,7 @@ export class Viewer extends React.Component<Viewer.Props, State> {
                         tooltip='Enable/disable automatic refresh'
                         tooltipPosition='above'
                         value={this.state.autoRefreshEnabled}
-                        updateNotifier={v => this.setState({ ...this.state, autoRefreshEnabled: v })}
-                        containerClass='form-field-left-container-narrow' />
+                        updateNotifier={v => this.setState({ ...this.state, autoRefreshEnabled: v })} />
                 </div>
                 {this.renderMmbOutput()}
             </div>

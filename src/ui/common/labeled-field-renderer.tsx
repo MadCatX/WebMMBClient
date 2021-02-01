@@ -23,7 +23,7 @@ export namespace LabeledFieldRenderer {
         switch (props.style) {
         case 'above':
             return (
-                <div className={props.containerClass}>
+                <div className={props.containerClass ?? 'form-field-above-container'}>
                     <div className='form-field-label-container'>
                         <TooltippedField
                             position={props.tooltipPosition ?? 'above'}
@@ -31,7 +31,7 @@ export namespace LabeledFieldRenderer {
                             text={props.tooltip}
                             renderContent={() => renderLabel(props, false)} />
                     </div>
-                    <div>
+                    <div className='form-field-above-item'>
                         {widgetRenderer()}
                     </div>
                 </div>

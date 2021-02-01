@@ -125,16 +125,14 @@ export class CompoundsInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM.
                         id='chain-id'
                         value={this.state.chain}
                         updateNotifier={v => this.setState({ ...this.state, chain: v })}
-                        validator={v => v.length <= 1}
-                        className='line-edit fit-width-input' />
+                        validator={v => v.length <= 1} />
                     <StrLField
                         label='First residue no.'
                         style='above'
                         id='residue-no'
                         value={this.state.firstResidueNo.toString()}
                         validator={v => !isNaN(Num.parseIntStrict(v)) || v.length === 0}
-                        updateNotifier={v => this.setState({ ...this.state, firstResidueNo: v })}
-                        className='line-edit fit-width-input' />
+                        updateNotifier={v => this.setState({ ...this.state, firstResidueNo: v })} />
                     <CpTypeLField
                         label='Type'
                         style='above'
@@ -144,8 +142,7 @@ export class CompoundsInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM.
                         options={[
                                 { value: 'RNA', caption: 'RNA' },
                                 { value: 'DNA', caption: 'DNA' },
-                        ]}
-                        className='combo-box fit-width-input' />
+                        ]} />
                     <SeqLField
                         label='Sequence'
                         style='above'
@@ -154,8 +151,7 @@ export class CompoundsInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM.
                         validator={v => isSequenceValid(this.state.compoundType, v) || v.length < this.state.sequence.length}
                         updateNotifier={v => this.setState({ ...this.state, sequence: v })}
                         hint='Enter sequence'
-                        spellcheck={false}
-                        className='text-area fit-width-input' />
+                        spellcheck={false} />
                     <PushButton
                         className='pushbutton-common pushbutton-add'
                         value="+"

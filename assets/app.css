@@ -1,5 +1,11 @@
+:root {
+    --small-font-size: 10pt;
+    --normal-font-size: 12pt;
+}
+
 body {
     font-family: sans-serif;
+    font-size: var(--normal-font-size);
 }
 
 #app-login {
@@ -48,7 +54,8 @@ body {
 
     background: none;
     border: none;
-    margin: auto 0 auto 0;
+    font-size: var(--normal-font-size);
+    margin: auto auto auto 0.3em;
     outline: black solid 0.1em;
     outline-offset: 0.2em;
     width: 1em;
@@ -65,10 +72,19 @@ body {
     appearance: none;
 
     background: none;
-    background: url(imgs/down_arrow.svg) no-repeat right transparent;
     border: 0.1em solid black;
     border-radius: 0;
     padding: 0.2em 0.8em 0.2em 0.2em;
+}
+
+.combo-box-icon {
+    background: url(imgs/down_arrow.svg) no-repeat right transparent;
+}
+
+@media only screen and (hover: none) {
+    .multiple-combo-box-icon {
+        background: url(imgs/three_dots.svg) no-repeat right transparent;
+    }
 }
 
 .centered-text {
@@ -127,34 +143,7 @@ body {
 }
 
 .fit-width-input {
-    margin: 0.2em;
-    width: calc(100% - 0.8em);
-}
-
-.form-field-left-container {
-    display: flex;
     width: 100%;
-}
-
-.form-field-left-container-plain {
-    display: flex;
-}
-
-.form-field-input-above {
-    width: 100%;
-}
-
-.form-field-input-left {
-    flex: 1;
-    margin: auto auto auto 0.6em;
-}
-
-.form-field-input-left-noflex {
-    margin: auto auto auto 0.6em;
-}
-
-.form-field-label-left {
-    margin: auto 0.6em auto auto;
 }
 
 .footer {
@@ -163,6 +152,31 @@ body {
     bottom: 0;
     position: absolute;
     width: 100%;
+}
+.form-field-label-container {
+    display: flex;
+}
+
+.form-field-above-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-field-above-item {
+    display: grid;
+    grid-template-columns: 0.9fr;
+}
+
+.form-field-left-container {
+    align-items: center;
+    column-gap: 0.4em;
+    display: flex;
+}
+
+.form-field-left-container {
+    align-items: center;
+    column-gap: 0.4em;
+    display: flex;
 }
 
 .green {
@@ -271,7 +285,9 @@ body {
 }
 
 .logout-container {
+    align-items: center;
     background-color: #e0e0e0;
+    display: flex;
     position: absolute;
     right: 0;
     top: 50%;
@@ -346,14 +362,22 @@ body {
     margin-top: 0.6em;
 }
 
+.mol-in-gp-input {
+    display: grid;
+    row-gap: 0.4em;
+}
+
 .padded {
     padding: 0.2em 0.2em;
 }
 
 .pushbutton-add {
+    align-items: center;
     background-color: #007f00;
     color: white;
+    display: flex;
     height: 3em;
+    justify-content: center;
     margin-left: auto;
     width: 3em;
 }
@@ -362,15 +386,15 @@ body {
 }
 
 .pushbutton-common {
+    align-items: center;
     border: 0.1em solid black;
-    text-align: center;
+    display: flex;
+    justify-content: center;
     text-decoration: none;
     transition: background-color 0.25s;
 }
 
 .pushbutton-chained {
-    display: inline-block;
-    text-align: center;
     margin: 0.2em;
 }
 
@@ -379,9 +403,12 @@ body {
 }
 
 .pushbutton-delete {
+    align-items: center;
     background-color: red;
     color: black;
+    display: flex;
     height: 80%;
+    justify-content: center;
     margin: auto 0 auto auto;
     width: 3em;
 }
@@ -503,7 +530,6 @@ body {
 }
 
 .tooltip-container {
-    display: inline-block;
     position: relative;
 }
 .tooltip-container:hover {
@@ -569,6 +595,15 @@ body {
     left: calc(100% - 0.4em);
 }
 
+.tooltip-container-question-mark-text-common {
+    color: #646f9d;
+    padding-left: 0.2em;
+}
+
+.tooltip-container-question-mark-text {
+    font-size: var(--small-font-size);
+}
+
 .tooltip-inner {
     background-color: #e0e0e0;
     padding: 0.2em;
@@ -579,6 +614,10 @@ body {
 .top-panel {
     position: relative;
     width: 100%;
+}
+
+.verbatim {
+    font-size: var(--small-font-size);
 }
 
 .version-info-text {

@@ -2,7 +2,6 @@
  * Copyright (c) 2020-2021 WebMMB contributors, licensed under MIT, See LICENSE file for details.
  *
  * @author Michal Malý (michal.maly@ibt.cas.cz)
- * @author Samuel C. Flores (samuelfloresc@gmail.com)
  * @author Jiří Černý (jiri.cerny@ibt.cas.cz)
  */
 
@@ -36,7 +35,7 @@ export class ComboBox<T> extends CtrldComponent<T, ComboBox.Props<T>> {
                             this.props.updateNotifier(actualValue.value);
                     }
                 }
-                className={this.props.className ?? 'combo-box'}
+                className={this.props.className ?? 'combo-box combo-box-font combo-box-icon'}
             >
                 {this.props.options.map(o => {
                     const v = this.props.stringifier ? this.props.stringifier(o.value) : defStrfr(o.value);
