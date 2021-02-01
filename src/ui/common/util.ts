@@ -11,6 +11,14 @@ function HasOwnProperty<X extends {}, Y extends PropertyKey>(obj: X, prop: Y): o
 }
 
 export namespace Util {
+    export function formatError(status: number|undefined, prefix: string, text: string) {
+        if (status === 403)
+            return `${prefix} - ${status}: You session may have expired. Try logging in again.`;
+
+        const st = status ? `${status}: ${prefix} - ` : `${prefix} - `;
+        return `${st} ${text}`;
+    }
+
     export function toString(value: any) {
         if (value === undefined)
             return '';

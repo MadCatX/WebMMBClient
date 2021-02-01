@@ -9,6 +9,7 @@
 import * as React from 'react';
 import { JobItem } from './job-item';
 import { PushButton } from './common/push-button';
+import { Util } from './common/util';
 import { JsonCommands, jsonCommandsFromJson } from '../mmb/commands';
 import * as Api from '../mmb/api';
 import { JobQuery } from '../mmb/job-query';
@@ -62,10 +63,6 @@ export class JobList extends React.Component<JobList.Props, State> {
         this.onDeleteJobClicked = this.onDeleteJobClicked.bind(this);
     }
 
-    componentDidMount() {
-        this.refresh();
-    }
-
     private onDeleteJobClicked(id: string) {
         Net.abortFetch(this.deleteJobAborter);
 
@@ -81,7 +78,7 @@ export class JobList extends React.Component<JobList.Props, State> {
                 if (Response.isError(r)) {
                     this.setState({
                         ...this.state,
-                        error: r.message
+                        error: Util.formatError(resp.status, 'Cannot delete job', r.message),
                     });
                 } else {
                     this.refresh();
@@ -90,7 +87,7 @@ export class JobList extends React.Component<JobList.Props, State> {
             }).catch(e => {
                 this.setState({
                     ...this.state,
-                    error: e.toString(),
+                    error: Util.formatError(resp.status, 'Cannot delete job', e.toString()),
                 });
             });
         }).catch(e => {
@@ -98,7 +95,7 @@ export class JobList extends React.Component<JobList.Props, State> {
                 return;
             this.setState({
                 ...this.state,
-                error: e.toString(),
+                error: Util.formatError(undefined, 'Cannot delete job', e.toString()),
             });
         });
     }
@@ -118,47 +115,39 @@ export class JobList extends React.Component<JobList.Props, State> {
         const { promise, aborter } = JobQuery.list();
         this.listJobsAborter = aborter;
         promise.then(resp => {
-            if (resp.status === 200) {
-                resp.json().then(json => {
-                    if (Net.isFetchAborted(aborter))
-                        return;
+            resp.json().then(json => {
+                if (Net.isFetchAborted(aborter))
+                    return;
 
-                    const r = Response.parse(json, ResponseDeserializers.toJobList);
+                const r = Response.parse(json, ResponseDeserializers.toJobList);
 
-                    if (Response.isError(r)) {
-                        this.setState({
-                            ...this.state,
-                            jobs: [],
-                            error: 'Invalid job list data',
-                        });
-                    } else if (Response.isOk(r)) {
-                        this.setState({
-                            ...this.state,
-                            jobs: r.data.map((item) => jobListItemToEntry(item)),
-                            error: '',
-                        });
-                    }
-                }).catch(e => {
+                if (Response.isError(r)) {
                     this.setState({
                         ...this.state,
                         jobs: [],
-                        error: `Cannot fetch list of jobs (${e.toString()})`,
+                        error: Util.formatError(resp.status, 'Cannot fetch list of jobs', r.message),
                     });
-                });
-            } else {
+                } else if (Response.isOk(r)) {
+                    this.setState({
+                        ...this.state,
+                        jobs: r.data.map((item) => jobListItemToEntry(item)),
+                        error: '',
+                    });
+                }
+            }).catch(e => {
                 this.setState({
                     ...this.state,
                     jobs: [],
-                    error: `Cannot fetch list of jobs (${resp.status} - ${resp.statusText})`,
+                    error: Util.formatError(resp.status, 'Cannot fetch list of jobs', e.toString()),
                 });
-            }
+            });
         }).catch(e => {
             if (Net.isAbortError(e))
                 return;
             this.setState({
                 ...this.state,
                 jobs: [],
-                error: `Cannot fetch list of jobs (${e.toString()})`,
+                error: Util.formatError(undefined, 'Cannot fetch list of jobs', e.toString()),
             });
         });
     }
@@ -203,45 +192,43 @@ export class JobList extends React.Component<JobList.Props, State> {
         const { promise, aborter } = JobQuery.commands(id);
         this.selectJobAborter = aborter;
         promise.then(resp => {
-            if (resp.status === 200) {
-                resp.json().then(json => {
-                    if (Net.isFetchAborted(aborter))
-                        return;
+            resp.json().then(json => {
+                if (Net.isFetchAborted(aborter))
+                    return;
 
-                    const r = Response.parse(json, jsonCommandsFromJson);
+                const r = Response.parse(json, jsonCommandsFromJson);
 
-                    if (Response.isError(r)) {
-                        this.setState({
-                            ...this.state,
-                            error: r.message,
-                        });
-                    } else if (Response.isOk(r)) {
-                        this.setState({
-                            ...this.state,
-                            error: '',
-                        });
-                        this.props.onSelectJob(job, r.data);
-                    }
-                }).catch(e => {
+                if (Response.isError(r)) {
                     this.setState({
                         ...this.state,
-                        error: e.toString(),
+                        error: Util.formatError(resp.status, 'Cannot select job', r.message),
+
                     });
-                });
-            } else {
+                } else if (Response.isOk(r)) {
+                    this.setState({
+                        ...this.state,
+                        error: '',
+                    });
+                    this.props.onSelectJob(job, r.data);
+                }
+            }).catch(e => {
                 this.setState({
                     ...this.state,
-                    error: `Failed to fetch job commands (${resp.status}: ${resp.statusText}`,
+                    error: Util.formatError(resp.status, 'Cannot select job', e.toString()),
                 });
-            }
+            });
         }).catch(e => {
             if (Net.isAbortError(e))
                 return;
             this.setState({
                 ...this.state,
-                error: e.toString(),
+                error: Util.formatError(undefined, 'Cannot select job', e.toString()),
             });
         });
+    }
+
+    componentDidMount() {
+        this.refresh();
     }
 
     componentWillUnmount() {

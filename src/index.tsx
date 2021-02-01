@@ -145,9 +145,6 @@ export class Main extends React.Component<Props, State> {
         promise.then(resp => {
             console.log('Requesting session info');
 
-            if (resp.status !== 200)
-                throw new Error(`Failed to get session info, ${resp.status} ${resp.statusText}`);
-
             resp.json().then(json => {
                 if (Net.isFetchAborted(aborter))
                     return;
@@ -155,7 +152,7 @@ export class Main extends React.Component<Props, State> {
                 const r = Response.parse(json, ResponseDeserializers.toSessionInfo);
 
                 if (Response.isError(r)) {
-                    console.error(r.message);
+                    throw new Error(`${resp.status}: Failed to get session info, ${r.message}`);
                 } else if (Response.isOk(r)) {
                     this.setState({
                         ...this.state,

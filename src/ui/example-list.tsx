@@ -62,8 +62,8 @@ export class ExampleList extends React.Component<ExampleList.Props, State> {
         const { promise, aborter } = AppQuery.activateExample(name);
         this.activateExampleAborter = aborter;
         promise.then(resp => {
-        resp.json().then(json => {
-            if (Net.isFetchAborted(aborter))
+            resp.json().then(json => {
+                if (Net.isFetchAborted(aborter))
                     return;
 
                 const r = Response.parse(json, ResponseDeserializers.toJobInfo)
