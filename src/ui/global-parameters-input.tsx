@@ -60,6 +60,7 @@ export class GlobalParametersInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKey
                         tooltip='firstStage, lastStage'
                         style='above'
                         options={this.props.availableStages.map(n => { return { caption: n.toString(), value: n }})}
+                        stringifier={v => v?.toString() ?? ''}
                         ctxData={this.props.ctxData}
                         className='combo-box labeled-field-concise' />
                     <CHLField
