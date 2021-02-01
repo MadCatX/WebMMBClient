@@ -1,4 +1,5 @@
 :root {
+    --tiny-font-size: 8pt;
     --small-font-size: 10pt;
     --normal-font-size: 12pt;
 }
@@ -147,9 +148,11 @@ body {
 }
 
 .footer {
+    align-items: center;
     background-color: #e0e0e0;
-    height: 1.2em;
     bottom: 0;
+    display: flex;
+    height: 2em;
     position: absolute;
     width: 100%;
 }
@@ -622,7 +625,8 @@ body {
 
 .version-info-text {
     color: #404040;
-    font-size: 8pt;
+    font-size: var(--tiny-font-size);
+    margin: auto 0.2em auto 0.2em;
 }
 
 .viewer-container {
