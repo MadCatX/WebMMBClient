@@ -9,12 +9,6 @@
 import * as React from 'react';
 
 export class TooltippedField extends React.Component<TooltippedField.Props> {
-    constructor(props: TooltippedField.Props) {
-        super(props);
-
-        this.renderTooltip = this.renderTooltip.bind(this);
-    }
-
     private renderTooltip() {
         if (this.props.text === undefined)
             return undefined;
@@ -24,17 +18,31 @@ export class TooltippedField extends React.Component<TooltippedField.Props> {
     }
 
     render() {
-        return (
-            <div className='tooltip-container'>
-                {this.renderTooltip()}
-                {this.props.renderContent()}
-            </div>
-        );
+        switch (this.props.style) {
+        case 'entire-label':
+            return (
+                <div className='tooltip-container tooltip-container-entire-label'>
+                    {this.renderTooltip()}
+                    {this.props.renderContent()}
+                </div>
+            );
+        case 'question-mark':
+            return (
+                <>
+                    {this.props.renderContent()}
+                    <div className='tooltip-container tooltip-container-question-mark'>
+                        <div className='tooltip-container-question-mark-text-common tooltip-container-question-mark-text'>[?]</div>
+                        {this.renderTooltip()}
+                    </div>
+                </>
+            );
+        }
     }
 }
 
 export namespace TooltippedField {
-    export type Position = 'above' | 'below' | 'left'
+    export type Position = 'above' | 'below' | 'left' | 'right';
+    export type Style = 'entire-label' | 'question-mark';
 
     export interface ContentRenderer {
         (): React.ReactFragment;
@@ -42,6 +50,7 @@ export namespace TooltippedField {
 
     export interface Props {
         position: Position;
+        style: Style;
         renderContent: ContentRenderer;
         text?: string;
     }

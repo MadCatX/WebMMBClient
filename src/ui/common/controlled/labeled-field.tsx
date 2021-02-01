@@ -11,7 +11,7 @@ import { ComboBox } from './combo-box';
 import { CheckBox } from './check-box';
 import { LineEdit } from './line-edit';
 import { TextArea } from './text-area';
-import { TooltippedField } from '../tooltipped-field';
+import { LabeledFieldRenderer } from '../labeled-field-renderer';
 
 function CBCtor<T>() {
     return ComboBox as new(props: ComboBox.Props<T>) => ComboBox<T>;
@@ -26,65 +26,19 @@ function TACtor<T extends string>() {
 }
 
 abstract class BaseLabeledField<P extends BaseLabeledField.Props> extends React.Component<P> {
-    private renderLabel = (left: boolean) => {
-        const cls = left ? 'form-field-label-left' : 'form-field-label';
-        return (<label className={cls} htmlFor={`${this.props.id}`}>{this.props.label}</label>);
-    }
-
     abstract renderWidget(): React.ReactFragment;
 
     render() {
-        switch (this.props.style) {
-        case 'above':
-            return (
-                <div className={this.props.containerClass}>
-                    <TooltippedField
-                        position={this.props.tooltipPosition ?? 'above'}
-                        text={this.props.tooltip}
-                        renderContent={() => this.renderLabel(false)} />
-                    <div>
-                        {this.renderWidget()}
-                    </div>
-                </div>
-            );
-        case 'left':
-            return (
-                <div className={this.props.containerClass ?? 'form-field-left-container'}>
-                    <TooltippedField
-                        position={this.props.tooltipPosition ?? 'left'}
-                        text={this.props.tooltip}
-                        renderContent={() => this.renderLabel(true)} />
-                    {this.renderWidget()}
-                </div>
-            );
-        case 'left-grid':
-            return (
-                <>
-                    <TooltippedField
-                        position={this.props.tooltipPosition ?? 'left'}
-                        text={this.props.tooltip}
-                        renderContent={() => this.renderLabel(true)} />
-                    {this.renderWidget()}
-                </>
-            );
-        }
+        return LabeledFieldRenderer.render(this.props, () => this.renderWidget());
     }
 }
 
 namespace BaseLabeledField {
-    export interface Props {
-        id: string;
-        label: string;
-        style: LabeledField.LabelPlacing;
-        containerClass?: string;
-        tooltip?: string;
-        tooltipPosition?: TooltippedField.Position;
+    export interface Props extends LabeledFieldRenderer.Props {
     }
 }
 
 export namespace LabeledField {
-    export type LabelPlacing = 'left' | 'above' | 'left-grid';
-
     export interface CBProps<T> extends BaseLabeledField.Props, ComboBox.Props<T> {
     }
 

@@ -53,6 +53,7 @@ export class Logout extends React.Component<Logout.Props, State> {
                 <div className={cpyCls}>Copied!&nbsp;</div>
                 <TooltippedField
                     position='below'
+                    style='entire-label'
                     text='Click on the ID to copy it to clipboard'
                     renderContent={
                         () => (<div className='inlined' onClick={this.copyIdToClipboard}>Session ID: {this.props.username ?? ''}</div>)

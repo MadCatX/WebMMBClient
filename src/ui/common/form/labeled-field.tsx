@@ -12,60 +12,20 @@ import { FormField } from './form-field';
 import { CheckBox } from './check-box';
 import { ComboBox } from './combo-box';
 import { LineEdit } from './line-edit';
+import { MultipleComboBox } from './multiple-combo-box';
 import { TextArea } from './text-area';
-import { TooltippedField } from '../tooltipped-field';
+import { LabeledFieldRenderer } from '../labeled-field-renderer';
 
-abstract class FBaseLabeledField<KE, KV extends string, T, U extends FormModel.V<T>, P extends FBaseLabeledField.Props<KE, KV, T>> extends FormField<KE, KV, T, P> {
-    private renderLabel = (left: boolean) => {
-        const cls = left ? 'form-field-label-left' : 'form-field-label';
-        return (<label className={cls} htmlFor={`${this.props.id}`}>{this.props.label}</label>);
-    }
-
+export abstract class FBaseLabeledField<KE, KV extends string, T, U extends FormModel.V<T>, P extends FBaseLabeledField.Props<KE, KV, T>, S = {}> extends FormField<KE, KV, T, P, S> {
     abstract renderWidget(): React.ReactFragment;
 
     render() {
-        switch (this.props.style) {
-        case 'above':
-            return (
-                <div>
-                    <TooltippedField
-                        position='above'
-                        text={this.props.tooltip}
-                        renderContent={() => this.renderLabel(false)} />
-                    <div>
-                        {this.renderWidget()}
-                    </div>
-                </div>
-            );
-        case 'left':
-            return (
-                <div className='form-field-left-container'>
-                    <TooltippedField
-                        position='left'
-                        text={this.props.tooltip}
-                        renderContent={() => this.renderLabel(true)} />
-                    {this.renderWidget()}
-                </div>
-            );
-        case 'left-grid':
-            return (
-                <>
-                    <TooltippedField
-                        position='left'
-                        text={this.props.tooltip}
-                        renderContent={() => this.renderLabel(true)} />
-                    {this.renderWidget()}
-                </>
-            );
-        }
+        return LabeledFieldRenderer.render(this.props, () => this.renderWidget())
     }
 }
 
-namespace FBaseLabeledField {
-    export interface Props<KE, KV extends string, T> extends FormField.Props<KE, KV, T> {
-        label: string;
-        style: LabeledField.LabelPlacing;
-        tooltip?: string;
+export namespace FBaseLabeledField {
+    export interface Props<KE, KV extends string, T> extends FormField.Props<KE, KV, T>, LabeledFieldRenderer.Props {
     }
 }
 
@@ -87,6 +47,11 @@ export namespace LabeledField {
         LineEdit.Props<KE, KV, T> {
     }
 
+    export interface MCBProps<KE, KV extends string, T, U extends T> extends
+        FBaseLabeledField.Props<KE, KV, T>,
+        MultipleComboBox.Props<KE, KV, T, U> {
+    }
+
     export interface TAProps<KE, KV extends string, T> extends
         FBaseLabeledField.Props<KE, KV, T>,
         TextArea.Props<KE, KV, T> {
@@ -104,12 +69,16 @@ export namespace LabeledField {
         return LabeledLineEdit as new(props: LEProps<KE, KV, T>) => LabeledLineEdit<KE, KV, T>;
     }
 
+    export function MultipleComboBox<KE, KV extends string, T, U extends T>() {
+        return LabeledMultipleComboBox as new(props: MCBProps<KE, KV, T, U>) => LabeledMultipleComboBox<KE, KV, T, U>;
+    }
+
     export function TextArea<KE, KV extends string, T>() {
         return LabeledTextArea as new(props: TAProps<KE, KV, T>) => LabeledTextArea<KE, KV, T>;
     }
 }
 
-export class LabeledCheckBox<KE, KV extends string, T> extends FBaseLabeledField<KE, KV, T, T, LabeledField.CHProps<KE, KV, T>> {
+export class LabeledCheckBox<KE, KV extends string, T, S = {}> extends FBaseLabeledField<KE, KV, T, T, LabeledField.CHProps<KE, KV, T>, S> {
     private Widget = CheckBox.Spec<KE, KV, T>();
 
     renderWidget() {
@@ -119,7 +88,7 @@ export class LabeledCheckBox<KE, KV extends string, T> extends FBaseLabeledField
     }
 }
 
-export class LabeledComboBox<KE, KV extends string, T, U extends FormModel.V<T>> extends FBaseLabeledField<KE, KV, T, U, LabeledField.CBProps<KE, KV, T, U>> {
+export class LabeledComboBox<KE, KV extends string, T, U extends FormModel.V<T>, S = {}> extends FBaseLabeledField<KE, KV, T, U, LabeledField.CBProps<KE, KV, T, U>, S> {
     private Widget = ComboBox.Spec<KE, KV, T, U>();
 
     renderWidget() {
@@ -129,7 +98,7 @@ export class LabeledComboBox<KE, KV extends string, T, U extends FormModel.V<T>>
     }
 }
 
-export class LabeledLineEdit<KE, KV extends string, T> extends FBaseLabeledField<KE, KV, T, T, LabeledField.LEProps<KE, KV, T>> {
+export class LabeledLineEdit<KE, KV extends string, T, S = {}> extends FBaseLabeledField<KE, KV, T, T, LabeledField.LEProps<KE, KV, T>, S> {
     private Widget = LineEdit.Spec<KE, KV, T>();
 
     renderWidget() {
@@ -139,7 +108,17 @@ export class LabeledLineEdit<KE, KV extends string, T> extends FBaseLabeledField
     }
 }
 
-export class LabeledTextArea<KE, KV extends string, T> extends FBaseLabeledField<KE, KV, T, T, LabeledField.TAProps<KE, KV, T>> {
+export class LabeledMultipleComboBox<KE, KV extends string, T, U extends T, S = {}> extends FBaseLabeledField<KE, KV, T, U, LabeledField.MCBProps<KE, KV, T, U>, S> {
+    private Widget = MultipleComboBox.Spec<KE, KV, T, U>();
+
+    renderWidget() {
+        return (
+            <this.Widget {...this.props} />
+        );
+    }
+}
+
+export class LabeledTextArea<KE, KV extends string, T, S = {}> extends FBaseLabeledField<KE, KV, T, T, LabeledField.TAProps<KE, KV, T>, S> {
     private Widget = TextArea.Spec<KE, KV, T>();
 
     renderWidget() {

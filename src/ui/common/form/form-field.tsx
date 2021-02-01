@@ -17,6 +17,6 @@ export namespace FormField {
     export interface Props<KE, KV, T> {
         keyId: KV;
         ctxData: FormModel.ContextData<KE, KV, T>;
-        id?: string;
+        id: string;
     }
 }
