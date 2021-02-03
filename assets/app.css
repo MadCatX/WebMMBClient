@@ -318,7 +318,7 @@ body {
 
 .mol-in-cp-input {
     display: grid;
-    grid-template-columns: 8.8em 8.8em 5em 20em auto;
+    grid-template-columns: 8.8em 8.8em 5em 1fr auto;
 }
 
 .mol-in-cp-added {

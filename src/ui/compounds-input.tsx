@@ -151,7 +151,8 @@ export class CompoundsInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM.
                         validator={v => isSequenceValid(this.state.compoundType, v) || v.length < this.state.sequence.length}
                         updateNotifier={v => this.setState({ ...this.state, sequence: v })}
                         hint='Enter sequence'
-                        spellcheck={false} />
+                        spellcheck={false}
+                        resizeMode={'vertical'} />
                     <PushButton
                         className='pushbutton-common pushbutton-add'
                         value="+"
