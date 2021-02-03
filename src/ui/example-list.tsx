@@ -7,14 +7,15 @@
  */
 
 import * as React from 'react';
+import { PushButton } from './common/push-button';
+import { MmbInputModel as MIM } from '../model/mmb-input-model';
 import * as Api from '../mmb/api';
 import { AppQuery } from '../mmb/app-query';
-import { JsonCommands, jsonCommandsFromJson } from '../mmb/commands';
+import { jsonCommandsFromJson } from '../mmb/commands';
 import { JobQuery } from '../mmb/job-query';
 import { Response } from '../mmb/response';
 import { ResponseDeserializers } from '../mmb/response-deserializers';
 import { Net } from '../util/net';
-import { PushButton } from './common/push-button';
 
 interface State {
     error: string;
@@ -91,7 +92,7 @@ export class ExampleList extends React.Component<ExampleList.Props, State> {
                                     error: rr.message
                                 });
                             } else if (Response.isOk(rr)) {
-                                this.props.onExampleSelected(info, rr.data);
+                                this.props.onExampleSelected(info, MIM.jsonCommandsToValues(info.name, info.available_stages, rr.data));
                             }
                         }).catch(e => {
                             JobQuery.del(info.id);
@@ -183,7 +184,7 @@ export class ExampleList extends React.Component<ExampleList.Props, State> {
 
 export namespace ExampleList {
     export interface OnExampleSelected {
-        (info: Api.JobInfo, commands: JsonCommands): void;
+        (info: Api.JobInfo, setup: MIM.Values): void;
     }
 
     export interface Props {

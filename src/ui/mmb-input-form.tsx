@@ -8,13 +8,13 @@
 
 import * as React from 'react';
 import { AdvancedMmbOptions } from './advanced-mmb-options';
-import { FormContextManager as FCM } from '../model/common/form-context-manager';
-import { Form } from './common/form/form';
 import { BaseInteractionsInput } from './base-interactions-input';
 import { CompoundsInput } from './compounds-input';
 import { DoubleHelicesInput } from './double-helices-input';
 import { GlobalParametersInput } from './global-parameters-input';
 import { NtCsInput } from './ntcs-input';
+import { Form } from './common/form/form';
+import { TextArea } from './common/form/text-area';
 import { ParameterNames, Parameters } from '../mmb/available-parameters';
 import { CommandsSerializer, JsonCommandsSerializer, TextCommandsSerializer } from '../mmb/commands-serializer';
 import { GlobalConfig } from '../model/global-config';
@@ -25,9 +25,12 @@ import { DoubleHelix } from '../model/double-helix';
 import { MmbInputModel as MIM } from '../model/mmb-input-model';
 import { NtCConformation } from '../model/ntc-conformation';
 import { MdParameters } from '../model/md-parameters';
+import { FormContextManager as FCM } from '../model/common/form-context-manager';
 import { JobNameInput } from './job-name-input';
 import { MmbCommands } from './mmb-commands';
 import { Num } from '../util/num';
+
+const RawCmdsTA = TextArea.Spec<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes>();
 
 export class MmbInputForm extends Form<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes, MmbInputForm.Props> {
     private Ctx: React.Context<MIM.ContextData>;
@@ -42,7 +45,25 @@ export class MmbInputForm extends Form<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTy
         this.Ctx = FCM.makeContext();
     }
 
+    getValues() {
+        return new Map([ ...this.state.values ]);
+    }
+
     commandsToJob() {
+        const name = this.getName();
+        const commands = JsonCommandsSerializer.serialize(this.makeParams());
+
+        return { name, commands };
+    }
+
+    rawCommandsToJob() {
+        const name = this.getName();
+        const commands = this.getScalar<string>(this.state, 'mol-in-raw-commands', '');
+
+        return { name, commands };
+    }
+
+    private getName() {
         const name = this.getScalar(this.state, 'mol-in-job-name', '');
 
         const ne = this.emptyErrors();
@@ -60,11 +81,8 @@ export class MmbInputForm extends Form<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTy
                 ...this.state,
                 errors: new Map([...this.state.errors, ...ne]),
             });
+            return name; // FIXME: setting state and returning is nasty
         }
-
-        const commands = JsonCommandsSerializer.serialize(this.makeParams());
-
-        return { name, commands };
     }
 
     private makeMmbCommands() {
@@ -157,14 +175,41 @@ export class MmbInputForm extends Form<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTy
         return (
             <this.Ctx.Provider value={ctxData}>
                 <form>
-                    <JobNameInput ctxData={ctxData} name={this.props.jobName} />
-                    <CompoundsInput ctxData={ctxData} />
-                    <DoubleHelicesInput ctxData={ctxData} />
-                    <BaseInteractionsInput ctxData={ctxData} />
-                    <NtCsInput ctxData={ctxData} />
-                    <GlobalParametersInput ctxData={ctxData} availableStages={this.props.availableStages} />
-                    <AdvancedMmbOptions ctxData={ctxData} />
-                    {this.makeMmbCommands()}
+                    {this.props.mode === 'maverick'
+                     ?
+                     <>
+                         <JobNameInput ctxData={ctxData} name={this.props.jobName} />
+                         <div className='raw-commands-container'>
+                             <RawCmdsTA
+                                 id='mmb-in-raw-commands'
+                                 keyId='mol-in-raw-commands'
+                                 spellcheck={false}
+                                 resizeMode={'vertical'}
+                                 rows={30}
+                                 ctxData={ctxData} />
+                        </div>
+                     </>
+                     :
+                     <>
+                         <JobNameInput ctxData={ctxData} name={this.props.jobName} />
+                         <CompoundsInput ctxData={ctxData} />
+                         <DoubleHelicesInput ctxData={ctxData} />
+                         <BaseInteractionsInput ctxData={ctxData} />
+                         <NtCsInput ctxData={ctxData} />
+                         <GlobalParametersInput ctxData={ctxData} availableStages={this.props.availableStages} />
+                         {this.props.mode === 'advanced'
+                          ?
+                          (
+                              <>
+                                  <AdvancedMmbOptions ctxData={ctxData} />
+                                  {this.makeMmbCommands()}
+                              </>
+                          )
+                          :
+                          undefined
+                         }
+                     </>
+                    }
                 </form>
             </this.Ctx.Provider>
         );
@@ -174,5 +219,6 @@ export class MmbInputForm extends Form<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTy
 export namespace MmbInputForm {
     export interface Props extends MIM.Props {
         availableStages: number[];
+        mode: MIM.UiMode;
     }
 }

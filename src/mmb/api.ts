@@ -10,12 +10,14 @@ import { AnyObject } from '../util/json';
 
 type ApiRequestType =
     'StartJob'        |
+    'StartJobRaw'     |
     'StopJob'         |
     'DeleteJob'       |
     'JobStatus'       |
     'ListJobs'        |
     'MmbOutput'       |
     'JobCommands'     |
+    'JobCommandsRaw'  |
     'SessionInfo'     |
     'CloneJob'        |
     'ListExamples'    |
@@ -28,6 +30,7 @@ type AuthRequestType =
 export type JobState = 'NotStarted' | 'Running' | 'Finished' | 'Failed';
 export type JobStep = number | 'preparing' | 'none';
 export type JobTotalSteps = number | 'none';
+export type JobCommandsMode = 'Synthetic' | 'Raw';
 
 /* Requests */
 
@@ -58,6 +61,11 @@ export type ResumeJobRqData = {
 export type StartJobRqData = {
     name: string,
     commands: AnyObject,
+}
+
+export type StartJobRawRqData = {
+    name: string,
+    commands: string,
 }
 
 /* Responses */
@@ -94,6 +102,7 @@ export type JobInfo = {
     total_steps: JobTotalSteps,
     available_stages: number[],
     created_on: number,
+    commands_mode: JobCommandsMode,
 }
 
 export type JobListItem = {

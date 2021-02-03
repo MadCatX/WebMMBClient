@@ -10,7 +10,7 @@ import * as React from 'react';
 import { PushButton } from './common/push-button';
 import { JobState } from '../mmb/api';
 
-export class JobControls extends React.Component<JobControls.Props, JobControls.State> {
+export class JobControls extends React.Component<JobControls.Props> {
     render() {
         return (
             <div>
@@ -54,8 +54,5 @@ export namespace JobControls {
         handleStatus: () => void;
         handleStop: () => void;
         jobState: JobState;
-    }
-
-    export interface State {
     }
 }

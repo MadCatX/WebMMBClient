@@ -311,6 +311,7 @@ body {
 }
 
 .mmb-output {
+    font-size: var(--small-font-size);
     height: 30em;
     overflow: scroll;
 }
@@ -448,6 +449,13 @@ body {
     font-weight: bold;
 }
 
+.raw-commands-container {
+    display: grid;
+    grid-template-columns: 1fr;
+    margin-top: 0.8em;
+    margin-bottom: 0.8em;
+}
+
 .section {
     display: block;
     margin-top: 1em;
@@ -530,6 +538,18 @@ body {
 
     border: 0.1em solid black;
     border-radius: 0;
+}
+
+.text-area-horiz-resize {
+    resize: horizontal;
+}
+
+.text-area-vert-resize {
+    resize: vertical;
+}
+
+.text-area-no-resize {
+    resize: none;
 }
 
 .tooltip-container {
@@ -619,6 +639,10 @@ body {
     width: 100%;
 }
 
+.ui-mode-container {
+    margin-bottom: 0.4em;
+}
+
 .verbatim {
     font-size: var(--small-font-size);
 }
@@ -644,4 +668,9 @@ body {
     column-gap: 1em;
     display: flex;
     width: 100%;
+}
+
+.warning-message {
+    color: #e18505;
+    font-size: var(--normal-font-size);
 }

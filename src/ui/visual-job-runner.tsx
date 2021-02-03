@@ -13,20 +13,22 @@ import { MmbInputForm } from './mmb-input-form';
 import { Viewer } from './viewer';
 import { ErrorBox } from './common/error-box';
 import { Util } from './common/util';
+import { LabeledField } from './common/controlled/labeled-field';
 import * as Api from '../mmb/api';
-import { ParameterNames } from '../mmb/available-parameters';
-import { JsonCommands } from '../mmb/commands';
 import { JobQuery } from '../mmb/job-query';
 import { Response } from '../mmb/response';
 import { ResponseDeserializers } from '../mmb/response-deserializers';
-import { JsonCommandsDeserializer } from '../mmb/commands-deserializer';
 import { MmbInputModel as MIM } from '../model/mmb-input-model';
-import { GlobalConfig } from '../model/global-config';
-import { Reporting } from '../model/reporting';
 import { Net } from '../util/net';
 
 const DefaultAutoRefreshEnabled = true;
 const DefaultAutoRefreshInterval = 10;
+const ModeLField = LabeledField.ComboBox<MIM.UiMode>();
+const UiModeMessage = {
+    simple: '',
+    advanced: 'Warning: Be aware that any changes made here will not be erased if you switch back to simple mode.',
+    maverick: 'Warning: Commands entered in this mode will be submitted directly to MMB with no additional validation. You are on a highway to the danger zone unless you know what you are doing.',
+};
 
 function forceResize() {
     const elem = document.getElementById('viewer');
@@ -47,6 +49,7 @@ interface State {
     autoRefreshEnabled: boolean;
     autoRefreshInterval: number;
     mmbOutput: Viewer.MmbOutput;
+    uiMode: MIM.UiMode;
 }
 
 export class VisualJobRunner extends React.Component<VisualJobRunner.Props, State> {
@@ -72,6 +75,7 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
             autoRefreshEnabled: true,
             autoRefreshInterval: 10,
             mmbOutput: { text: undefined, errors: undefined },
+            uiMode: 'simple',
         };
 
         this.makeMmbInputForm = this.makeMmbInputForm.bind(this);
@@ -113,55 +117,6 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
         }
     }
 
-    private makeInitialValues(stages: number[], commands?: JsonCommands, name?: string) {
-        const map = new Map<MIM.ValueKeys, MIM.V<MIM.ValueTypes>>();
-
-        if (commands === undefined || name === undefined) {
-            // Set default values
-            map.set('mol-in-gp-bisf', GlobalConfig.Defaults.baseInteractionScaleFactor);
-            map.set('mol-in-gp-temperature', GlobalConfig.Defaults.temperature);
-            map.set('mol-in-gp-reporting-interval', Reporting.Defaults.interval);
-            map.set('mol-in-gp-num-reports', Reporting.Defaults.count);
-            map.set('mol-in-gp-stage', 1);
-
-            return map;
-        }
-
-        const global = JsonCommandsDeserializer.toGlobal(commands);
-        const stage = stages[stages.length - 1];
-        const md = JsonCommandsDeserializer.toMdParams(commands);
-        const compounds = JsonCommandsDeserializer.toCompounds(commands);
-        const doubleHelices = JsonCommandsDeserializer.toDoubleHelices(commands);
-        const baseInteractions = JsonCommandsDeserializer.toBaseInteractions(commands);
-        const ntcs = JsonCommandsDeserializer.toNtCs(commands);
-        const rep = JsonCommandsDeserializer.toReporting(commands);
-        const advParams = (() => {
-            const obj = JsonCommandsDeserializer.toAdvancedParameters(commands);
-            const map = new Map<ParameterNames, unknown>();
-
-            for (const prop in obj) {
-                map.set(prop as ParameterNames, obj[prop]);
-            }
-            return map;
-        })();
-
-        // Global
-        map.set('mol-in-gp-reporting-interval', rep.interval);
-        map.set('mol-in-gp-num-reports', rep.count);
-        map.set('mol-in-gp-bisf', global.baseInteractionScaleFactor);
-        map.set('mol-in-gp-temperature', global.temperature);
-        map.set('mol-in-gp-def-md-params', md.useDefaults);
-        map.set('mol-in-gp-stage', stage);
-        map.set('mol-in-cp-added', compounds);
-        map.set('mol-in-bi-added', baseInteractions);
-        map.set('mol-in-dh-added', doubleHelices);
-        map.set('mol-in-ntcs-added', ntcs);
-        map.set('mol-adv-params', advParams);
-        map.set('mol-in-job-name', name);
-
-        return map;
-    }
-
     private makeMmbInputForm() {
         try {
             const stages = (() => {
@@ -174,13 +129,32 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
                 }
                 return sorted;
             })();
-            const initVals = this.makeInitialValues(stages, this.props.commands, this.props.info?.name);
+
             return (
-                <MmbInputForm
-                    ref={this.mmbInputFormRef}
-                    jobName={this.props.info?.name}
-                    availableStages={stages}
-                    initialValues={initVals} />
+                <>
+                    <div className='ui-mode-container'>
+                        <ModeLField
+                            id='mmb-in-ui-mode'
+                            label='User interface mode'
+                            style='left'
+                            value={this.state.uiMode}
+                            options={
+                                [
+                                    { value: 'simple', caption: 'Simple' },
+                                    { value: 'advanced', caption: 'Advanced' },
+                                    { value: 'maverick', caption: 'Maverick' },
+                                ]
+                            }
+                            updateNotifier={uiMode => this.setState({ ...this.state, uiMode })} />
+                        <div className='warning-message'>{UiModeMessage[this.state.uiMode]}</div>
+                    </div>
+                    <MmbInputForm
+                        ref={this.mmbInputFormRef}
+                        jobName={this.props.info?.name}
+                        availableStages={stages}
+                        mode={this.state.uiMode}
+                        initialValues={this.props.setup} />
+                </>
             );
         } catch (e) {
             return (
@@ -312,11 +286,22 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
         }
 
         try {
-            const {name, commands} = this.mmbInputFormRef.current.commandsToJob();
-
             Net.abortFetch(this.startJobAborter);
 
-            const { promise, aborter } = JobQuery.start(name, commands);
+            const { promise, aborter } = (() => {
+                if (this.state.uiMode === 'maverick') {
+                    const { name, commands } = this.mmbInputFormRef.current.rawCommandsToJob();
+                    console.log(commands);
+
+                    return JobQuery.startRaw(name, commands);
+                } else {
+                    const { name, commands } = this.mmbInputFormRef.current.commandsToJob();
+                    console.log(commands);
+
+                    return JobQuery.start(name, commands);
+                }
+            })();
+
             this.startJobAborter = aborter;
             promise.then(resp => {
                 resp.json().then(json => {
@@ -333,7 +318,7 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
                             ...this.state,
                             ...this.jobInfoOkBlock(r.data)
                         });
-                        this.props.onJobStarted(r.data, commands);
+                        this.props.onJobStarted(r.data, this.mmbInputFormRef.current!.getValues());
                     }
                 }).catch(e => {
                     this.setState({
@@ -347,7 +332,6 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
                     ...this.jobInfoErrorBlock(undefined, 'Cannot start job', e.toString(), 'none', 'none'),
                 });
             });
-            console.log(commands);
         } catch (e) {
             if (Net.isAbortError(e))
                 return;
@@ -424,6 +408,17 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
     componentDidUpdate(_prevProps: VisualJobRunner.Props) {
         if (this.state.jobState !== 'Running')
             this.killAutoRefresh();
+        if (this.props.info !== undefined) {
+            switch (this.props.info.commands_mode) {
+            case 'Raw':
+                if (this.state.uiMode !== 'maverick')
+                    this.setState({ ...this.state, uiMode: 'maverick' });
+                break;
+            case 'Synthetic':
+                if (this.state.uiMode === 'maverick')
+                        this.setState({ ...this.state, uiMode: 'simple' });
+            }
+        }
     }
 
     componentWillUnmount() {
@@ -466,18 +461,13 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
 
 export namespace VisualJobRunner {
     export interface OnJobStarted {
-        (info: Api.JobInfo, commands: JsonCommands): void;
-    }
-
-    export interface ActiveJob {
-        info: Api.JobInfo;
-        commands: JsonCommands;
+        (info: Api.JobInfo, setup: MIM.Values): void;
     }
 
     export interface Props {
         onJobStarted: OnJobStarted;
         username: string;
+        setup: MIM.Values;
         info?: Api.JobInfo;
-        commands?: JsonCommands;
     }
 }

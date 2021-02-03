@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020 WebMMB contributors, licensed under MIT, See LICENSE file for details.
+ * Copyright (c) 2020-2021 WebMMB contributors, licensed under MIT, See LICENSE file for details.
  *
  * @author Michal Malý (michal.maly@ibt.cas.cz)
  * @author Samuel C. Flores (samuelfloresc@gmail.com)
@@ -24,6 +24,7 @@ const JobInfoObj: Api.JobInfo = {
     total_steps: 0,
     available_stages: [] as number[],
     created_on: 0,
+    commands_mode: 'Synthetic',
 };
 const JobListItemObj: Api.JobListItem = {
     ok: false,
@@ -80,12 +81,19 @@ function isJobInfo(v: unknown): v is Api.JobInfo {
         checkType(tObj, 'total_steps', isInt);
         checkType(tObj, 'available_stages', (v: unknown): v is number[] => isArr<number>(v, isInt));
         checkType(tObj, 'created_on', isInt);
+        checkType(tObj, 'commands_mode', isJobCommandsMode);
     } catch (e) {
         console.error(e);
         return false;
     }
 
     return true;
+}
+
+function isJobCommandsMode(v: unknown): v is Api.JobState {
+    if (!isStr(v))
+        return false;
+    return v === 'Synthetic' || v === 'Raw';
 }
 
 function isJobState(v: unknown): v is Api.JobState {
@@ -149,6 +157,7 @@ export namespace ResponseDeserializers {
                 total_steps: obj.total_steps,
                 available_stages: obj.available_stages,
                 created_on: Num.parseIntStrict(obj.created_on),  // On-wire value is a string to prevent rounding
+                commands_mode: obj.commands_mode,
             };
         } else
             throw new Error('Object is not JobInfo');

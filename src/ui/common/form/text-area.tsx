@@ -21,6 +21,21 @@ export class FTextArea<KE, KV extends string, T> extends FormField<KE, KV, T, Te
     }
 
     render() {
+        let cls = this.props.className ?? 'text-area';
+        if (this.props.resizeMode) {
+            switch (this.props.resizeMode) {
+            case 'horizontal':
+                cls += ' text-area-horiz-resize';
+                break;
+            case 'vertical':
+                cls += ' text-area-vert-resize';
+                break;
+            case 'none':
+                cls += ' text-area-no-resize';
+                    break;
+            }
+        }
+
         return (
             <textarea
                 id={this.props.id}
@@ -44,7 +59,7 @@ export class FTextArea<KE, KV extends string, T> extends FormField<KE, KV, T, Te
                 rows={this.props.rows}
                 cols={this.props.columns}
                 value={this.getValue()}
-                className={this.props.className} />
+                className={cls} />
         );
     }
 }
@@ -65,6 +80,7 @@ export namespace TextArea {
         readonly?: boolean;
         spellcheck?: boolean;
         disabled?: boolean;
+        resizeMode?: 'free' | 'horizontal' | 'vertical' | 'none';
         validator?: Validator;
         modifier?: Modifier;
         className?: string;

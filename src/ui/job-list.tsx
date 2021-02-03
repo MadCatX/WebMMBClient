@@ -10,11 +10,13 @@ import * as React from 'react';
 import { JobItem } from './job-item';
 import { PushButton } from './common/push-button';
 import { Util } from './common/util';
-import { JsonCommands, jsonCommandsFromJson } from '../mmb/commands';
+import { jsonCommandsFromJson } from '../mmb/commands';
 import * as Api from '../mmb/api';
 import { JobQuery } from '../mmb/job-query';
 import { Response } from '../mmb/response';
 import { ResponseDeserializers } from '../mmb/response-deserializers';
+import { MmbInputModel as MIM } from '../model/mmb-input-model';
+import { isStr } from '../util/json';
 import { Net } from '../util/net';
 
 interface JobEntry extends Api.JobInfo {
@@ -42,6 +44,7 @@ function jobListItemToEntry(item: Api.JobListItem): JobEntry {
             total_steps: 0,
             available_stages: new Array<number>(),
             created_on: 0,
+            commands_mode: 'Synthetic',
         };
     }
 }
@@ -189,27 +192,61 @@ export class JobList extends React.Component<JobList.Props, State> {
 
         Net.abortFetch(this.selectJobAborter);
 
-        const { promise, aborter } = JobQuery.commands(id);
+        const queryFunc = (() => {
+            switch (job.commands_mode) {
+            case 'Synthetic':
+                return JobQuery.commands;
+            case 'Raw':
+                return JobQuery.commands_raw;
+            }
+        })();
+
+        const { promise, aborter } = queryFunc(id);
         this.selectJobAborter = aborter;
         promise.then(resp => {
             resp.json().then(json => {
                 if (Net.isFetchAborted(aborter))
                     return;
 
-                const r = Response.parse(json, jsonCommandsFromJson);
+                if (job.commands_mode === 'Synthetic') {
+                    const r = Response.parse(json, jsonCommandsFromJson);
 
-                if (Response.isError(r)) {
-                    this.setState({
-                        ...this.state,
-                        error: Util.formatError(resp.status, 'Cannot select job', r.message),
+                    if (Response.isError(r)) {
+                        this.setState({
+                            ...this.state,
+                            error: Util.formatError(resp.status, 'Cannot select job', r.message),
 
-                    });
-                } else if (Response.isOk(r)) {
-                    this.setState({
-                        ...this.state,
-                        error: '',
-                    });
-                    this.props.onSelectJob(job, r.data);
+                        });
+                    } else if (Response.isOk(r)) {
+                        this.setState({
+                            ...this.state,
+                            error: '',
+                        });
+                        this.props.onSelectJob(job, MIM.jsonCommandsToValues(job.name, job.available_stages, r.data));
+                    }
+                } else {
+                    const r = Response.parse(
+                                json,
+                                (v: unknown): string => {
+                                    if (!isStr(v))
+                                        throw new Error('Object is not a string');
+                                    return v;
+                                }
+                              );
+
+                    if (Response.isError(r)) {
+                        this.setState({
+                            ...this.state,
+                            error: Util.formatError(resp.status, 'Cannot select job', r.message),
+
+                        });
+                    } else if (Response.isOk(r)) {
+                        this.setState({
+                            ...this.state,
+                            error: '',
+                        });
+                        this.props.onSelectJob(job, MIM.rawCommandsToValues(job.name, job.available_stages, r.data));
+                    }
                 }
             }).catch(e => {
                 this.setState({
@@ -259,7 +296,7 @@ export namespace JobList {
     }
 
     export interface OnSelectJob {
-        (job?: Api.JobInfo, commands?: JsonCommands): void;
+        (info?: Api.JobInfo, setup?: MIM.Values): void;
     }
 
     export interface Props {

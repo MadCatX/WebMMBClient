@@ -17,9 +17,9 @@ import { VisualJobRunner } from './ui/visual-job-runner';
 import { ExternalResourcesLoader } from './external-resources-loader';
 import * as Api from './mmb/api';
 import { AppQuery } from './mmb/app-query';
-import { JsonCommands } from './mmb/commands';
 import { Response } from './mmb/response';
 import { ResponseDeserializers } from './mmb/response-deserializers';
+import { MmbInputModel as MIM } from './model/mmb-input-model';
 import { Net } from './util/net';
 import { versionInfo } from './version';
 
@@ -27,7 +27,7 @@ type Tabs = 'job-list' | 'job-control' | 'example-list';
 
 type ActiveJob = {
     info: Api.JobInfo,
-    commands: JsonCommands,
+    setup: MIM.Values,
 }
 
 interface State {
@@ -64,8 +64,8 @@ export class Main extends React.Component<Props, State> {
         return this.state.session_id !== undefined && isExtResAvailable('molstar-app');
     }
 
-    private onExampleSelected(info: Api.JobInfo, commands: JsonCommands) {
-        this.onSelectJob(info, commands);
+    private onExampleSelected(info: Api.JobInfo, setup: MIM.Values) {
+        this.onSelectJob(info, setup);
     }
 
     private onJobDeleted(id: string) {
@@ -77,20 +77,20 @@ export class Main extends React.Component<Props, State> {
         }
     }
 
-    private onJobStarted(info: Api.JobInfo, commands: JsonCommands) {
+    private onJobStarted(info: Api.JobInfo, setup: MIM.Values) {
         this.setState({
             ...this.state,
-            activeJob: { info, commands },
+            activeJob: { info, setup },
         });
     }
 
-    private onSelectJob(info?: Api.JobInfo, commands?: JsonCommands) {
+    private onSelectJob(info?: Api.JobInfo, setup?: MIM.Values) {
         if (!this.allowJobControl())
             return;
 
         const aj = (() => {
-            if (info !== undefined && commands !== undefined)
-                return { info, commands };
+            if (info !== undefined && setup !== undefined)
+                return { info, setup };
             return undefined;
         })();
 
@@ -126,7 +126,7 @@ export class Main extends React.Component<Props, State> {
                     username={this.state.session_id!}
                     onJobStarted={this.onJobStarted}
                     info={this.state.activeJob?.info}
-                    commands={this.state.activeJob?.commands} />
+                    setup={this.state.activeJob?.setup ?? MIM.defaultSetupValues()} />
                 );
         case 'example-list':
             return (

@@ -19,6 +19,14 @@ export namespace JobQuery {
         return Request.api(req);
     }
 
+    export function commands_raw(jobId: string)  {
+        const req: Api.ApiRequest<Api.SimpleJobRqData> = {
+            req_type: 'JobCommandsRaw',
+            data: { id: jobId },
+        };
+        return Request.api(req);
+    }
+
     export function clone(id: string, name: string) {
         const req: Api.ApiRequest<Api.CloneJobRqData> = {
             req_type: 'CloneJob',
@@ -62,6 +70,14 @@ export namespace JobQuery {
     export function start(name: string, commands: JsonCommands) {
         const req: Api.ApiRequest<Api.StartJobRqData> = {
             req_type: 'StartJob',
+            data: { name, commands },
+        };
+        return Request.api(req);
+    }
+
+    export function startRaw(name: string, commands: string) {
+        const req: Api.ApiRequest<Api.StartJobRawRqData> = {
+            req_type: 'StartJobRaw',
             data: { name, commands },
         };
         return Request.api(req);
