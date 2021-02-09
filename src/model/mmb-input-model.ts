@@ -22,7 +22,7 @@ import { NtCConformation } from '../model/ntc-conformation';
 import { Reporting } from '../model/reporting';
 
 export namespace MmbInputModel {
-    export type ErrorKeys = 'mol-in-no-name' | 'mol-adv-params';
+    export type ErrorKeys = 'mol-in-no-name' | 'mol-adv-params' | 'mol-raw';
     export type ValueKeys = 'mol-in-cp-added' | 'mol-in-dh-added' | 'mol-in-bi-added' | 'mol-in-ntcs-added' |
         'mol-in-gp-reporting-interval' | 'mol-in-gp-num-reports' | 'mol-in-gp-temperature' | 'mol-in-gp-bisf' | 'mol-in-gp-def-md-params' | 'mol-in-gp-stage' |
         'mol-in-job-name' |

@@ -29,6 +29,8 @@ import { FormContextManager as FCM } from '../model/common/form-context-manager'
 import { JobNameInput } from './job-name-input';
 import { MmbCommands } from './mmb-commands';
 import { Num } from '../util/num';
+import {PushButton} from './common/push-button';
+import {ErrorBox} from './common/error-box';
 
 const RawCmdsTA = TextArea.Spec<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes>();
 
@@ -82,6 +84,20 @@ export class MmbInputForm extends Form<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTy
                 errors: new Map([...this.state.errors, ...ne]),
             });
             return name; // FIXME: setting state and returning is nasty
+        }
+    }
+
+    private importGuidedToRaw() {
+        try {
+            const commands = TextCommandsSerializer.serialize(this.makeParams()).reduce((txt, line) => txt + line + '\n');
+            const v = this.emptyValues();
+            v.set('mol-in-raw-commands', commands);
+            this.setErrorsAndValues(
+                new Map(),
+                new Map([...this.state.values, ...v])
+            );
+        } catch (e) {
+            this.setErrors(new Map(['mol-raw', e]));
         }
     }
 
@@ -179,6 +195,10 @@ export class MmbInputForm extends Form<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTy
                      ?
                      <>
                          <JobNameInput ctxData={ctxData} name={this.props.jobName} />
+                         <PushButton
+                             className='pushbutton-common pushbutton-flex'
+                             value='Import from guided mode'
+                             onClick={() => this.importGuidedToRaw()} />
                          <div className='raw-commands-container'>
                              <RawCmdsTA
                                  id='mmb-in-raw-commands'
@@ -187,6 +207,8 @@ export class MmbInputForm extends Form<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTy
                                  resizeMode={'vertical'}
                                  rows={30}
                                  ctxData={ctxData} />
+                             <ErrorBox
+                                 errors={this.state.errors.get('mol-raw') ?? []} />
                         </div>
                      </>
                      :
