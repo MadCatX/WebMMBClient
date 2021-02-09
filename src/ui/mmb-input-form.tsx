@@ -197,7 +197,7 @@ export class MmbInputForm extends Form<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTy
                      <>
                          <div className='pushbutton-flex-container'>
                              <PushButton
-                                 className='pushbutton-common pushbutton-flex'
+                                 className='pushbutton-common pushbutton-flex pushbutton-hclr-default'
                                  value='Import from guided mode'
                                  onClick={() => this.importGuidedToRaw()} />
                          </div>
