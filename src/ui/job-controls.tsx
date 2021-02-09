@@ -14,7 +14,7 @@ export class JobControls extends React.Component<JobControls.Props> {
     render() {
         return (
             <div>
-                <div className='job-controls-btns'>
+                <div className='job-controls-btns pushbutton-flex-container'>
                     <PushButton
                         className='pushbutton-common pushbutton-flex pushbutton-clr-default pushbutton-hclr-green'
                         classNameDisabled='pushbutton-common pushbutton-flex pushbutton-clr-default-disabled'

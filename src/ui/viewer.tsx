@@ -127,7 +127,7 @@ export class Viewer extends React.Component<Viewer.Props, State> {
         return (
             <div className='viewer-container'>
                 <div id='viewer'></div>
-                <div className='viewer-buttons'>
+                <div className='viewer-buttons pushbutton-flex-container'>
                     <PushButton
                         className='pushbutton-common pushbutton-flex pushbutton-clr-default pushbutton-hclr-default'
                         value='Ball-and-stick'

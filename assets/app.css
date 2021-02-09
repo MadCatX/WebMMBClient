@@ -191,8 +191,6 @@ body {
 }
 
 .job-controls-btns {
-    display: flex;
-    margin: 0 -0.2em;
     width: 100%;
 }
 
@@ -421,8 +419,13 @@ body {
 }
 
 .pushbutton-flex {
-    margin: 0 0.2em;
+    margin: 0;
     flex-grow: 1;
+}
+
+.pushbutton-flex-container {
+    display: flex;
+    column-gap: 0.4em;
 }
 
 .pushbutton-clr-default {
@@ -659,7 +662,6 @@ body {
 }
 
 .viewer-buttons {
-    display: flex;
     margin-bottom: 1em;
     width: 100%;
 }

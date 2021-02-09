@@ -191,14 +191,16 @@ export class MmbInputForm extends Form<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTy
         return (
             <this.Ctx.Provider value={ctxData}>
                 <form>
+                    <JobNameInput ctxData={ctxData} name={this.props.jobName} />
                     {this.props.mode === 'maverick'
                      ?
                      <>
-                         <JobNameInput ctxData={ctxData} name={this.props.jobName} />
-                         <PushButton
-                             className='pushbutton-common pushbutton-flex'
-                             value='Import from guided mode'
-                             onClick={() => this.importGuidedToRaw()} />
+                         <div className='pushbutton-flex-container'>
+                             <PushButton
+                                 className='pushbutton-common pushbutton-flex'
+                                 value='Import from guided mode'
+                                 onClick={() => this.importGuidedToRaw()} />
+                         </div>
                          <div className='raw-commands-container'>
                              <RawCmdsTA
                                  id='mmb-in-raw-commands'
@@ -213,7 +215,6 @@ export class MmbInputForm extends Form<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTy
                      </>
                      :
                      <>
-                         <JobNameInput ctxData={ctxData} name={this.props.jobName} />
                          <CompoundsInput ctxData={ctxData} />
                          <DoubleHelicesInput ctxData={ctxData} />
                          <BaseInteractionsInput ctxData={ctxData} />
