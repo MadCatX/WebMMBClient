@@ -82,7 +82,7 @@ export namespace JsonCommandsDeserializer {
 
         for (const key in commands.advParams) {
             if (!Parameters.has(key as ParameterNames))
-                throw new Error(`Advanced parameter ${name} does not exist`);
+                throw new Error(`Advanced parameter ${key} does not exist`);
 
             const value = commands.advParams[key];
             const param = Parameters.get(key as ParameterNames)!;
@@ -91,28 +91,28 @@ export namespace JsonCommandsDeserializer {
                 if (param.isValid(num))
                     advParams[key] = num;
                 else
-                    throw new Error(`Advanced parameter ${name} has invalid value ${value}`);
+                    throw new Error(`Advanced parameter ${key} has invalid value ${value}`);
             } else if (P.isReal(param)) {
                 const num = Num.parseFloatStrict(value);
                 if (param.isValid(num))
                     advParams[key] = num;
                 else
-                    throw new Error(`Advanced parameter ${name} has invalid value ${value}`);
+                    throw new Error(`Advanced parameter ${key} has invalid value ${value}`);
             } else if (P.isBoolean(param)) {
                 if (param.chkType(value))
                     advParams[key] = value;
                 else
-                    throw new Error(`Advanced parameter ${name} has invalid value ${value}`);
+                    throw new Error(`Advanced parameter ${key} has invalid value ${value}`);
             } else if (P.isTextual(param)) {
                 if (param.chkType(value))
                     advParams[key] = value;
                 else
-                    throw new Error(`Advanced parameter ${name} has invalid value ${value}`);
+                    throw new Error(`Advanced parameter ${key} has invalid value ${value}`);
             } else if (P.isOptions(param)) {
                 if (param.chkType(value))
                     advParams[key] = value;
                 else
-                    throw new Error(`Advanced parameter ${name} has invalid value ${value}`);
+                    throw new Error(`Advanced parameter ${key} has invalid value ${value}`);
             }
         }
 
