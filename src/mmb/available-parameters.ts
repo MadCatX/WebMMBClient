@@ -53,9 +53,9 @@ export type ParameterNames = 'addAllAtomSterics' | 'addAllHeavyAtomSterics' | 'a
     'setForceScrubber' | 'setHelicalStacking' | 'setRemoveBasePairsInRigidStretch' |
     'setTemperature' | 'smallGroupInertiaMultiplier' | 'sphericalHelix center' |
     'sphericalHelix radius' | 'sphericalHelix startTheta' | 'sphericalHelix phiOffset' |
-    'sphericalHelix interStrandDistance' | 'stackAllHelicalResidues' | 'temperature' |
+    'sphericalHelix interStrandDistance' | 'stackAllHelicalResidues' |
     'thermostatType' | 'tinkerParameterFileName' | 'useFixedStepSize' |
-    'useMultithreadedComputation' | 'useOpenMMAcceleration' | 'vanderWallSphereRadius' |
+    'useOpenMMAcceleration' | 'vanderWallSphereRadius' |
     'velocityRescalingInterval' | 'verbose' | 'vmdOutput' |
     'waterDropletMake' | 'waterInertiaMultiplier' | 'writeCoordinates' |
     'writeDoublePrecisionTrajectories' | 'helixBondMobility' | 'loopBondMobility' |
@@ -154,11 +154,9 @@ export const Parameters: ReadonlyMap<ParameterNames, P.Parameter<ParameterNames>
     ['sphericalHelix phiOffset', new P.RealParameter<ParameterNames>('sphericalHelix phiOffset', '')],
     ['sphericalHelix interStrandDistance', new P.RealParameter<ParameterNames>('sphericalHelix interStrandDistance', '')],
     ['stackAllHelicalResidues', new P.BooleanParameter<ParameterNames>('stackAllHelicalResidues', '')],
-    ['temperature', new P.RealParameter<ParameterNames>('temperature', '', P.PositiveRange)],
     ['thermostatType', new P.OptionsParameter<ParameterNames, ThermostatTypes>('thermostatType', '', options(ThermostatTypes))],
     ['tinkerParameterFileName', new P.TextualParameter<ParameterNames>('tinkerParameterFileName', '')],
     ['useFixedStepSize', new P.BooleanParameter<ParameterNames>('useFixedStepSize', '')],
-    ['useMultithreadedComputation', new P.BooleanParameter<ParameterNames>('useMultithreadedComputation', '')],
     ['useOpenMMAcceleration', new P.BooleanParameter<ParameterNames>('useOpenMMAcceleration', '')],
     ['vanderWallSphereRadius', new P.RealParameter<ParameterNames>('vanderWallSphereRadius', '')],
     ['velocityRescalingInterval', new P.RealParameter<ParameterNames>('velocityRescalingInterval', '', P.PositiveRange)],
