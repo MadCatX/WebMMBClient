@@ -44,6 +44,7 @@ export class NtCsInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM.Value
             chain: viable.length > 0 ? viable[0].chain : undefined,
             firstResNo: viable.length > 0 ? viable[0].firstResidueNo : undefined,
             lastResNo: viable.length > 0 ? viable[0].firstResidueNo + 1 : undefined,
+            cfrm: viable.length > 0 ? MIM.AllNtCsOptions[0].value : undefined,
             errors: new Array<string>(),
         };
     }
@@ -122,7 +123,7 @@ export class NtCsInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM.Value
                     chain: c.chain,
                     firstResNo: c.firstResidueNo,
                     lastResNo: c.firstResidueNo + 1,
-                    cfrm: 'AA00',
+                    cfrm: MIM.AllNtCsOptions[0].value,
                 };
                 this.setState({ ...this.state, ...update });
                 return;

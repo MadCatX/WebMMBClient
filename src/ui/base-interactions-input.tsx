@@ -57,6 +57,8 @@ export class BaseInteractionsInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKey
         this.state = {
             chainOne: compounds.length > 0 ? compounds[0].chain : undefined,
             chainTwo: compounds.length > 0 ? compounds[0].chain : undefined,
+            residueOne: compounds.length > 0 ? compounds[0].firstResidueNo : undefined,
+            residueTwo: compounds.length > 0 ? compounds[0].firstResidueNo : undefined,
             edgeOne: 'Watson-Crick',
             edgeTwo: 'Watson-Crick',
             orientation: 'Cis',
@@ -67,17 +69,19 @@ export class BaseInteractionsInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKey
     private addBaseInteraction() {
         if (this.state.chainOne === undefined || this.state.residueOne === undefined || this.state.edgeOne === undefined ||
             this.state.chainTwo === undefined || this.state.residueTwo === undefined || this.state.edgeTwo === undefined ||
-            this.state.orientation === undefined)
-            throw new Error('Incomplete base interaction definition');
+            this.state.orientation === undefined) {
+            this.setState({ ...this.state, errors: [ 'Incomplete base interaction definition' ] });
+            return;
+        }
 
         const compounds = FU.getArray<Compound[]>(this.props.ctxData, 'mol-in-cp-added');
-        if (compounds.find(c => c.chain === this.state.chainOne) === undefined || compounds.find(c => c.chain === this.state.chainTwo) === undefined)
-            throw new Error('Invalid chains');
+        if (compounds.find(c => c.chain === this.state.chainOne) === undefined || compounds.find(c => c.chain === this.state.chainTwo) === undefined) {
+            this.setState({ ...this.state, errors: [ 'Invalid chains' ] });
+            return;
+        }
 
-        const errors = new Array<string>();
         if (this.state.residueOne === this.state.residueTwo && this.state.chainOne === this.state.chainTwo) {
-            errors.push('Residue cannot interact with itself');
-            this.setState({ ...this.state, errors });
+            this.setState({ ...this.state, errors: [ 'Residue cannot interact with itself' ] });
             return;
         }
 
@@ -92,16 +96,14 @@ export class BaseInteractionsInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKey
             this.state.orientation
         );
 
-        if (interactions.find(e => e.equals(bi)) !== undefined)
-            errors.push('Such base interaction already exists');
-
-        if (errors.length > 0)
-            this.setState({ ...this.state, errors });
-        else {
-            interactions.push(bi);
-            this.setState({ ...this.state, errors: [] });
-            FU.updateValues(this.props.ctxData, [{ key: 'mol-in-bi-added', value: interactions }]);
+        if (interactions.find(e => e.equals(bi)) !== undefined) {
+            this.setState({ ...this.state, errors: [ 'Such base interaction already exists' ] });
+            return;
         }
+
+        interactions.push(bi);
+        this.setState({ ...this.state, errors: [] });
+        FU.updateValues(this.props.ctxData, [{ key: 'mol-in-bi-added', value: interactions }]);
     }
 
     componentDidUpdate() {

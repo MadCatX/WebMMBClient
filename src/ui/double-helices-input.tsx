@@ -43,6 +43,9 @@ export class DoubleHelicesInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, 
             errors: new Array<string>(),
             chainOne: compounds.length > 0 ? compounds[0].chain : undefined,
             chainTwo: compounds.length > 0 ? compounds[0].chain : undefined,
+            firstResNoOne: compounds.length > 0 ? compounds[0].firstResidueNo : undefined,
+            lastResNoOne: compounds.length > 0 ? compounds[0].firstResidueNo : undefined,
+            firstResNoTwo: compounds.length > 0 ? compounds[0].lastResidueNo : undefined,
         };
     }
 
