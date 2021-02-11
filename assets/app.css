@@ -347,6 +347,17 @@ body {
     margin-top: 0.6em;
 }
 
+.mol-in-mobilizers-input {
+    display: grid;
+    grid-template-columns: 8em 8em 8em 8em auto;
+}
+
+.mol-in-mobilizers-added {
+    display: grid;
+    grid-template-columns: 8em 8em 8em auto;
+    margin-top: 0.6em;
+}
+
 .mol-in-ntcs-input {
     display: grid;
     grid-template-columns: 7em 7em 7em 7em auto;

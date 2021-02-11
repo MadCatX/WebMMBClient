@@ -35,6 +35,7 @@ export class ComboBox<T> extends CtrldComponent<T, ComboBox.Props<T>> {
                             this.props.updateNotifier(actualValue.value);
                     }
                 }
+                disabled={this.props.disabled}
                 className={this.props.className ?? 'combo-box combo-box-font combo-box-icon'}
             >
                 {this.props.options.map(o => {
@@ -55,6 +56,7 @@ export namespace ComboBox {
     export interface Props<T> extends CtrldComponent.Props<T> {
         options: Model.Option<T>[];
         stringifier?: Model.Stringifier<T>;
+        disabled?: boolean;
         className?: string;
     }
 

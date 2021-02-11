@@ -45,6 +45,7 @@ export class FComboBox<KE, KV extends string, T, U extends FormModel.V<T>> exten
                             this.updateValue(actualValue.value);
                     }
                 }
+                disabled={this.props.disabled}
                 className={this.props.className ?? 'combo-box combo-box-font combo-box-icon'}
             >
                 {this.props.options.map(o => {
@@ -65,6 +66,7 @@ export namespace ComboBox {
     export interface Props<KE, KV, T, U extends FormModel.V<T>> extends FormField.Props<KE, KV, T> {
         options: Model.Option<U>[];
         stringifier?: Model.Stringifier<U>;
+        disabled?: boolean;
         className?: string;
     }
 

@@ -17,19 +17,20 @@ import { BaseInteraction } from '../model/base-interaction';
 import { Compound } from '../model/compound';
 import { DoubleHelix } from '../model/double-helix';
 import { GlobalConfig } from '../model/global-config';
+import { Mobilizer } from './mobilizer';
 import { NtC } from '../model/ntc';
 import { NtCConformation } from '../model/ntc-conformation';
 import { Reporting } from '../model/reporting';
 
 export namespace MmbInputModel {
     export type ErrorKeys = 'mol-in-no-name' | 'mol-adv-params' | 'mol-raw';
-    export type ValueKeys = 'mol-in-cp-added' | 'mol-in-dh-added' | 'mol-in-bi-added' | 'mol-in-ntcs-added' |
+    export type ValueKeys = 'mol-in-cp-added' | 'mol-in-dh-added' | 'mol-in-bi-added' | 'mol-in-ntcs-added' | 'mol-in-mobilizers-added' |
         'mol-in-gp-reporting-interval' | 'mol-in-gp-num-reports' | 'mol-in-gp-temperature' | 'mol-in-gp-bisf' | 'mol-in-gp-def-md-params' | 'mol-in-gp-stage' |
         'mol-in-job-name' |
         'mol-in-raw-commands' |
         'mol-adv-params';
     export type AdvParams = Map<AVP.ParameterNames, unknown>;
-    export type ValueTypes = BaseInteraction[] | Compound[] | DoubleHelix[] | NtCConformation[] | string[] | AdvParams;
+    export type ValueTypes = BaseInteraction[] | Compound[] | DoubleHelix[] | NtCConformation[] | string[] | AdvParams | Mobilizer[];
     export type V<T> = FormModel.V<T>;
     export type Errors = FormModel.Errors<ErrorKeys>;
     export type Values = FormModel.Values<ValueKeys, ValueTypes>;

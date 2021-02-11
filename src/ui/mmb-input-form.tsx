@@ -12,6 +12,7 @@ import { BaseInteractionsInput } from './base-interactions-input';
 import { CompoundsInput } from './compounds-input';
 import { DoubleHelicesInput } from './double-helices-input';
 import { GlobalParametersInput } from './global-parameters-input';
+import { MobilizersInput } from './mobilizers-input';
 import { NtCsInput } from './ntcs-input';
 import { Form } from './common/form/form';
 import { TextArea } from './common/form/text-area';
@@ -99,6 +100,10 @@ export class MmbInputForm extends Form<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTy
         } catch (e) {
             this.setErrors(new Map(['mol-raw', e]));
         }
+    }
+
+    private isAdv() {
+        return this.props.mode === 'advanced';
     }
 
     private makeMmbCommands() {
@@ -223,9 +228,10 @@ export class MmbInputForm extends Form<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTy
                          <DoubleHelicesInput ctxData={ctxData} />
                          <BaseInteractionsInput ctxData={ctxData} />
                          <NtCsInput ctxData={ctxData} />
+                         {this.isAdv() ? <MobilizersInput ctxData={ctxData} /> : undefined}
                          <GlobalParametersInput ctxData={ctxData}
                              availableStages={this.props.availableStages} />
-                         {this.props.mode === 'advanced'
+                         {this.isAdv()
                           ?
                           (
                               <>
