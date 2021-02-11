@@ -45,6 +45,7 @@ interface State {
     jobStep: Api.JobStep;
     jobTotalSteps: Api.JobTotalSteps;
     jobAvailableStages: number[];
+    jobCurrentStage: number|undefined;
     jobError: string;
     autoRefreshEnabled: boolean;
     autoRefreshInterval: number;
@@ -71,6 +72,7 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
             jobStep: step,
             jobTotalSteps: props.info?.total_steps ?? 'none',
             jobAvailableStages: props.info?.available_stages ?? new Array<number>(),
+            jobCurrentStage: undefined,
             jobError: '',
             autoRefreshEnabled: true,
             autoRefreshInterval: 10,
@@ -106,6 +108,7 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
             jobStep: step,
             jobTotalSteps: data.total_steps,
             jobAvailableStages: data.available_stages,
+            jobCurrentStage: data.current_stage,
             jobError: '',
         };
     }
@@ -152,6 +155,7 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
                         ref={this.mmbInputFormRef}
                         jobName={this.props.info?.name}
                         availableStages={stages}
+                        currentStage={this.state.jobCurrentStage}
                         mode={this.state.uiMode}
                         initialValues={this.props.setup} />
                 </>

@@ -120,11 +120,15 @@ export class MmbInputForm extends Form<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTy
     }
 
     componentDidUpdate(prevProps: MmbInputForm.Props) {
+        const v = this.emptyValues();
         if (this.props.availableStages.length !== prevProps.availableStages.length) {
-            const v = this.emptyValues();
             v.set('mol-in-gp-stage', this.props.availableStages.length);
-            this.setValues(new Map([...this.state.values, ...v]));
         }
+        if (this.props.currentStage !== undefined && this.props.currentStage !== prevProps.currentStage)
+            v.set('mol-in-gp-stage', this.props.currentStage);
+
+        if (v.size > 0)
+            this.setValues(new Map([...this.state.values, ...v]));
     }
 
     private makeParams(): CommandsSerializer.Parameters<ParameterNames> {
@@ -219,7 +223,8 @@ export class MmbInputForm extends Form<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTy
                          <DoubleHelicesInput ctxData={ctxData} />
                          <BaseInteractionsInput ctxData={ctxData} />
                          <NtCsInput ctxData={ctxData} />
-                         <GlobalParametersInput ctxData={ctxData} availableStages={this.props.availableStages} />
+                         <GlobalParametersInput ctxData={ctxData}
+                             availableStages={this.props.availableStages} />
                          {this.props.mode === 'advanced'
                           ?
                           (
@@ -242,6 +247,7 @@ export class MmbInputForm extends Form<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTy
 export namespace MmbInputForm {
     export interface Props extends MIM.Props {
         availableStages: number[];
+        currentStage: number|undefined;
         mode: MIM.UiMode;
     }
 }

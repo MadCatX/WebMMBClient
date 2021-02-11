@@ -23,6 +23,7 @@ const JobInfoObj: Api.JobInfo = {
     step: 'none',
     total_steps: 0,
     available_stages: [] as number[],
+    current_stage: undefined,
     created_on: 0,
     commands_mode: 'Synthetic',
 };
@@ -80,6 +81,11 @@ function isJobInfo(v: unknown): v is Api.JobInfo {
         checkType(tObj, 'step', isJobStep);
         checkType(tObj, 'total_steps', isInt);
         checkType(tObj, 'available_stages', (v: unknown): v is number[] => isArr<number>(v, isInt));
+        checkType(tObj, 'current_stage', (v: unknown): v is number|undefined => {
+            if (v === undefined)
+                return true;
+            return isInt(v);
+        });
         checkType(tObj, 'created_on', isInt);
         checkType(tObj, 'commands_mode', isJobCommandsMode);
     } catch (e) {
@@ -156,6 +162,7 @@ export namespace ResponseDeserializers {
                 step: obj.step,
                 total_steps: obj.total_steps,
                 available_stages: obj.available_stages,
+                current_stage: obj.current_stage,
                 created_on: Num.parseIntStrict(obj.created_on),  // On-wire value is a string to prevent rounding
                 commands_mode: obj.commands_mode,
             };

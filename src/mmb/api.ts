@@ -101,6 +101,7 @@ export type JobInfo = {
     step: JobStep,
     total_steps: JobTotalSteps,
     available_stages: number[],
+    current_stage: number|undefined,
     created_on: number,
     commands_mode: JobCommandsMode,
 }
