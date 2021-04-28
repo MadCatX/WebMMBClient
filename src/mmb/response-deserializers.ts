@@ -23,7 +23,7 @@ const JobInfoObj: Api.JobInfo = {
     step: 'none',
     total_steps: 0,
     available_stages: [] as number[],
-    current_stage: undefined,
+    current_stage: null,
     created_on: 0,
     commands_mode: 'Synthetic',
 };
@@ -81,8 +81,8 @@ function isJobInfo(v: unknown): v is Api.JobInfo {
         checkType(tObj, 'step', isJobStep);
         checkType(tObj, 'total_steps', isInt);
         checkType(tObj, 'available_stages', (v: unknown): v is number[] => isArr<number>(v, isInt));
-        checkType(tObj, 'current_stage', (v: unknown): v is number|undefined => {
-            if (v === undefined)
+        checkType(tObj, 'current_stage', (v: unknown): v is number|null => {
+            if (v === null)
                 return true;
             return isInt(v);
         });

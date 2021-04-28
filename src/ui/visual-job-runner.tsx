@@ -45,7 +45,7 @@ interface State {
     jobStep: Api.JobStep;
     jobTotalSteps: Api.JobTotalSteps;
     jobAvailableStages: number[];
-    jobCurrentStage: number|undefined;
+    jobCurrentStage: number|null;
     jobError: string;
     autoRefreshEnabled: boolean;
     autoRefreshInterval: number;
@@ -72,7 +72,7 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
             jobStep: step,
             jobTotalSteps: props.info?.total_steps ?? 'none',
             jobAvailableStages: props.info?.available_stages ?? new Array<number>(),
-            jobCurrentStage: undefined,
+            jobCurrentStage: null,
             jobError: '',
             autoRefreshEnabled: true,
             autoRefreshInterval: 10,

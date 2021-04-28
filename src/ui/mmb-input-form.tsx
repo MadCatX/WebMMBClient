@@ -130,7 +130,7 @@ export class MmbInputForm extends Form<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTy
         if (this.props.availableStages.length !== prevProps.availableStages.length) {
             v.set('mol-in-gp-stage', this.props.availableStages.length);
         }
-        if (this.props.currentStage !== undefined && this.props.currentStage !== prevProps.currentStage)
+        if (this.props.currentStage !== null && this.props.currentStage !== prevProps.currentStage)
             v.set('mol-in-gp-stage', this.props.currentStage);
 
         if (v.size > 0)
@@ -256,7 +256,7 @@ export class MmbInputForm extends Form<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTy
 export namespace MmbInputForm {
     export interface Props extends MIM.Props {
         availableStages: number[];
-        currentStage: number|undefined;
+        currentStage: number|null;
         mode: MIM.UiMode;
     }
 }

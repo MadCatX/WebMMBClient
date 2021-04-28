@@ -43,7 +43,7 @@ function jobListItemToEntry(item: Api.JobListItem): JobEntry {
             step: 0,
             total_steps: 0,
             available_stages: new Array<number>(),
-            current_stage: undefined,
+            current_stage: null,
             created_on: 0,
             commands_mode: 'Synthetic',
         };
