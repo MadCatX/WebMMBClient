@@ -139,7 +139,7 @@ export namespace TextCommandsSerializer {
         // Mobilizers
         commands.push('', '# Mobilizers');
         params.mobilizers.forEach(m => {
-            let entry = m.bondMobility;
+            let entry = `mobilizer ${m.bondMobility}`;
             if (m.chain !== undefined)
                 entry += ` ${m.chain}`;
             if (m.residueSpan !== undefined)
