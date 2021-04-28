@@ -6,7 +6,6 @@
  * @author Jiří Černý (jiri.cerny@ibt.cas.cz)
  */
 
-export type BondMobility = 'Rigid' | 'Torsion' | 'Free';
 
 export class ResidueSpan {
     constructor(public readonly first: number, public readonly last: number) {
@@ -28,7 +27,7 @@ export class ResidueSpan {
 }
 
 export class Mobilizer {
-    constructor(public readonly bondMobility: BondMobility,
+    constructor(public readonly bondMobility: Mobilizer.BondMobility,
                 public readonly chain?: string,
                 public readonly residueSpan?: ResidueSpan) {
     }
@@ -37,5 +36,13 @@ export class Mobilizer {
         return this.bondMobility === other.bondMobility &&
                this.chain === other.chain &&
                this.residueSpan === other.residueSpan;
+    }
+}
+
+export namespace Mobilizer {
+    export type BondMobility = 'Rigid' | 'Torsion' | 'Free';
+
+    export function isBondMobility(v: string): v is BondMobility {
+        return v === 'Rigid' || v === 'Torsion' || v === 'Free';
     }
 }

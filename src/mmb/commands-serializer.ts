@@ -6,12 +6,13 @@
  * @author Jiří Černý (jiri.cerny@ibt.cas.cz)
  */
 
-import { JsonAdvancedParameters, JsonCommands } from './commands';
+import { JsonAdvancedParameters, JsonCommands, MobilizerParameter } from './commands';
 import { BaseInteraction } from '../model/base-interaction';
 import { Compound } from '../model/compound';
 import { DoubleHelix } from '../model/double-helix';
 import { GlobalConfig } from '../model/global-config';
 import { MdParameters } from '../model/md-parameters';
+import { Mobilizer } from '../model/mobilizer';
 import { NtCConformation } from '../model/ntc-conformation';
 import { Parameter as P } from '../model/parameter';
 import { Reporting } from '../model/reporting';
@@ -31,6 +32,7 @@ export namespace CommandsSerializer {
         doubleHelices: DoubleHelix[],
         mdParameters: MdParameters,
         ntcs: NtCConformation[],
+        mobilizers: Mobilizer[],
         reporting: Reporting,
         stages: StagesSpan,
         advParams: AdvancedParameters<K>,
@@ -134,6 +136,17 @@ export namespace TextCommandsSerializer {
             commands.push(entry);
         });
 
+        // Mobilizers
+        commands.push('', '# Mobilizers');
+        params.mobilizers.forEach(m => {
+            let entry = m.bondMobility;
+            if (m.chain !== undefined)
+                entry += ` ${m.chain}`;
+            if (m.residueSpan !== undefined)
+                entry += ` ${m.residueSpan.first} ${m.residueSpan.last}`;
+            commands.push(entry);
+        });
+
         return commands;
     }
 }
@@ -151,6 +164,7 @@ export namespace JsonCommandsSerializer {
         doubleHelices: [],
         baseInteractions: [],
         ntcs: [],
+        mobilizers: [],
         advParams: {} as JsonAdvancedParameters,
     };
 
@@ -201,6 +215,26 @@ export namespace JsonCommandsSerializer {
         return cmds;
     }
 
+    function mobilizers(mobilizers: Mobilizer[]) {
+        const defs = new Array<MobilizerParameter>();
+
+        mobilizers.forEach(m => {
+            const def: MobilizerParameter = { bondMobility: m.bondMobility };
+            if (m.chain !== undefined) {
+                def.chain = m.chain;
+
+                if (m.residueSpan !== undefined) {
+                    def.firstResidue = m.residueSpan.first;
+                    def.firstResidue = m.residueSpan.last;
+                }
+            }
+
+            defs.push(def);
+        });
+
+        return defs;
+    }
+
     function ntcs(ntcs: NtCConformation[]) {
         const defs: string[] = [];
 
@@ -246,6 +280,7 @@ export namespace JsonCommandsSerializer {
         cmds.doubleHelices = doubleHelices(params.doubleHelices);
         cmds.baseInteractions = baseInteractions(params.baseInteractions);
         cmds.ntcs = ntcs(params.ntcs);
+        cmds.mobilizers = mobilizers(params.mobilizers);
 
         return cmds;
     }

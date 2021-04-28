@@ -10,6 +10,13 @@ import { AnyObject, assignAll, isArr, isObj, isStr } from '../util/json';
 
 export type JsonAdvancedParameters = Record<string, string | boolean | number>;
 
+export interface MobilizerParameter {
+    bondMobility: string;
+    chain?: string;
+    firstResidue?: number;
+    lastResidue?: number;
+}
+
 export const DefaultMdParamsKey = 'setDefaultMDParameters';
 
 const JsonCommands = {
@@ -24,6 +31,7 @@ const JsonCommands = {
     doubleHelices: [] as string[],
     baseInteractions: [] as string[],
     ntcs: [] as string[],
+    mobilizers: [] as MobilizerParameter[],
     advParams: {} as JsonAdvancedParameters,
 };
 export type JsonCommands = typeof JsonCommands;

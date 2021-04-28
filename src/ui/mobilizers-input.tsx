@@ -15,7 +15,7 @@ import { Util } from './common/util';
 import { FormUtil } from '../model/common/form';
 import { Compound } from '../model/compound';
 import { MmbInputModel as MIM } from '../model/mmb-input-model';
-import { BondMobility, Mobilizer, ResidueSpan } from '../model/mobilizer';
+import { Mobilizer, ResidueSpan } from '../model/mobilizer';
 import { ComboBox as ComboBoxModel } from '../model/common/combo-box';
 
 const FU = new FormUtil<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes>();
@@ -23,7 +23,7 @@ const FU = new FormUtil<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes>();
 type AllItems = 'all-items';
 
 const AddedTable = MIM.TWDR<Mobilizer[]>();
-const BMLField = LabeledField.ComboBox<BondMobility>();
+const BMLField = LabeledField.ComboBox<Mobilizer.BondMobility>();
 const ChainLField = LabeledField.ComboBox<string | AllItems>();
 const FResNoLField = LabeledField.ComboBox<number | AllItems>();
 const LResNoLField = LabeledField.ComboBox<number>();
@@ -43,7 +43,7 @@ function rToS(v: number | AllItems | undefined) {
 }
 
 interface State {
-    bondMobility: BondMobility;
+    bondMobility: Mobilizer.BondMobility;
     chain: string | AllItems;
     firstResNo: number | AllItems;
     lastResNo?: number;
@@ -175,7 +175,12 @@ export class MobilizersInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM
 
         const c = compounds.find(c => c.chain === this.state.chain);
         if (c === undefined) {
-            console.error(`Chain ${this.state.chain} was selected but there is no compound with such chain ID`);
+            this.setState({
+                ...this.state,
+                chain: 'all-items',
+                firstResNo: 'all-items',
+                lastResNo: undefined,
+            });
             return;
         }
 
@@ -215,11 +220,11 @@ export class MobilizersInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM
         const firstResNoOpts: ComboBoxModel.Option<number | AllItems>[] = [ { value: 'all-items', caption: 'All residues' } ];
         const lastResNoOpts: ComboBoxModel.Option<number>[] = [];
 
+        let selectedChain = this.state.chain;
+
         if (this.state.chain !== 'all-items') {
-            const c = compounds.find(c => c.chain === this.state.chain);
-            if (c === undefined)
-                console.error(`Chain ${this.state.chain} was selected but there is no compound with such chain ID`);
-            else {
+            const c = compounds.find(c => c.chain === selectedChain);
+            if (c !== undefined) {
                 for (let i = c.firstResidueNo; i <= c.lastResidueNo; i++)
                     firstResNoOpts.push({ value: i, caption: i.toString() } );
 
@@ -228,7 +233,8 @@ export class MobilizersInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM
                     for (let i = lastFrom; i <= c.lastResidueNo; i++)
                         lastResNoOpts.push({ value: i, caption: i.toString() });
                 }
-            }
+            } else
+                selectedChain = 'all-items';
         }
 
         return (
@@ -251,7 +257,7 @@ export class MobilizersInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM
                         label='Chain'
                         style='above'
                         options={this.makeChainOptions(compounds)}
-                        value={this.state.chain}
+                        value={selectedChain}
                         updateNotifier={v => this.setState({ ...this.state, chain: v })} />
                     <FResNoLField
                         id='mobilizers-first-res-no'
@@ -288,7 +294,7 @@ export class MobilizersInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM
                     columns={[
                         { caption: 'Bond mobility', k: 'bondMobility' },
                         { caption: 'Chain', k: 'chain' },
-                        { caption: 'Residue span', k: 'residueSpan', stringify: (v: ResidueSpan) => `${v.first} -> ${v.last}` },
+                        { caption: 'Residue span', k: 'residueSpan', stringify: (v: ResidueSpan|undefined) => v ? `${v.first} -> ${v.last}` : 'All residues' },
                     ]}
                     ctxData={this.props.ctxData} />
             </div>

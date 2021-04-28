@@ -24,6 +24,7 @@ import { BaseInteraction } from '../model/base-interaction';
 import { Compound } from '../model/compound';
 import { DoubleHelix } from '../model/double-helix';
 import { MmbInputModel as MIM } from '../model/mmb-input-model';
+import { Mobilizer } from '../model/mobilizer';
 import { NtCConformation } from '../model/ntc-conformation';
 import { MdParameters } from '../model/md-parameters';
 import { FormContextManager as FCM } from '../model/common/form-context-manager';
@@ -171,6 +172,7 @@ export class MmbInputForm extends Form<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTy
         const doubleHelices = this.getArray<DoubleHelix[]>(this.state, 'mol-in-dh-added');
         const baseInteractions = this.getArray<BaseInteraction[]>(this.state, 'mol-in-bi-added');
         const ntcs = this.getArray<NtCConformation[]>(this.state, 'mol-in-ntcs-added');
+        const mobilizers = this.getArray<Mobilizer[]>(this.state, 'mol-in-mobilizers-added');
         const advValues = this.getScalar(this.state, 'mol-adv-params', new Map<ParameterNames, unknown>());
 
         return {
@@ -181,6 +183,7 @@ export class MmbInputForm extends Form<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTy
             doubleHelices,
             baseInteractions,
             ntcs,
+            mobilizers,
             mdParameters,
             advParams: { parameters: Parameters, values: advValues },
         };

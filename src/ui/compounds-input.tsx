@@ -16,6 +16,7 @@ import { BaseInteraction } from '../model/base-interaction';
 import { Compound } from '../model/compound';
 import { DoubleHelix } from '../model/double-helix';
 import { MmbInputModel as MIM } from '../model/mmb-input-model';
+import { Mobilizer } from '../model/mobilizer';
 import { NtCConformation } from '../model/ntc-conformation';
 import { Num } from '../util/num';
 
@@ -104,12 +105,16 @@ export class CompoundsInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM.
         let ntcs = FU.getArray<NtCConformation[]>(this.props.ctxData, 'mol-in-ntcs-added');
         ntcs = ntcs.filter(e => e.chain !== chain);
 
+        let mobilizers = FU.getArray<Mobilizer[]>(this.props.ctxData, 'mol-in-mobilizers-added');
+        mobilizers = mobilizers.filter(e => e.chain !== chain);
+
         FU.updateValues(
             this.props.ctxData,
             [
                 { key: 'mol-in-dh-added', value: doubleHelices },
                 { key: 'mol-in-bi-added', value: baseInteractions },
                 { key: 'mol-in-ntcs-added', value: ntcs },
+                { key: 'mol-in-mobilizers-added', value: mobilizers },
             ],
         );
     }

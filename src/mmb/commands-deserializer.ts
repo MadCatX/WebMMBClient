@@ -13,6 +13,7 @@ import { DoubleHelix } from '../model/double-helix';
 import { EdgeInteraction } from '../model/edge-interaction';
 import { GlobalConfig } from '../model/global-config';
 import { MdParameters } from '../model/md-parameters';
+import { Mobilizer, ResidueSpan } from '../model/mobilizer';
 import { NtC } from '../model/ntc';
 import { NtCConformation } from '../model/ntc-conformation';
 import { Orientation } from '../model/orientation';
@@ -223,6 +224,29 @@ export namespace JsonCommandsDeserializer {
         const defMd = Object(commands).hasOwnProperty(DefaultMdParamsKey);
 
         return new MdParameters(defMd);
+    }
+
+    export function toMobilizers(commands: JsonCommands) {
+        const mobilizers: Mobilizer[] = [];
+
+        for (const m of commands.mobilizers) {
+            if (!Mobilizer.isBondMobility(m.bondMobility))
+                throw new Error(`Invalid bond mobility ${m.bondMobility}`);
+
+            const bondMobility = m.bondMobility;
+            if (!m.chain)
+                mobilizers.push(new Mobilizer(bondMobility));
+            else {
+                const chain = getChain(m.chain);
+
+                if (m.firstResidue !== undefined && m.lastResidue !== undefined)
+                    mobilizers.push(new Mobilizer(bondMobility, chain, new ResidueSpan(m.firstResidue, m.lastResidue)));
+                else
+                    mobilizers.push(new Mobilizer(bondMobility, chain));
+            }
+        }
+
+        return mobilizers;
     }
 
     export function toNtCs(commands: JsonCommands) {

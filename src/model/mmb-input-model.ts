@@ -139,6 +139,7 @@ export namespace MmbInputModel {
         const doubleHelices = JsonCommandsDeserializer.toDoubleHelices(commands);
         const baseInteractions = JsonCommandsDeserializer.toBaseInteractions(commands);
         const ntcs = JsonCommandsDeserializer.toNtCs(commands);
+        const mobilizers = JsonCommandsDeserializer.toMobilizers(commands);
         const rep = JsonCommandsDeserializer.toReporting(commands);
         const advParams = (() => {
             const obj = JsonCommandsDeserializer.toAdvancedParameters(commands);
@@ -161,6 +162,7 @@ export namespace MmbInputModel {
         map.set('mol-in-bi-added', baseInteractions);
         map.set('mol-in-dh-added', doubleHelices);
         map.set('mol-in-ntcs-added', ntcs);
+        map.set('mol-in-mobilizers-added', mobilizers);
         map.set('mol-adv-params', advParams);
         map.set('mol-in-job-name', name);
 
