@@ -6,7 +6,7 @@
  * @author Jiří Černý (jiri.cerny@ibt.cas.cz)
  */
 
-import { AnyObject, assignAll, isArr, isObj, isStr } from '../util/json';
+import { AnyObject, assignAll, isArr, isInt, isObj, isStr } from '../util/json';
 
 export type JsonAdvancedParameters = Record<string, string | boolean | number>;
 
@@ -46,6 +46,27 @@ export function jsonCommandsFromJson(obj: unknown): JsonCommands {
         if (prop === 'advParams') {
             if (!isObj(obj[prop]))
                 throw new Error(`Property ${prop} is not an object`);
+        } else if (prop === 'mobilizers') {
+            if (!isArr<MobilizerParameter>(obj[prop], (v): v is MobilizerParameter => {
+                if (!isObj(v))
+                    return false;
+
+                if (!v.hasOwnProperty('bondMobility'))
+                    return false;
+                const mp = v as unknown as MobilizerParameter;
+
+                if (!isStr(mp.bondMobility))
+                    return false;
+                if (mp.chain && !isStr(mp.chain))
+                    return false;
+                if (mp.firstResidue && !isInt(mp.firstResidue))
+                    return false;
+                if (mp.lastResidue && !isInt(mp.lastResidue))
+                    return false;
+
+                return true;
+            }))
+                throw new Error(`Property ${prop} has a wrong type`);
         } else if (!isArr<string>(obj[prop], isStr))
             throw new Error(`Property ${prop} is not a string array`);
     }

@@ -225,7 +225,7 @@ export namespace JsonCommandsSerializer {
 
                 if (m.residueSpan !== undefined) {
                     def.firstResidue = m.residueSpan.first;
-                    def.firstResidue = m.residueSpan.last;
+                    def.lastResidue = m.residueSpan.last;
                 }
             }
 
