@@ -6,7 +6,6 @@
  * @author Jiří Černý (jiri.cerny@ibt.cas.cz)
  */
 
-import { JsonAdvancedParameters, JsonCommands, MobilizerParameter } from './commands';
 import { BaseInteraction } from '../model/base-interaction';
 import { Compound } from '../model/compound';
 import { DoubleHelix } from '../model/double-helix';
@@ -18,6 +17,7 @@ import { Parameter as P } from '../model/parameter';
 import { Reporting } from '../model/reporting';
 import { StagesSpan } from '../model/stages-span';
 import { Num } from '../util/num';
+import * as Api from './api';
 
 export namespace CommandsSerializer {
     export type AdvancedParameters<K extends (string extends K ? never : string)> = {
@@ -152,24 +152,25 @@ export namespace TextCommandsSerializer {
 }
 
 export namespace JsonCommandsSerializer {
-    const Commands: JsonCommands = {
-        baseInteractionScaleFactor: [],
-        useMultithreadedComputation: [],
-        temperature: [],
-        firstStage: [],
-        lastStage: [],
-        reportingInterval: [],
-        numReportingIntervals: [],
+    const Commands: Api.JsonCommands = {
+        base_interaction_scale_factor: 0,
+        use_multithreaded_computation: false,
+        temperature: 0,
+        first_stage: 0,
+        last_stage: 0,
+        reporting_interval: 0,
+        num_reporting_intervals: 0,
         sequences: [],
-        doubleHelices: [],
-        baseInteractions: [],
+        double_helices: [],
+        base_interactions: [],
         ntcs: [],
         mobilizers: [],
-        advParams: {} as JsonAdvancedParameters,
+        adv_params: {},
+        set_default_MD_parameters: false,
     };
 
     function advancedParameters<K extends (string extends K ? never : string)>(advParams: CommandsSerializer.AdvancedParameters<K>) {
-        let defs = {} as JsonAdvancedParameters;
+        let defs: Api.JsonAdvancedParameters = {};
 
         for (const [name, value] of advParams.values.entries()) {
             const param = advParams.parameters.get(name)!;
@@ -207,25 +208,22 @@ export namespace JsonCommandsSerializer {
         return defs;
     }
 
-    function mdParams(cmds: JsonCommands, md: MdParameters) {
-        if (md.useDefaults) {
-            const empty: null[] = [];
-            return Object.assign(cmds, { setDefaultMDParameters: empty });
-        }
+    function mdParams(cmds: Api.JsonCommands, md: MdParameters) {
+        cmds.set_default_MD_parameters = md.useDefaults;
         return cmds;
     }
 
     function mobilizers(mobilizers: Mobilizer[]) {
-        const defs = new Array<MobilizerParameter>();
+        const defs = new Array<Api.MobilizerParameter>();
 
         mobilizers.forEach(m => {
-            const def: MobilizerParameter = { bondMobility: m.bondMobility };
+            const def: Api.MobilizerParameter = { bond_mobility: m.bondMobility };
             if (m.chain !== undefined) {
                 def.chain = m.chain;
 
                 if (m.residueSpan !== undefined) {
-                    def.firstResidue = m.residueSpan.first;
-                    def.lastResidue = m.residueSpan.last;
+                    def.first_residue = m.residueSpan.first;
+                    def.last_residue = m.residueSpan.last;
                 }
             }
 
@@ -259,26 +257,26 @@ export namespace JsonCommandsSerializer {
         let cmds = Object.assign({}, Commands);
 
         // Global
-        cmds.baseInteractionScaleFactor = [params.global.baseInteractionScaleFactor.toString()];
-        cmds.useMultithreadedComputation = [CommandsSerializer.trueFalse(params.global.useMultithreading)];
-        cmds.temperature = [params.global.temperature.toString()];
+        cmds.base_interaction_scale_factor = params.global.baseInteractionScaleFactor;
+        cmds.use_multithreaded_computation = params.global.useMultithreading;
+        cmds.temperature = params.global.temperature;
 
         // Advanced
-        cmds.advParams = advancedParameters(params.advParams);
+        cmds.adv_params = advancedParameters(params.advParams);
 
         // Stages
-        cmds.firstStage = [params.stages.first.toString()];
-        cmds.lastStage = [params.stages.last.toString()];
+        cmds.first_stage = params.stages.first;
+        cmds.last_stage = params.stages.last;
 
         // Reporting
-        cmds.reportingInterval = [params.reporting.interval.toString()];
-        cmds.numReportingIntervals = [params.reporting.count.toString()];
+        cmds.reporting_interval = params.reporting.interval;
+        cmds.num_reporting_intervals = params.reporting.count;;
 
         cmds = mdParams(cmds, params.mdParameters);
 
         cmds.sequences = sequences(params.compounds);
-        cmds.doubleHelices = doubleHelices(params.doubleHelices);
-        cmds.baseInteractions = baseInteractions(params.baseInteractions);
+        cmds.double_helices = doubleHelices(params.doubleHelices);
+        cmds.base_interactions = baseInteractions(params.baseInteractions);
         cmds.ntcs = ntcs(params.ntcs);
         cmds.mobilizers = mobilizers(params.mobilizers);
 

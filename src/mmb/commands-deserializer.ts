@@ -20,8 +20,8 @@ import { Orientation } from '../model/orientation';
 import { Parameter as P } from '../model/parameter';
 import { Reporting } from '../model/reporting';
 import { StagesSpan } from '../model/stages-span';
-import { DefaultMdParamsKey, JsonAdvancedParameters, JsonCommands } from './commands';
 import { Num } from '../util/num';
+import * as Api from './api';
 
 export namespace JsonCommandsDeserializer {
     function getChain(tok: string) {
@@ -55,37 +55,14 @@ export namespace JsonCommandsDeserializer {
         return n;
     }
 
-    function getSingleBool(toks: string[], pos = 0) {
-        const v = toks[pos];
-        if (v === 'True')
-            return true;
-        if (v === 'False')
-            return false;
-        throw new Error(`Invalid boolean value ${v}`);
-    }
+    export function toAdvancedParameters(commands: Api.JsonCommands): Api.JsonAdvancedParameters {
+        const advParams = {} as Api.JsonAdvancedParameters;
 
-    function getSingleFloat(toks: string[], pos = 0) {
-        const n = Num.parseFloatStrict(toks[pos]);
-        if (isNaN(n))
-            throw new Error(`Invalid value ${toks[pos]}`);
-        return n;
-    }
-
-    function getSingleInt(toks: string[], pos = 0) {
-        const n = Num.parseIntStrict(toks[pos]);
-        if (isNaN(n))
-            throw new Error(`Invalid value ${toks[pos]}`);
-        return n;
-    }
-
-    export function toAdvancedParameters(commands: JsonCommands): JsonAdvancedParameters {
-        const advParams = {} as JsonAdvancedParameters;
-
-        for (const key in commands.advParams) {
+        for (const key in commands.adv_params) {
             if (!Parameters.has(key as ParameterNames))
                 throw new Error(`Advanced parameter ${key} does not exist`);
 
-            const value = commands.advParams[key];
+            const value = commands.adv_params[key];
             const param = Parameters.get(key as ParameterNames)!;
             if (P.isIntegral(param)) {
                 const num = Num.parseIntStrict(value);
@@ -120,10 +97,10 @@ export namespace JsonCommandsDeserializer {
         return advParams;
     }
 
-    export function toBaseInteractions(commands: JsonCommands) {
+    export function toBaseInteractions(commands: Api.JsonCommands) {
         const baseInteractions: BaseInteraction[] = [];
 
-        for (const line of commands.baseInteractions) {
+        for (const line of commands.base_interactions) {
             const def = line.split(' ');
 
             if (def.length !== 8)
@@ -152,10 +129,10 @@ export namespace JsonCommandsDeserializer {
         return baseInteractions;
     }
 
-    export function toDoubleHelices(commands: JsonCommands) {
+    export function toDoubleHelices(commands: Api.JsonCommands) {
         const doubleHelices: DoubleHelix[] = [];
 
-        for (const line of commands.doubleHelices) {
+        for (const line of commands.double_helices) {
             const def = line.split(' ');
 
             if (def.length !== 7)
@@ -183,7 +160,7 @@ export namespace JsonCommandsDeserializer {
         return doubleHelices;
     }
 
-    export function toCompounds(commands: JsonCommands) {
+    export function toCompounds(commands: Api.JsonCommands) {
         const compounds: Compound[] = [];
 
         for (const line of commands.sequences) {
@@ -209,10 +186,10 @@ export namespace JsonCommandsDeserializer {
         return compounds;
     }
 
-    export function toGlobal(commands: JsonCommands) {
-        const bisf = getSingleInt(commands.baseInteractionScaleFactor);
-        const mt = getSingleBool(commands.useMultithreadedComputation);
-        const temp = getSingleFloat(commands.temperature);
+    export function toGlobal(commands: Api.JsonCommands) {
+        const bisf = commands.base_interaction_scale_factor;
+        const mt = commands.use_multithreaded_computation;
+        const temp = commands.temperature;
 
         if (bisf < 0)
             throw new Error('Invalid baseInteractionScaleFactor value');
@@ -220,27 +197,27 @@ export namespace JsonCommandsDeserializer {
         return new GlobalConfig(bisf, mt, temp);
     }
 
-    export function toMdParams(commands: JsonCommands) {
-        const defMd = Object(commands).hasOwnProperty(DefaultMdParamsKey);
+    export function toMdParams(commands: Api.JsonCommands) {
+        const defMd = commands.set_default_MD_parameters;
 
         return new MdParameters(defMd);
     }
 
-    export function toMobilizers(commands: JsonCommands) {
+    export function toMobilizers(commands: Api.JsonCommands) {
         const mobilizers: Mobilizer[] = [];
 
         for (const m of commands.mobilizers) {
-            if (!Mobilizer.isBondMobility(m.bondMobility))
-                throw new Error(`Invalid bond mobility ${m.bondMobility}`);
+            if (!Mobilizer.isBondMobility(m.bond_mobility))
+                throw new Error(`Invalid bond mobility ${m.bond_mobility}`);
 
-            const bondMobility = m.bondMobility;
+            const bondMobility = m.bond_mobility;
             if (!m.chain)
                 mobilizers.push(new Mobilizer(bondMobility));
             else {
                 const chain = getChain(m.chain);
 
-                if (m.firstResidue !== undefined && m.lastResidue !== undefined)
-                    mobilizers.push(new Mobilizer(bondMobility, chain, new ResidueSpan(m.firstResidue, m.lastResidue)));
+                if (m.first_residue !== undefined && m.last_residue !== undefined)
+                    mobilizers.push(new Mobilizer(bondMobility, chain, new ResidueSpan(m.first_residue, m.last_residue)));
                 else
                     mobilizers.push(new Mobilizer(bondMobility, chain));
             }
@@ -249,7 +226,7 @@ export namespace JsonCommandsDeserializer {
         return mobilizers;
     }
 
-    export function toNtCs(commands: JsonCommands) {
+    export function toNtCs(commands: Api.JsonCommands) {
         const ntcs: NtCConformation[] = [];
 
         for (const line of commands.ntcs) {
@@ -275,16 +252,21 @@ export namespace JsonCommandsDeserializer {
         return ntcs;
     }
 
-    export function toReporting(commands: JsonCommands) {
-        const count = getSingleInt(commands.numReportingIntervals);
-        const interval = getSingleFloat(commands.reportingInterval);
+    export function toReporting(commands: Api.JsonCommands) {
+        const count = commands.num_reporting_intervals;
+        const interval = commands.reporting_interval;
+
+        if (isNaN(Num.parseIntStrict(count)))
+            throw new Error('Invalid number of reporting intervals');
+        if (isNaN(Num.parseFloatStrict(interval)))
+            throw new Error('Invalid reporting interval');
 
         return new Reporting(interval, count);
     }
 
-    export function toStages(commands: JsonCommands) {
-        const first = getSingleInt(commands.firstStage);
-        const last = getSingleInt(commands.lastStage);
+    export function toStages(commands: Api.JsonCommands) {
+        const first = Num.parseIntStrict(commands.first_stage);
+        const last = Num.parseIntStrict(commands.last_stage);
 
         return new StagesSpan(first, last);
     }

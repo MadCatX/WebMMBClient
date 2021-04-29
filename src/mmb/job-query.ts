@@ -8,7 +8,6 @@
 
 import * as Api from './api';
 import { Request } from './request';
-import { JsonCommands } from '../mmb/commands';
 
 export namespace JobQuery {
     export function commands(jobId: string)  {
@@ -67,7 +66,7 @@ export namespace JobQuery {
         return Request.api(req);
     }
 
-    export function start(name: string, commands: JsonCommands) {
+    export function start(name: string, commands: Api.JsonCommands) {
         const req: Api.ApiRequest<Api.StartJobRqData> = {
             req_type: 'StartJob',
             data: { name, commands },

@@ -10,7 +10,7 @@ import { FormModel } from '../model/common/form';
 import { TableWithDeletableRows } from '../ui/common/table-with-deletable-rows';
 import { ComboBox } from '../model/common/combo-box';
 import * as AVP from '../mmb/available-parameters';
-import { JsonCommands } from '../mmb/commands';
+import { JsonCommands } from '../mmb/api';
 import { JsonCommandsDeserializer } from '../mmb/commands-deserializer';
 import { ParameterNames } from '../mmb/available-parameters';
 import { BaseInteraction } from './base-interaction';

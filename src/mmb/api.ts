@@ -6,8 +6,6 @@
  * @author Jiří Černý (jiri.cerny@ibt.cas.cz)
  */
 
-import { AnyObject } from '../util/json';
-
 type ApiRequestType =
     'StartJob'        |
     'StartJobRaw'     |
@@ -32,6 +30,34 @@ export type JobStep = number | 'preparing' | 'none';
 export type JobTotalSteps = number | 'none';
 export type JobCommandsMode = 'Synthetic' | 'Raw';
 
+/* JSON commands */
+
+export type MobilizerParameter = {
+    bond_mobility: string;
+    chain?: string;
+    first_residue?: number;
+    last_residue?: number;
+};
+
+export type JsonAdvancedParameters = Record<string, string | boolean | number>;
+
+export type JsonCommands = {
+    base_interaction_scale_factor: number,
+    use_multithreaded_computation: boolean,
+    temperature: number,
+    first_stage: number,
+    last_stage: number,
+    reporting_interval: number,
+    num_reporting_intervals: number,
+    sequences: string[],
+    double_helices: string[],
+    base_interactions: string[],
+    ntcs: string[],
+    mobilizers: MobilizerParameter[],
+    adv_params: JsonAdvancedParameters,
+    set_default_MD_parameters: boolean,
+};
+
 /* Requests */
 
 export type ApiRequest<T> = {
@@ -55,12 +81,12 @@ export type SimpleJobRqData = {
 
 export type ResumeJobRqData = {
     id: string,
-    commands: AnyObject,
+    commands: JsonCommands,
 }
 
 export type StartJobRqData = {
     name: string,
-    commands: AnyObject,
+    commands: JsonCommands,
 }
 
 export type StartJobRawRqData = {
