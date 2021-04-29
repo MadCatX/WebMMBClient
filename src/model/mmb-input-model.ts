@@ -13,14 +13,14 @@ import * as AVP from '../mmb/available-parameters';
 import { JsonCommands } from '../mmb/commands';
 import { JsonCommandsDeserializer } from '../mmb/commands-deserializer';
 import { ParameterNames } from '../mmb/available-parameters';
-import { BaseInteraction } from '../model/base-interaction';
-import { Compound } from '../model/compound';
-import { DoubleHelix } from '../model/double-helix';
-import { GlobalConfig } from '../model/global-config';
+import { BaseInteraction } from './base-interaction';
+import { Compound } from './compound';
+import { DoubleHelix } from './double-helix';
+import { GlobalConfig } from './global-config';
 import { Mobilizer } from './mobilizer';
-import { NtC } from '../model/ntc';
-import { NtCConformation } from '../model/ntc-conformation';
-import { Reporting } from '../model/reporting';
+import { NtC } from './ntc';
+import { NtCConformation } from './ntc-conformation';
+import { Reporting } from './reporting';
 
 export namespace MmbInputModel {
     export type ErrorKeys = 'mol-in-no-name' | 'mol-adv-params' | 'mol-raw';
