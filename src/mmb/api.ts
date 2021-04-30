@@ -45,7 +45,7 @@ export type MobilizerParameter = {
     last_residue?: number;
 };
 
-export type JsonAdvancedParameters = Record<string, string | boolean | number>;
+export type JsonAdvancedParameters = Record<string, string | boolean | number | null>;
 
 export type JsonCommands = {
     base_interaction_scale_factor: number,

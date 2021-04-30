@@ -52,9 +52,12 @@ export namespace TextCommandsSerializer {
 
             if (P.isBoolean(param))
                 ret.push(`${name} ${CommandsSerializer.trueFalse(value as boolean)}`);
-            else if (P.isFile(param))
-                ret.push(`${name} ${(value as File).name}`);
-            else
+            else if (P.isFile(param)) {
+                if (value === null)
+                    ret.push(`${name} -- No file --`);
+                else
+                    ret.push(`${name} ${(value as File).name}`);
+            } else
                 ret.push(`${name} ${value}`);
         }
 

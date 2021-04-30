@@ -91,7 +91,8 @@ export namespace JsonCommandsDeserializer {
                     advParams[key] = value;
                 else
                     throw new Error(`Advanced parameter ${key} has invalid value ${value}`);
-            }
+            } else if (P.isFile(param))
+                advParams[key] = null; /* We cannot deserialize file parameters */
         }
 
         return advParams;
