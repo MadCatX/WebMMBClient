@@ -277,7 +277,7 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
         this.queryJobStatus();
     }
 
-    private startJob() {
+    private async startJob() {
         if (this.mmbInputFormRef.current === null)
             return;
 
@@ -289,21 +289,33 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
             return;
         }
 
+
         try {
             Net.abortFetch(this.startJobAborter);
 
-            const { promise, aborter } = (() => {
-                if (this.state.uiMode === 'maverick') {
-                    const { name, commands } = this.mmbInputFormRef.current.rawCommandsToJob();
-                    console.log(commands);
+            const { name, commands } = await (async () => {
+                if (this.state.uiMode === 'maverick')
+                    return this.mmbInputFormRef.current!.rawCommandsToJob();
+                else {
+                    const { name, commands } = this.mmbInputFormRef.current!.commandsToJob();
 
-                    return JobQuery.startRaw(name, commands);
-                } else {
-                    const { name, commands } = this.mmbInputFormRef.current.commandsToJob();
-                    console.log(commands);
+                    console.log('Preparing commands...');
 
-                    return JobQuery.start(name, commands);
+                    const c = await commands;
+
+                    console.log('Commands prepared...');
+
+                    return { name, commands: c };
                 }
+            })();
+
+            console.log(commands);
+
+            const { promise, aborter } = (() => {
+                if (this.state.uiMode === 'maverick')
+                    return JobQuery.startRaw(name, commands as string);
+                else
+                    return JobQuery.start(name, commands as Api.JsonCommands);
             })();
 
             this.startJobAborter = aborter;

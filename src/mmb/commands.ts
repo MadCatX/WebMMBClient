@@ -9,6 +9,8 @@
 import { assignAll, checkProps, checkType, isArr, isBool, isInt, isNum, isObj, isStr } from '../util/json';
 import * as Api from './api';
 
+const ExtraFile: Api.ExtraFile = { key: '', data: '' };
+
 const JsonCommands: Api.JsonCommands = {
     base_interaction_scale_factor: 0,
     use_multithreaded_computation: false,
@@ -24,11 +26,30 @@ const JsonCommands: Api.JsonCommands = {
     mobilizers: [],
     adv_params: {},
     set_default_MD_parameters: false,
+    extra_files: [],
 };
 
 function isAdvancedParams(v: unknown): v is Api.JsonAdvancedParameters {
     return isObj(v);
 }
+
+function isExtraFile(v: unknown): v is Api.ExtraFile {
+    if (!isObj(v))
+        return false;
+
+    try {
+        checkProps(v, ExtraFile);
+
+        const tObj = v as Api.ExtraFile;
+        checkType(tObj, 'key', isStr);
+        checkType(tObj, 'data', isStr);
+
+        return true;
+    } catch (e) {
+        return false;
+    }
+}
+
 
 function isMobilizer(v: unknown): v is Api.MobilizerParameter {
     if (!isObj(v))
@@ -80,6 +101,7 @@ export function jsonCommandsFromJson(v: unknown): Api.JsonCommands {
     checkType(tObj, 'mobilizers', isMobilizerArr);
     checkType(tObj, 'adv_params', isAdvancedParams);
     checkType(tObj, 'set_default_MD_parameters', isBool);
+    checkType(tObj, 'extra_files', (v): v is Api.ExtraFile[] => isArr<Api.ExtraFile>(v, isExtraFile));
 
     let cmds = assignAll({}, v, JsonCommands);
 

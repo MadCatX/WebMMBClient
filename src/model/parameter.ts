@@ -7,7 +7,7 @@
  */
 
 export namespace Parameter {
-    export type Type = 'integral' | 'real' | 'boolean' | 'textual' | 'options';
+    export type Type = 'integral' | 'real' | 'boolean' | 'textual' | 'options' | 'file';
 
     export abstract class Parameter<K extends (string extends K ? never : string)> {
         constructor(readonly name: K, readonly description: string, readonly type: Type) {
@@ -194,6 +194,34 @@ export namespace Parameter {
         }
     }
 
+    export class FileParameter<K extends (string extends K ? never : string)> extends TypeCheckedParameter<K, File | null> {
+        constructor(name: K, description: string) {
+            super(name, description, 'file');
+        }
+
+        public chkType(v: unknown): v is File {
+            if (v === null)
+                return false;
+            if (typeof v !== 'object')
+                return false;
+
+            /* TODO: We could use a more robust check here */
+            return true;
+        }
+
+        public default() {
+            return null;
+        }
+
+        public isValid(_v: File) {
+            return true;
+        }
+
+        public options() {
+            return undefined;
+        }
+    }
+
     export function isIntegral<K extends (string extends K ? never : string)>(param: Parameter<K>): param is IntegralParameter<K> {
         return param.type === 'integral';
     }
@@ -212,5 +240,9 @@ export namespace Parameter {
 
     export function isOptions<K extends (string extends K ? never : string), O extends (string extends O ? never : string)>(param: Parameter<K>): param is OptionsParameter<K, O> {
         return param.type === 'options';
+    }
+
+    export function isFile<K extends (string extends K ? never : string)>(param: Parameter<K>): param is FileParameter<K> {
+        return param.type === 'file';
     }
 }

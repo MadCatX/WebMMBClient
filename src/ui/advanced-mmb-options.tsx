@@ -7,7 +7,7 @@
  */
 
 import * as React from 'react';
-import { BooleanParameterField, IntegralParameterField, OptionsParameterField, RealParameterField, TextualParameterField } from './advanced-parameter-field';
+import { BooleanParameterField, IntegralParameterField, OptionsParameterField, RealParameterField, TextualParameterField, FileParameterField } from './advanced-parameter-field';
 import { MmbInputModel as MIM } from '../model/mmb-input-model';
 import { FormUtil } from '../model/common/form';
 import { ErrorBox } from './common/error-box';
@@ -24,6 +24,7 @@ const RealParamField = RealParameterField<ParameterNames>();
 const TextParamField = TextualParameterField<ParameterNames>();
 const BoolParamField = BooleanParameterField<ParameterNames>();
 const OptsParamField = OptionsParameterField<ParameterNames>();
+const FileParamField = FileParameterField<ParameterNames>();
 
 interface State {
     name: ParameterNames;
@@ -40,9 +41,6 @@ export class AdvancedMmbOptions extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, 
         };
 
         this.deleteParameter = this.deleteParameter.bind(this);
-        this.updateParameterBool = this.updateParameterBool.bind(this);
-        this.updateParameterNum = this.updateParameterNum.bind(this);
-        this.updateParameterStr = this.updateParameterStr.bind(this);
     }
 
     private addParameter(name: ParameterNames) {
@@ -77,25 +75,13 @@ export class AdvancedMmbOptions extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, 
             return '';
         else if (P.isOptions(param))
             return param.default();
+        else if (P.isFile(param))
+            return param.default();
 
         throw new Error('Invalid parameter type');
     }
 
-    private updateParameterBool(name: ParameterNames, value: boolean) {
-        const values = FU.getScalar(this.props.ctxData, 'mol-adv-params', new Map<ParameterNames, unknown>());
-
-        values.set(name, value);
-        FU.updateValue(this.props.ctxData, { key: 'mol-adv-params', value: values });
-    }
-
-    private updateParameterNum(name: ParameterNames, value: number) {
-        const values = FU.getScalar(this.props.ctxData, 'mol-adv-params', new Map<ParameterNames, unknown>());
-
-        values.set(name, value);
-        FU.updateValue(this.props.ctxData, { key: 'mol-adv-params', value: values });
-    }
-
-    private updateParameterStr(name: ParameterNames, value: string) {
+    private updateParameter<T>(name: ParameterNames, value: T) {
         const values = FU.getScalar(this.props.ctxData, 'mol-adv-params', new Map<ParameterNames, unknown>());
 
         values.set(name, value);
@@ -117,7 +103,7 @@ export class AdvancedMmbOptions extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, 
                                 parameter={param}
                                 value={e[1] as number}
                                 deleter={this.deleteParameter}
-                                updater={this.updateParameterNum} />
+                                updater={(n, v) => this.updateParameter(n, v)} />
                         );
                     } else if (P.isReal(param)) {
                         return (
@@ -126,7 +112,7 @@ export class AdvancedMmbOptions extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, 
                                 parameter={param}
                                 value={e[1]! as number}
                                 deleter={this.deleteParameter}
-                                updater={this.updateParameterNum} />
+                                updater={(n, v) => this.updateParameter(n, v)} />
                         );
                     } else if (P.isTextual(param)) {
                         return (
@@ -135,7 +121,7 @@ export class AdvancedMmbOptions extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, 
                                 parameter={param}
                                 value={e[1]! as string}
                                 deleter={this.deleteParameter}
-                                updater={this.updateParameterStr} />
+                                updater={(n, v) => this.updateParameter(n, v)} />
                         );
                     } else if (P.isBoolean(param)) {
                         return (
@@ -144,7 +130,7 @@ export class AdvancedMmbOptions extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, 
                                 parameter={param}
                                 value={e[1]! as boolean}
                                 deleter={this.deleteParameter}
-                                updater={this.updateParameterBool} />
+                                updater={(n, v) => this.updateParameter(n, v)} />
                         );
                     } else if (P.isOptions(param)) {
                         return (
@@ -153,7 +139,16 @@ export class AdvancedMmbOptions extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, 
                                 parameter={param}
                                 value={e[1]! as string}
                                 deleter={this.deleteParameter}
-                                updater={this.updateParameterStr} />
+                                updater={(n, v) => this.updateParameter(n, v)} />
+                        );
+                    } else if (P.isFile(param)) {
+                        return (
+                            <FileParamField
+                                key={param.name}
+                                parameter={param}
+                                value={e[1]! as File|null}
+                                deleter={this.deleteParameter}
+                                updater={(n, v) => this.updateParameter(n, v)} />
                         );
                     } else
                         throw new Error('Unknown parameter type');
@@ -186,6 +181,9 @@ export class AdvancedMmbOptions extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, 
                 if (!(param.chkType(value) && param.isValid(value)))
                     errors.push(`${name} is invalid`);
             } else if (P.isOptions(param)) {
+                if (!(param.chkType(value) && param.isValid(value)))
+                    errors.push(`${name} is invalid`);
+            } else if (P.isFile(param)) {
                 if (!(param.chkType(value) && param.isValid(value)))
                     errors.push(`${name} is invalid`);
             }
@@ -227,9 +225,9 @@ export class AdvancedMmbOptions extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, 
                             this.addParameter(this.state.name);
                         }} />
                 </div>
-            {this.renderParameters()}
-            <ErrorBox
-                errors={errors} />
+                {this.renderParameters()}
+                <ErrorBox
+                    errors={errors} />
             </div>
         );
     }

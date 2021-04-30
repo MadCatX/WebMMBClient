@@ -52,6 +52,8 @@ export namespace TextCommandsSerializer {
 
             if (P.isBoolean(param))
                 ret.push(`${name} ${CommandsSerializer.trueFalse(value as boolean)}`);
+            else if (P.isFile(param))
+                ret.push(`${name} ${(value as File).name}`);
             else
                 ret.push(`${name} ${value}`);
         }
@@ -167,6 +169,7 @@ export namespace JsonCommandsSerializer {
         mobilizers: [],
         adv_params: {},
         set_default_MD_parameters: false,
+        extra_files: [],
     };
 
     function advancedParameters<K extends (string extends K ? never : string)>(advParams: CommandsSerializer.AdvancedParameters<K>) {
@@ -175,14 +178,16 @@ export namespace JsonCommandsSerializer {
         for (const [name, value] of advParams.values.entries()) {
             const param = advParams.parameters.get(name)!;
 
-            if (P.isIntegral(param)) {
+            if (P.isIntegral(param))
                 defs[name] = Num.parseIntStrict(value);
-            } else if (P.isReal(param)) {
+            else if (P.isReal(param))
                 defs[name] = Num.parseFloatStrict(value);
-            } else if (P.isBoolean(param)) {
+            else if (P.isBoolean(param))
                 defs[name] = value as boolean;
-            } else
-                defs[name] = value as string;
+            else if (P.isFile(param))
+                defs[name] = (value as File).name;
+            else
+                throw new Error('Unknown advanced parameter type');
         }
 
         return defs;
@@ -206,6 +211,42 @@ export namespace JsonCommandsSerializer {
         });
 
         return defs;
+    }
+
+    async function extraFiles<K extends (string extends K ? never : string)>(advParams: CommandsSerializer.AdvancedParameters<K>) {
+        const exfs: Api.ExtraFile[] = [];
+
+        for (const [name, value] of advParams.values.entries()) {
+            const param = advParams.parameters.get(name)!;
+
+            if (P.isFile(param)) {
+                const f = value as File|null;
+                if (f === null)
+                    throw new Error('File object is null');
+
+                const reader = new FileReader();
+                const p = new Promise((resolve, reject) => {
+                    reader.onerror = () => {
+                        reader.abort();
+                        reject(`Failed to load file ${f.name}`);
+                    };
+                    reader.onload = () => {
+                        let bin = reader.result;
+                        if (bin === null)
+                            throw new Error('No data');
+                        bin = bin.toString().replace('data:*/*;base64,', '');
+                        resolve(bin);
+                    };
+
+                    reader.readAsDataURL(f);
+                });
+
+                const data = await p as string;
+                exfs.push({ key: name, data });
+            }
+        }
+
+        return exfs;
     }
 
     function mdParams(cmds: Api.JsonCommands, md: MdParameters) {
@@ -253,7 +294,7 @@ export namespace JsonCommandsSerializer {
         return defs;
     }
 
-    export function serialize<K extends (string extends K ? never : string)>(params: CommandsSerializer.Parameters<K>) {
+    export async function serialize<K extends (string extends K ? never : string)>(params: CommandsSerializer.Parameters<K>) {
         let cmds = Object.assign({}, Commands);
 
         // Global
@@ -279,6 +320,7 @@ export namespace JsonCommandsSerializer {
         cmds.base_interactions = baseInteractions(params.baseInteractions);
         cmds.ntcs = ntcs(params.ntcs);
         cmds.mobilizers = mobilizers(params.mobilizers);
+        cmds.extra_files = await extraFiles(params.advParams);
 
         return cmds;
     }

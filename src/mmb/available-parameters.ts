@@ -28,7 +28,7 @@ export type ParameterNames = 'addAllAtomSterics' | 'addAllHeavyAtomSterics' | 'a
     'addRNABackboneSterics' | 'addSelectedAtoms' | 'alignmentForcesIsGapped' |
     'alignmentForcesGapPenalty' | 'alignmentForcesDeadLengthFraction' | 'alignmentForcesForceConstant' |
     'applyC1pSprings' | 'calcEnergy' | 'constrainRigidSegments' | 'constraintTolerance' |
-    'cutoffRadius' | 'densityAtomFraction' | 'densityFileName' | 'densityFileName' |
+    'cutoffRadius' | 'densityAtomFraction' | 'densityFileName' |
     'densityFitPhosphates' | 'densityForceConstant' | 'densityNoiseComputeAutocorrelation' |
     'densityReportAtEachAtomPosition' | 'densityNoiseTemperature' | 'densityNoiseScale' |
     'densityMapActivate' | 'dutyCycle' | 'electroDensityFileName' | 'electroDensityForceConstant' |
@@ -78,7 +78,7 @@ export const Parameters: ReadonlyMap<ParameterNames, P.Parameter<ParameterNames>
     ['constraintTolerance', new P.RealParameter<ParameterNames>('constraintTolerance', '')],
     ['cutoffRadius', new P.RealParameter<ParameterNames>('cutoffRadius', '(nm)', new P.Range(new P.Min(0.1, 'inclusive')))],
     ['densityAtomFraction', new P.RealParameter<ParameterNames>('densityAtomFraction', '', P.EZeroEOneRange)],
-    ['densityFileName', new P.TextualParameter<ParameterNames>('densityFileName', '')],
+    ['densityFileName', new P.FileParameter<ParameterNames>('densityFileName', '')],
     ['densityFitPhosphates', new P.BooleanParameter<ParameterNames>('densityFitPhosphates', 'When set to False, this means phosphate groups in DNA and RNA will feel zero density map fitting force. Be warned that this slows down your run A LOT -- proportional to the number of nucleic acid residues that have fitting forces turned on')],
     ['densityForceConstant', new P.RealParameter<ParameterNames>('densityForceConstant', '')],
     ['densityNoiseComputeAutocorrelation', new P.RealParameter<ParameterNames>('densityNoiseComputeAutocorrelation', 'Compute the autocorrelation function for both the planck\'s law noise and input density. may only have effect if densityNoiseScale > 0', P.PositiveRange)],

@@ -150,6 +150,27 @@ export class GOptionsParameterField<K extends (string extends K ? never : string
     }
 }
 
+export class GFileParameterField<K extends (string extends K ? never : string)> extends AbstractParameterField<K, P.Parameter<K>, File | null> {
+    constructor(props: AbstractParameterField.Props<K, P.Parameter<K>, File | null>) {
+        super(props);
+    }
+
+    renderInner() {
+        return (
+            <input
+                type='file'
+                onChange={e => {
+                    const files = e.currentTarget.files;
+                    if (files === null)
+                        this.props.updater(this.props.parameter.name, null);
+                    else
+                        this.props.updater(this.props.parameter.name, files.item(0));
+                }}
+                className='file-upload' />
+        );
+    }
+}
+
 export function IntegralParameterField<K extends (string extends K ? never : string)>() {
     return GIntegralParameterField as new(props: AbstractParameterField.Props<K, P.IntegralParameter<K>, number>) => GIntegralParameterField<K>;
 }
@@ -168,4 +189,8 @@ export function BooleanParameterField<K extends (string extends K ? never : stri
 
 export function OptionsParameterField<K extends (string extends K ? never : string)>() {
     return GOptionsParameterField as new(props: AbstractParameterField.Props<K, P.Parameter<K>, string>) => GOptionsParameterField<K>;
+}
+
+export function FileParameterField<K extends (string extends K ? never : string)>() {
+    return GFileParameterField as new(props: AbstractParameterField.Props<K, P.Parameter<K>, File | null>) => GFileParameterField<K>;
 }
