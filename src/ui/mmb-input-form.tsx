@@ -99,7 +99,7 @@ export class MmbInputForm extends Form<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTy
                 new Map([...this.state.values, ...v])
             );
         } catch (e) {
-            this.setErrors(new Map(['mol-raw', e]));
+            this.setErrors(new Map([['mol-raw', e]]));
         }
     }
 
