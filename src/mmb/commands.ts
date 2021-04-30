@@ -9,7 +9,7 @@
 import { assignAll, checkProps, checkType, isArr, isBool, isInt, isNum, isObj, isStr } from '../util/json';
 import * as Api from './api';
 
-const ExtraFile: Api.ExtraFile = { key: '', data: '' };
+const ExtraFile: Api.ExtraFile = { key: '', name: '', data: '' };
 
 const JsonCommands: Api.JsonCommands = {
     base_interaction_scale_factor: 0,
@@ -42,6 +42,7 @@ function isExtraFile(v: unknown): v is Api.ExtraFile {
 
         const tObj = v as Api.ExtraFile;
         checkType(tObj, 'key', isStr);
+        checkType(tObj, 'name', isStr);
         checkType(tObj, 'data', isStr);
 
         return true;

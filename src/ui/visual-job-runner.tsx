@@ -298,13 +298,7 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
                     return this.mmbInputFormRef.current!.rawCommandsToJob();
                 else {
                     const { name, commands } = this.mmbInputFormRef.current!.commandsToJob();
-
-                    console.log('Preparing commands...');
-
                     const c = await commands;
-
-                    console.log('Commands prepared...');
-
                     return { name, commands: c };
                 }
             })();
@@ -353,7 +347,7 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
                 return;
             this.setState({
                 ...this.state,
-                ...this.jobInfoErrorBlock(undefined, 'Cannot start job', e.message, 'none', 'none'),
+                ...this.jobInfoErrorBlock(undefined, 'Cannot start job', e.toString(), 'none', 'none'),
             });
         }
     }

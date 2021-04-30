@@ -216,6 +216,8 @@ export namespace JsonCommandsSerializer {
     async function extraFiles<K extends (string extends K ? never : string)>(advParams: CommandsSerializer.AdvancedParameters<K>) {
         const exfs: Api.ExtraFile[] = [];
 
+        const pruneRegex = new RegExp('data:(.+?)/(.+?);base64,');
+
         for (const [name, value] of advParams.values.entries()) {
             const param = advParams.parameters.get(name)!;
 
@@ -231,18 +233,24 @@ export namespace JsonCommandsSerializer {
                         reject(`Failed to load file ${f.name}`);
                     };
                     reader.onload = () => {
-                        let bin = reader.result;
+                        let bin = reader.result as string;
                         if (bin === null)
                             throw new Error('No data');
-                        bin = bin.toString().replace('data:*/*;base64,', '');
-                        resolve(bin);
+
+                        const header = bin.match(pruneRegex);
+                        if (header === null)
+                            reject('Failed to extract base64-encoded file content');
+                        else {
+                            bin = bin.toString().replace(header[0], '');
+                            resolve(bin);
+                        }
                     };
 
                     reader.readAsDataURL(f);
                 });
 
                 const data = await p as string;
-                exfs.push({ key: name, data });
+                exfs.push({ key: name, name: f.name, data });
             }
         }
 

@@ -34,6 +34,7 @@ export type JobCommandsMode = 'Synthetic' | 'Raw';
 
 export type ExtraFile = {
     key: string;
+    name: string;
     data: string;
 };
 
