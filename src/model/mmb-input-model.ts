@@ -133,7 +133,7 @@ export namespace MmbInputModel {
         const map = new Map<ValueKeys, V<ValueTypes>>();
 
         const global = JsonCommandsDeserializer.toGlobal(commands);
-        const stage = stages[stages.length - 1];
+        const stage = stages.length > 0 ? stages[stages.length - 1] : 1;
         const md = JsonCommandsDeserializer.toMdParams(commands);
         const compounds = JsonCommandsDeserializer.toCompounds(commands);
         const doubleHelices = JsonCommandsDeserializer.toDoubleHelices(commands);
