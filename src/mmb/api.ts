@@ -19,7 +19,8 @@ type ApiRequestType =
     'SessionInfo'     |
     'CloneJob'        |
     'ListExamples'    |
-    'ActivateExample';
+    'ActivateExample' |
+    'UploadFile';
 
 type AuthRequestType =
     'LogIn' |
@@ -29,6 +30,7 @@ export type JobState = 'NotStarted' | 'Running' | 'Finished' | 'Failed';
 export type JobStep = number | 'preparing' | 'none';
 export type JobTotalSteps = number | 'none';
 export type JobCommandsMode = 'Synthetic' | 'Raw';
+export type UploadFileRequestType = 'Start' | 'Continue' | 'Finish';
 
 /* JSON commands */
 
@@ -99,6 +101,13 @@ export type StartJobRqData = {
 export type StartJobRawRqData = {
     name: string,
     commands: string,
+}
+
+export type UploadFileRqData = {
+    id: string;
+    req_type: UploadFileRequestType,
+    file_name: string,
+    data: string,
 }
 
 /* Responses */

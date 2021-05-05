@@ -14,6 +14,7 @@ import { DoubleHelicesInput } from './double-helices-input';
 import { GlobalParametersInput } from './global-parameters-input';
 import { MobilizersInput } from './mobilizers-input';
 import { NtCsInput } from './ntcs-input';
+import { AdditionalFilesInput } from './additional-files-input';
 import { Form } from './common/form/form';
 import { TextArea } from './common/form/text-area';
 import { ParameterNames, Parameters } from '../mmb/available-parameters';
@@ -231,7 +232,15 @@ export class MmbInputForm extends Form<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTy
                          <DoubleHelicesInput ctxData={ctxData} />
                          <BaseInteractionsInput ctxData={ctxData} />
                          <NtCsInput ctxData={ctxData} />
-                         {this.isAdv() ? <MobilizersInput ctxData={ctxData} /> : undefined}
+                         {this.isAdv()
+                             ?
+                             <>
+                                 <MobilizersInput ctxData={ctxData} />
+                                 <AdditionalFilesInput ctxData={ctxData} />
+                             </>
+                             :
+                             undefined
+                            }
                          <GlobalParametersInput ctxData={ctxData}
                              availableStages={this.props.availableStages} />
                          {this.isAdv()

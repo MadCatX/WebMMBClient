@@ -143,6 +143,23 @@ body {
     transition: opacity 0.1s;
 }
 
+.file-upload-name {
+    padding-right: 1em;
+}
+
+.file-upload-state-done {
+    color: green;
+}
+
+.file-upload-state-failed {
+    color: red;
+}
+
+.files-upload-progress-list {
+    display: grid;
+    grid-template-columns: auto 1fr;
+}
+
 .fit-width-input {
     width: 100%;
 }
@@ -363,6 +380,11 @@ body {
     grid-template-columns: 7em 7em 7em 7em auto;
 }
 
+.mol-in-additional-files-input {
+    display: grid;
+    grid-template-columns: 12em auto;
+}
+
 .mol-in-ntcs-added {
     display: grid;
     grid-template-columns: 7em 7em 7em 7em auto;
@@ -374,6 +396,13 @@ body {
     grid-template-columns: 12em 30em auto;
     margin-top: 0.6em;
 }
+
+.mol-in-additional-files-added {
+    display: grid;
+    grid-template-columns: 18em 6em 6em auto;
+    margin-top: 0.6em;
+}
+
 
 .mol-in-gp-input {
     display: grid;
