@@ -51,7 +51,6 @@ function isExtraFile(v: unknown): v is Api.ExtraFile {
     }
 }
 
-
 function isMobilizer(v: unknown): v is Api.MobilizerParameter {
     if (!isObj(v))
         return false;
@@ -80,31 +79,43 @@ function isStrArr(v: unknown): v is string[] {
     return isArr<string>(v, isStr);
 }
 
-export function jsonCommandsFromJson(v: unknown): Api.JsonCommands {
+export function isJsonCommands(v: unknown): v is Api.JsonCommands {
     if (!isObj(v))
-        throw new Error('Input variable is not an object');
+        return false;
 
-    checkProps(v, JsonCommands);
+    try {
+        checkProps(v, JsonCommands);
 
-    const tObj = v as Api.JsonCommands;
+        const tObj = v as Api.JsonCommands;
 
-    checkType(tObj, 'base_interaction_scale_factor', isNum);
-    checkType(tObj, 'use_multithreaded_computation', isBool);
-    checkType(tObj, 'temperature', isNum);
-    checkType(tObj, 'first_stage', isInt);
-    checkType(tObj, 'last_stage', isInt);
-    checkType(tObj, 'reporting_interval', isNum);
-    checkType(tObj, 'num_reporting_intervals', isInt);
-    checkType(tObj, 'sequences', isStrArr);
-    checkType(tObj, 'double_helices', isStrArr);
-    checkType(tObj, 'base_interactions', isStrArr);
-    checkType(tObj, 'ntcs', isStrArr);
-    checkType(tObj, 'mobilizers', isMobilizerArr);
-    checkType(tObj, 'adv_params', isAdvancedParams);
-    checkType(tObj, 'set_default_MD_parameters', isBool);
-    checkType(tObj, 'extra_files', (v): v is Api.ExtraFile[] => isArr<Api.ExtraFile>(v, isExtraFile));
+        checkType(tObj, 'base_interaction_scale_factor', isNum);
+        checkType(tObj, 'use_multithreaded_computation', isBool);
+        checkType(tObj, 'temperature', isNum);
+        checkType(tObj, 'first_stage', isInt);
+        checkType(tObj, 'last_stage', isInt);
+        checkType(tObj, 'reporting_interval', isNum);
+        checkType(tObj, 'num_reporting_intervals', isInt);
+        checkType(tObj, 'sequences', isStrArr);
+        checkType(tObj, 'double_helices', isStrArr);
+        checkType(tObj, 'base_interactions', isStrArr);
+        checkType(tObj, 'ntcs', isStrArr);
+        checkType(tObj, 'mobilizers', isMobilizerArr);
+        checkType(tObj, 'adv_params', isAdvancedParams);
+        checkType(tObj, 'set_default_MD_parameters', isBool);
+        checkType(tObj, 'extra_files', (v): v is Api.ExtraFile[] => isArr<Api.ExtraFile>(v, isExtraFile));
 
-    let cmds = assignAll({}, v, JsonCommands);
+        return true;
+    } catch (e) {
+        console.error(e);
+        return false;
+    }
+}
+
+export function jsonCommandsFromJson(obj: unknown): Api.JsonCommands {
+    if (!isJsonCommands(obj))
+        throw new Error('Object is not JsonCommands');
+
+    let cmds = assignAll({}, obj, JsonCommands);
 
     return cmds;
 }

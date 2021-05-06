@@ -34,6 +34,14 @@ export namespace JobQuery {
         return Request.api(req);
     }
 
+    export function create(name: string) {
+        const req: Api.ApiRequest<Api.CreateJobRqData> = {
+            req_type: 'CreateJob',
+            data: { name },
+        };
+        return Request.api(req);
+    }
+
     export function del(id: string) {
         const req: Api.ApiRequest<Api.SimpleJobRqData> = {
             req_type: 'DeleteJob',
@@ -66,18 +74,18 @@ export namespace JobQuery {
         return Request.api(req);
     }
 
-    export function start(name: string, commands: Api.JsonCommands) {
+    export function start(id: string, commands: Api.JsonCommands) {
         const req: Api.ApiRequest<Api.StartJobRqData> = {
             req_type: 'StartJob',
-            data: { name, commands },
+            data: { id, commands },
         };
         return Request.api(req);
     }
 
-    export function startRaw(name: string, commands: string) {
+    export function startRaw(id: string, commands: string) {
         const req: Api.ApiRequest<Api.StartJobRawRqData> = {
             req_type: 'StartJobRaw',
-            data: { name, commands },
+            data: { id, commands },
         };
         return Request.api(req);
     }

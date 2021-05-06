@@ -10,6 +10,7 @@ type ApiRequestType =
     'StartJob'        |
     'StartJobRaw'     |
     'StopJob'         |
+    'CreateJob'       |
     'DeleteJob'       |
     'JobStatus'       |
     'ListJobs'        |
@@ -29,7 +30,7 @@ type AuthRequestType =
 export type JobState = 'NotStarted' | 'Running' | 'Finished' | 'Failed';
 export type JobStep = number | 'preparing' | 'none';
 export type JobTotalSteps = number | 'none';
-export type JobCommandsMode = 'Synthetic' | 'Raw';
+export type JobCommandsMode = 'None' | 'Synthetic' | 'Raw';
 export type UploadFileRequestType = 'Start' | 'Continue' | 'Finish';
 
 /* JSON commands */
@@ -84,6 +85,10 @@ export type CloneJobRqData = {
     name: string,
 }
 
+export type CreateJobRqData = {
+    name: string,
+}
+
 export type SimpleJobRqData = {
     id: string,
 }
@@ -94,12 +99,12 @@ export type ResumeJobRqData = {
 }
 
 export type StartJobRqData = {
-    name: string,
+    id: string,
     commands: JsonCommands,
 }
 
 export type StartJobRawRqData = {
-    name: string,
+    id: string,
     commands: string,
 }
 
@@ -134,6 +139,16 @@ export type Empty = typeof Empty;
 export type ExampleListItem = {
     name: string,
     description: string,
+}
+
+export type JobCommands = {
+    is_empty: boolean;
+    commands: JsonCommands|null;
+}
+
+export type JobCommandsRaw = {
+    is_empty: boolean;
+    commands: string|null;
 }
 
 export type JobInfo = {

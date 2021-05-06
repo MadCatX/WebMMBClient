@@ -15,25 +15,18 @@ import { Logout } from './ui/logout';
 import { TabsBar } from './ui/tabs-bar';
 import { VisualJobRunner } from './ui/visual-job-runner';
 import { ExternalResourcesLoader } from './external-resources-loader';
-import * as Api from './mmb/api';
 import { AppQuery } from './mmb/app-query';
 import { Response } from './mmb/response';
 import { ResponseDeserializers } from './mmb/response-deserializers';
-import { MmbInputModel as MIM } from './model/mmb-input-model';
 import { Net } from './util/net';
 import { versionInfo } from './version';
 
 type Tabs = 'job-list' | 'job-control' | 'example-list';
 
-type ActiveJob = {
-    info: Api.JobInfo,
-    setup: MIM.Values,
-}
-
 interface State {
     session_id?: string;
+    jobId: string|null;
     activeTab: Tabs;
-    activeJob?: ActiveJob;
 }
 
 interface Props {
@@ -49,65 +42,51 @@ export class Main extends React.Component<Props, State> {
 
         this.state = {
             session_id: undefined,
+            jobId: null,
             activeTab: 'job-list',
-            activeJob: undefined,
         };
 
         this.onSelectJob = this.onSelectJob.bind(this);
-        this.onJobDeleted = this.onJobDeleted.bind(this);
-        this.onJobStarted = this.onJobStarted.bind(this);
         this.onTabChanged = this.onTabChanged.bind(this);
         this.onExampleSelected = this.onExampleSelected.bind(this);
     }
 
-    private allowJobControl() {
-        return this.state.session_id !== undefined && isExtResAvailable('molstar-app');
+    private canSwitchToControl() {
+        return this.state.session_id !== undefined && this.state.jobId !== null && this.isMolstarLoaded();
     }
 
-    private onExampleSelected(info: Api.JobInfo, setup: MIM.Values) {
-        this.onSelectJob(info, setup);
+    private isMolstarLoaded() {
+        return isExtResAvailable('molstar-app');
     }
 
-    private onJobDeleted(id: string) {
-        if (this.state.activeJob?.info.id === id) {
-            this.setState({
-                ...this.state,
-                activeJob: undefined,
-            });
-        }
+    private onExampleSelected(jobId: string) {
+        this.onSelectJob(jobId);
     }
 
-    private onJobStarted(info: Api.JobInfo, setup: MIM.Values) {
-        this.setState({
-            ...this.state,
-            activeJob: { info, setup },
-        });
-    }
-
-    private onSelectJob(info?: Api.JobInfo, setup?: MIM.Values) {
-        if (!this.allowJobControl())
+    private onSelectJob(jobId: string) {
+        if (!this.isMolstarLoaded())
             return;
-
-        const aj = (() => {
-            if (info !== undefined && setup !== undefined)
-                return { info, setup };
-            return undefined;
-        })();
 
         this.setState({
             ...this.state,
             activeTab: 'job-control',
-            activeJob: aj,
+            jobId,
         });
     }
 
     private onTabChanged(id: Tabs) {
-        console.log(id);
-
-        if (id === 'job-control' && !this.allowJobControl())
+        if (id === this.state.activeTab)
+            return;
+        if (id === 'job-control' && !this.canSwitchToControl())
             return;
 
-        this.setState({ ...this.state, activeTab: id });
+        const jobId = id !== 'job-control' ? null : this.state.jobId;
+
+        this.setState({
+            ...this.state,
+            activeTab: id,
+            jobId,
+        });
     }
 
     private renderTab(id: Tabs) {
@@ -116,18 +95,18 @@ export class Main extends React.Component<Props, State> {
             return (
                 <JobList
                     onSelectJob={this.onSelectJob}
-                    jobDeleted={this.onJobDeleted} />);
+                />
+            );
         case 'job-control':
-            if (!this.allowJobControl())
-                throw new Error('Job control is not available');
+            if (!this.canSwitchToControl())
+                return;
 
             return (
                 <VisualJobRunner
                     username={this.state.session_id!}
-                    onJobStarted={this.onJobStarted}
-                    info={this.state.activeJob?.info}
-                    setup={this.state.activeJob?.setup ?? MIM.defaultSetupValues()} />
-                );
+                    jobId={this.state.jobId!}
+                />
+            );
         case 'example-list':
             return (
                 <ExampleList

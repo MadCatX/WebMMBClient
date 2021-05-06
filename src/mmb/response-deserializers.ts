@@ -7,6 +7,7 @@
  */
 
 import * as Api from './api';
+import { isJsonCommands, jsonCommandsFromJson } from './commands';
 import { checkProps, checkType, isArr, isBool, isInt, isObj, isStr, TypeChecker } from '../util/json';
 import { Num } from '../util/num';
 
@@ -16,6 +17,9 @@ const ExampleListItemObj: Api.ExampleListItem = {
     name: '',
     description: '',
 };
+const JobCommands: Api.JobCommands = { is_empty: true, commands: null };
+const JobCommandsRaw: Api.JobCommandsRaw = { is_empty: true, commands: null };
+
 const JobInfoObj: Api.JobInfo = {
     id: '',
     name: '',
@@ -96,10 +100,63 @@ function isJobInfo(v: unknown): v is Api.JobInfo {
     return true;
 }
 
+function isJobCommands(v: unknown): v is Api.JobCommands {
+    if (!isObj(v))
+        return false;
+
+    try {
+        checkProps(v, JobCommands);
+
+        const tObj = v as Api.JobCommands;
+        checkType(tObj, 'is_empty', isBool);
+
+        if (!tObj.is_empty)
+            checkType(tObj, 'commands', isJsonCommands);
+        else {
+            if (tObj.commands !== null) {
+                console.error('Non-null commands in commands object that was expected empty');
+                return false;
+            }
+        }
+
+        return true;
+    } catch (e) {
+        console.error(e);
+        return false;
+    }
+}
+
+function isJobCommandsRaw(v: unknown): v is Api.JobCommandsRaw {
+    if (!isObj(v))
+        return false;
+
+    try {
+        checkProps(v, JobCommandsRaw);
+
+        const tObj = v as Api.JobCommandsRaw;
+        checkType(tObj, 'is_empty', isBool);
+
+
+        if (!tObj.is_empty)
+            checkType(tObj, 'commands', isStr);
+        else {
+            if (tObj.commands !== null) {
+                console.error('Non-null commands in commands object that was expected empty');
+                return false;
+            }
+        }
+
+        return true;
+    } catch (e) {
+        console.error(e);
+        return false;
+    }
+}
+
 function isJobCommandsMode(v: unknown): v is Api.JobState {
     if (!isStr(v))
         return false;
-    return v === 'Synthetic' || v === 'Raw';
+    return v === 'Synthetic' || v === 'Raw' || v === 'None';
 }
 
 function isJobState(v: unknown): v is Api.JobState {
@@ -153,6 +210,25 @@ export namespace ResponseDeserializers {
         }
     }
 
+    export function toJobCommands(obj: unknown): Api.JobCommands {
+        if (isJobCommands(obj)) {
+            if (obj.is_empty)
+                return obj;
+            return {
+                is_empty: false,
+                commands: jsonCommandsFromJson(obj.commands)
+            }
+        }
+
+        throw new Error('Object is not JobCommands');
+    }
+
+    export function toJobCommandsRaw(obj: unknown): Api.JobCommandsRaw {
+        if (isJobCommandsRaw(obj))
+            return obj;
+        throw new Error('Object is not JobCommandsRaw');
+    }
+
     export function toJobInfo(obj: unknown): Api.JobInfo {
         if (isJobInfo(obj)) {
             return {
@@ -191,7 +267,7 @@ export namespace ResponseDeserializers {
     export function toMmbOutput(obj: unknown): string {
         if (!isStr(obj))
             throw new Error('Input variable is not a string');
-        return obj as string;
+        return obj;
     }
 
     export function toSessionInfo(obj: unknown): Api.SessionInfo {

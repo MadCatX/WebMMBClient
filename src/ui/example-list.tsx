@@ -8,11 +8,8 @@
 
 import * as React from 'react';
 import { PushButton } from './common/push-button';
-import { MmbInputModel as MIM } from '../model/mmb-input-model';
 import * as Api from '../mmb/api';
 import { AppQuery } from '../mmb/app-query';
-import { jsonCommandsFromJson } from '../mmb/commands';
-import { JobQuery } from '../mmb/job-query';
 import { Response } from '../mmb/response';
 import { ResponseDeserializers } from '../mmb/response-deserializers';
 import { Net } from '../util/net';
@@ -23,7 +20,7 @@ interface State {
 }
 
 export class ExampleList extends React.Component<ExampleList.Props, State> {
-    private activateExampleAborter: AbortController | null = null;
+    //private activateExampleAborter: AbortController | null = null;
     private listExamplesAborter: AbortController | null = null;
 
     constructor(props: ExampleList.Props) {
@@ -57,6 +54,11 @@ export class ExampleList extends React.Component<ExampleList.Props, State> {
         );
     }
 
+    private activateExample(name: string) {
+        // TODO: Create a new job from the example
+    }
+
+    /*
     private activateExample(name: string) {
         Net.abortFetch(this.activateExampleAborter);
 
@@ -121,6 +123,7 @@ export class ExampleList extends React.Component<ExampleList.Props, State> {
             });
         });
     }
+    */
 
     componentDidMount() {
         Net.abortFetch(this.listExamplesAborter);
@@ -184,7 +187,7 @@ export class ExampleList extends React.Component<ExampleList.Props, State> {
 
 export namespace ExampleList {
     export interface OnExampleSelected {
-        (info: Api.JobInfo, setup: MIM.Values): void;
+        (jobId: string): void;
     }
 
     export interface Props {

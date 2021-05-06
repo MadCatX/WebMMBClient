@@ -12,12 +12,9 @@ import { JobStatus } from './job-status';
 import { MmbInputForm } from './mmb-input-form';
 import { Viewer } from './viewer';
 import { ErrorBox } from './common/error-box';
-import { Util } from './common/util';
 import { LabeledField } from './common/controlled/labeled-field';
 import * as Api from '../mmb/api';
-import { JobQuery } from '../mmb/job-query';
-import { Response } from '../mmb/response';
-import { ResponseDeserializers } from '../mmb/response-deserializers';
+import { JobManipulator } from '../mmb/job-manipulator';
 import { MmbInputModel as MIM } from '../model/mmb-input-model';
 import { Net } from '../util/net';
 
@@ -39,22 +36,24 @@ function forceResize() {
 }
 
 interface State {
-    jobId?: string;
-    jobName?: string;
+    jobName: string;
     jobState: Api.JobState;
     jobStep: Api.JobStep;
     jobTotalSteps: Api.JobTotalSteps;
     jobAvailableStages: number[];
     jobCurrentStage: number|null;
+    jobCommandsMode: Api.JobCommandsMode;
     jobError: string;
     autoRefreshEnabled: boolean;
     autoRefreshInterval: number;
     mmbOutput: Viewer.MmbOutput;
     uiMode: MIM.UiMode;
+    setup: Map<MIM.ValueKeys, MIM.V<MIM.ValueTypes>>;
 }
 
 export class VisualJobRunner extends React.Component<VisualJobRunner.Props, State> {
     private mmbInputFormRef: React.RefObject<MmbInputForm>;
+    private commandsQueryAborter: AbortController | null = null;
     private jobQueryAborter: AbortController | null = null;
     private startJobAborter: AbortController | null = null;
     private stopJobAborter: AbortController | null = null;
@@ -63,35 +62,32 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
     constructor(props: VisualJobRunner.Props) {
         super(props);
 
-        const step = (props.info?.state === 'NotStarted' ? 'none' : (props.info?.step ?? 'none')) ?? 'none';
-
         this.state = {
-            jobId: props.info?.id,
-            jobName: props.info?.name,
-            jobState: props.info?.state ?? 'NotStarted',
-            jobStep: step,
-            jobTotalSteps: props.info?.total_steps ?? 'none',
-            jobAvailableStages: props.info?.available_stages ?? new Array<number>(),
+            jobName: '',
+            jobState: 'NotStarted',
+            jobStep: 'none',
+            jobTotalSteps: 'none',
+            jobAvailableStages: [],
             jobCurrentStage: null,
+            jobCommandsMode: 'None',
             jobError: '',
             autoRefreshEnabled: true,
             autoRefreshInterval: 10,
             mmbOutput: { text: undefined, errors: undefined },
             uiMode: 'simple',
+            setup: MIM.defaultSetupValues(),
         };
+
 
         this.makeMmbInputForm = this.makeMmbInputForm.bind(this);
         this.onAutoRefreshChanged = this.onAutoRefreshChanged.bind(this);
-        this.queryJobStatus = this.queryJobStatus.bind(this);
         this.refreshJob = this.refreshJob.bind(this);
-        this.startJob = this.startJob.bind(this);
-        this.stopJob = this.stopJob.bind(this);
 
         this.mmbInputFormRef = React.createRef();
     }
 
-    private jobInfoErrorBlock(status: number|undefined, errorPrefix: string, errorMessage: string, step?: Api.JobStep, totalSteps?: Api.JobTotalSteps) {
-        let obj = { jobState: 'Failed' as Api.JobState, jobError: Util.formatError(status, errorPrefix, errorMessage) };
+    private jobInfoErrorBlock(errorMsg: string, step?: Api.JobStep, totalSteps?: Api.JobTotalSteps) {
+        let obj = { jobState: 'Failed' as Api.JobState, jobError: errorMsg};
         if (step !== undefined)
             obj = Object.assign({ jobStep: step }, obj);
         if (totalSteps !== undefined)
@@ -109,6 +105,7 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
             jobTotalSteps: data.total_steps,
             jobAvailableStages: data.available_stages,
             jobCurrentStage: data.current_stage,
+            jobCommandsMode: data.commands_mode,
             jobError: '',
         };
     }
@@ -153,11 +150,11 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
                     </div>
                     <MmbInputForm
                         ref={this.mmbInputFormRef}
-                        jobName={this.props.info?.name}
+                        jobName={this.state.jobName}
                         availableStages={stages}
                         currentStage={this.state.jobCurrentStage}
                         mode={this.state.uiMode}
-                        initialValues={this.props.setup} />
+                        initialValues={this.state.setup} />
                 </>
             );
         } catch (e) {
@@ -168,8 +165,8 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
         }
     }
 
-    private mmbOutputErrorBlock(e: Error) {
-        return { mmbOutput: { text: undefined, errors: [e.toString()] } };
+    private mmbOutputErrorBlock(err: string) {
+        return { mmbOutput: { text: undefined, errors: [err] } };
     }
 
     private mmbOutputOkBlock(data: string) {
@@ -188,89 +185,101 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
         }
     }
 
-    private queryJobStatus() {
-        if (this.state.jobId === undefined)
-            return;
-
+    private async queryJobInitial() {
         Net.abortFetch(this.jobQueryAborter);
 
-        let { promise, aborter } = JobQuery.status(this.state.jobId);
-        this.jobQueryAborter = aborter;
-        promise.then(resp => {
-            resp.json().then(json => {
-                if (Net.isFetchAborted(aborter))
-                    return;
-                const r = Response.parse(json, ResponseDeserializers.toJobInfo);
+        try {
+            const taskInfo = JobManipulator.fetchInfo(this.props.jobId);
+            this.jobQueryAborter = taskInfo.aborter;
 
-                if (Response.isError(r)) {
-                    this.setState({
-                        ...this.state,
-                        ...this.jobInfoErrorBlock(resp.status, 'Cannot query job info', r.message),
-                    });
-                    return;
-                }
-                if (!Response.isOk(r))
-                    throw new Error('Unexpected response payload type');
+            const jobInfo = await taskInfo.performer();
+            if (!jobInfo)
+                return; // TODO: Report an error?
 
-                // We have basic job status data, now fetch MMB output
-                if (this.state.jobId === undefined) {
-                    // This should never happen
-                    this.setState({
-                        ...this.state,
-                        ...this.jobInfoOkBlock(r.data),
-                    });
-                    return;
-                }
+            const taskMmbOutput = JobManipulator.fetchMmbOutput(jobInfo.id);
+            this.jobQueryAborter = taskMmbOutput.aborter;
 
-                ({ promise, aborter } = JobQuery.mmbOutput(this.state.jobId));
-                this.jobQueryAborter = aborter;
-                promise.then(resp => {
-                    resp.json().then(json => {
-                        if (Net.isFetchAborted(aborter))
-                            return;
+            const mmbOutputPromise = taskMmbOutput.performer();
 
-                        const r2 = Response.parse(json, ResponseDeserializers.toMmbOutput);
-                        if (Response.isError(r2)) {
-                            this.setState({
-                                ...this.state,
-                                ...this.jobInfoOkBlock(r.data),
-                            });
-                        } else if (Response.isOk(r2)) {
-                            console.log(r2.data);
-                            this.setState({
-                                ...this.state,
-                                ...this.jobInfoOkBlock(r.data),
-                                ...this.mmbOutputOkBlock(r2.data),
-                            });
-                        }
-                    }).catch(e => {
-                        this.setState({
-                            ...this.state,
-                            ...this.jobInfoOkBlock(r.data),
-                            ...this.mmbOutputErrorBlock(e),
-                        });
-                    });
-                }).catch(e => {
-                    this.setState({
-                        ...this.state,
-                        ...this.jobInfoOkBlock(r.data),
-                        ...this.mmbOutputErrorBlock(e),
-                    });
-                });
-            }).catch(e => {
-                this.setState({
-                    ...this.state,
-                    ...this.jobInfoErrorBlock(resp.status, 'Cannot query job info', e.toString()),
-                });
-            });
-        }).catch(e => {
-            if (Net.isAbortError(e))
-                return;
+            const taskCommands = jobInfo.commands_mode === 'Raw' ? JobManipulator.commandsRaw(this.props.jobId) : JobManipulator.commands(this.props.jobId);
+            this.commandsQueryAborter = taskCommands.aborter;
+
+            const mmbOutput = await mmbOutputPromise;
+            const commands = await taskCommands.performer();
+            const setup = (() => {
+                if (!commands || commands.is_empty)
+                    return MIM.defaultSetupValues();
+                return jobInfo.commands_mode === 'Raw'
+                       ?
+                       MIM.rawCommandsToValues(jobInfo.name, jobInfo.available_stages, (commands as Api.JobCommandsRaw).commands!)
+                       :
+                       MIM.jsonCommandsToValues(jobInfo.name, jobInfo.available_stages, (commands as Api.JobCommands).commands!);
+            })();
+
+            let newState: Partial<State> = { ...this.jobInfoOkBlock(jobInfo) };
+            if (mmbOutput)
+                newState = { ...newState, ...this.mmbOutputOkBlock(mmbOutput) };
+
+            if (commands)
+                newState = { ...newState, setup };
+
             this.setState({
                 ...this.state,
-                jobError: e.message,
+                ...newState,
             });
-        });
+
+            if (jobInfo.state === 'Running')
+                this.setupAutoRefresh(this.state.autoRefreshEnabled, this.state.autoRefreshInterval, 'Running');
+        } catch (e) {
+            this.setState({
+                ...this.state,
+                ...this.jobInfoErrorBlock(e),
+            });
+        }
+    }
+
+    private async queryJobStatus() {
+        Net.abortFetch(this.jobQueryAborter);
+
+        const task = JobManipulator.fetchInfo(this.props.jobId);
+        this.jobQueryAborter = task.aborter;
+
+        try {
+            const jobInfo = await task.performer();
+            if (!jobInfo)
+                return;
+
+            try {
+                const task2 = JobManipulator.fetchMmbOutput(this.props.jobId);
+                this.jobQueryAborter = task2.aborter;
+
+                const mmbOutput = await task2.performer();
+                if (!mmbOutput) {
+                    this.setState({
+                        ...this.state,
+                        ...this.jobInfoOkBlock(jobInfo),
+                    });
+                } else {
+                    this.setState({
+                        ...this.state,
+                        ...this.jobInfoOkBlock(jobInfo),
+                        ...this.mmbOutputOkBlock(mmbOutput),
+                    });
+                }
+            } catch (e) {
+                // Failure when fetching MMB output
+                this.setState({
+                    ...this.state,
+                    ...this.mmbOutputErrorBlock(e.toString())
+                });
+            }
+        } catch (e) {
+            // Failure when fetching JobInfo
+            this.setState({
+                ...this.state,
+                ...this.jobInfoErrorBlock(e.toString()),
+            })
+        }
     }
 
     private refreshJob() {
@@ -289,67 +298,52 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
             return;
         }
 
+        Net.abortFetch(this.startJobAborter);
+
+        const commands = await this.mmbInputFormRef.current.commandsToJob();
+        const task = JobManipulator.start(this.props.jobId, commands);
+
+        this.startJobCommon(task);
+    }
+
+    private async startJobCommon(task: JobManipulator.Task<Api.JobInfo>) {
+        this.startJobAborter = task.aborter;
 
         try {
-            Net.abortFetch(this.startJobAborter);
-
-            const { name, commands } = await (async () => {
-                if (this.state.uiMode === 'maverick')
-                    return this.mmbInputFormRef.current!.rawCommandsToJob();
-                else {
-                    const { name, commands } = this.mmbInputFormRef.current!.commandsToJob();
-                    const c = await commands;
-                    return { name, commands: c };
-                }
-            })();
-
-            console.log(commands);
-
-            const { promise, aborter } = (() => {
-                if (this.state.uiMode === 'maverick')
-                    return JobQuery.startRaw(name, commands as string);
-                else
-                    return JobQuery.start(name, commands as Api.JsonCommands);
-            })();
-
-            this.startJobAborter = aborter;
-            promise.then(resp => {
-                resp.json().then(json => {
-                    if (Net.isFetchAborted(aborter))
-                        return;
-
-                    const r = Response.parse(json, ResponseDeserializers.toJobInfo);
-
-                    if (Response.isError(r))
-                        throw new Error(r.message);
-                    else if (Response.isOk(r)) {
-                        this.setupAutoRefresh(this.state.autoRefreshEnabled, this.state.autoRefreshInterval, 'Running');
-                        this.setState({
-                            ...this.state,
-                            ...this.jobInfoOkBlock(r.data)
-                        });
-                        this.props.onJobStarted(r.data, this.mmbInputFormRef.current!.getValues());
-                    }
-                }).catch(e => {
-                    this.setState({
-                        ...this.state,
-                        ...this.jobInfoErrorBlock(resp.status, 'Cannot start job', e.toString(), 'none', 'none'),
-                    });
-                });
-            }).catch(e => {
-                this.setState({
-                    ...this.state,
-                    ...this.jobInfoErrorBlock(undefined, 'Cannot start job', e.toString(), 'none', 'none'),
-                });
-            });
-        } catch (e) {
-            if (Net.isAbortError(e))
+            const jobInfo = await task.performer();
+            if (!jobInfo)
                 return;
+            this.setupAutoRefresh(this.state.autoRefreshEnabled, this.state.autoRefreshInterval, 'Running');
             this.setState({
                 ...this.state,
-                ...this.jobInfoErrorBlock(undefined, 'Cannot start job', e.toString(), 'none', 'none'),
+                ...this.jobInfoOkBlock(jobInfo),
+            });
+        } catch (e) {
+            this.setState({
+                ...this.state,
+                ...this.jobInfoErrorBlock(e.toString(), 'none', 'none'),
             });
         }
+    }
+
+    private startJobRaw() {
+        if (this.mmbInputFormRef.current === null)
+            return;
+
+        if (this.state.jobState === 'Running') {
+            this.setState({
+                ...this.state,
+                jobError: 'Job is already running',
+            });
+            return;
+        }
+
+        Net.abortFetch(this.startJobAborter);
+
+        const commands = this.mmbInputFormRef.current.rawCommandsToJob();
+        const task = JobManipulator.startRaw(this.props.jobId, commands);
+
+        this.startJobCommon(task);
     }
 
     private setupAutoRefresh(enabled: boolean, interval: number, state: Api.JobState) {
@@ -361,80 +355,67 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
             this.autoRefresherId = null;
     }
 
-    private stopJob() {
-        if (this.state.jobId === undefined)
-            return;
-
+    private async stopJob() {
         this.killAutoRefresh();
 
         Net.abortFetch(this.stopJobAborter);
 
-        const { promise, aborter } = JobQuery.stop(this.state.jobId);
-        this.stopJobAborter = aborter;
-        promise.then(resp => {
-            resp.json().then(json => {
-                if (Net.isFetchAborted(aborter))
-                    return;
+        const task = JobManipulator.stop(this.props.jobId);
+        this.stopJobAborter = task.aborter;
 
-                const r = Response.parse(json, ResponseDeserializers.toJobInfo);
-                if (Response.isError(r)) {
-                    this.setState({
-                        ...this.state,
-                        ...this.jobInfoErrorBlock(resp.status, 'Cannot stop job', r.message),
-                    });
-                } else if (Response.isOk(r)) {
-                    this.setState({
-                        ...this.state,
-                        ...this.jobInfoOkBlock(r.data),
-                    });
-                }
-            });
-        }).catch(e => {
-            if (Net.isAbortError(e))
+        try {
+            const jobInfo = await task.performer();
+            if (!jobInfo)
                 return;
             this.setState({
                 ...this.state,
-                ...this.jobInfoErrorBlock(undefined, 'Cannot stop job', e.toString()),
+                ...this.jobInfoOkBlock(jobInfo),
             });
-        });
+        } catch (e) {
+            this.setState({
+                ...this.state,
+                ...this.jobInfoErrorBlock(e.toString()),
+            });
+        }
     }
 
     private structureUrl() {
-        if (this.state.jobId === undefined)
-            return undefined;
-
-        return `/structure/${this.props.username}/${this.state.jobId}`;
+        return `/structure/${this.props.username}/${this.props.jobId}`;
     }
 
     componentDidMount() {
-        if (this.state.jobId !== undefined)
-            this.queryJobStatus();
-        if (this.state.jobState === 'Running')
-            this.setupAutoRefresh(this.state.autoRefreshEnabled, this.state.autoRefreshInterval, 'Running');
+        this.queryJobInitial();
 
         forceResize();
     }
 
-    componentDidUpdate(_prevProps: VisualJobRunner.Props) {
+    componentDidUpdate(prevProps: VisualJobRunner.Props) {
         if (this.state.jobState !== 'Running')
             this.killAutoRefresh();
-        if (this.props.info !== undefined) {
-            switch (this.props.info.commands_mode) {
+
+        if (this.props.jobId !== prevProps.jobId) {
+            this.killAutoRefresh();
+            this.queryJobInitial();
+            return;
+        }
+
+        switch (this.state.jobCommandsMode) {
             case 'Raw':
                 if (this.state.uiMode !== 'maverick')
                     this.setState({ ...this.state, uiMode: 'maverick' });
                 break;
             case 'Synthetic':
                 if (this.state.uiMode === 'maverick')
-                        this.setState({ ...this.state, uiMode: 'simple' });
-            }
+                    this.setState({ ...this.state, uiMode: 'simple' });
+                break;
         }
     }
 
     componentWillUnmount() {
+        Net.abortFetch(this.commandsQueryAborter);
         Net.abortFetch(this.jobQueryAborter);
         Net.abortFetch(this.startJobAborter);
-        Net.abortFetch(this.startJobAborter);
+        Net.abortFetch(this.stopJobAborter);
 
         this.killAutoRefresh();
     }
@@ -459,9 +440,18 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
                         error={this.state.jobError} />
                     {this.makeMmbInputForm()}
                     <JobControls
-                        handleStart={this.startJob}
-                        handleStatus={this.queryJobStatus}
-                        handleStop={this.stopJob}
+                        handleStart={() => {
+                            switch (this.state.uiMode) {
+                                case 'maverick':
+                                    this.startJobRaw();
+                                    break;
+                                default:
+                                    this.startJob();
+                                    break;
+                            }
+                        }}
+                        handleStatus={() => this.queryJobStatus}
+                        handleStop={() => this.stopJob}
                         jobState={this.state.jobState} />
                 </div>
             </div>
@@ -470,14 +460,8 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
 }
 
 export namespace VisualJobRunner {
-    export interface OnJobStarted {
-        (info: Api.JobInfo, setup: MIM.Values): void;
-    }
-
     export interface Props {
-        onJobStarted: OnJobStarted;
         username: string;
-        setup: MIM.Values;
-        info?: Api.JobInfo;
+        jobId: string;
     }
 }

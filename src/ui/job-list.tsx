@@ -8,16 +8,13 @@
 
 import * as React from 'react';
 import { JobItem } from './job-item';
+import { LabeledField } from './common/controlled/labeled-field';
 import { PushButton } from './common/push-button';
-import { Util } from './common/util';
-import { jsonCommandsFromJson } from '../mmb/commands';
 import * as Api from '../mmb/api';
-import { JobQuery } from '../mmb/job-query';
-import { Response } from '../mmb/response';
-import { ResponseDeserializers } from '../mmb/response-deserializers';
-import { MmbInputModel as MIM } from '../model/mmb-input-model';
-import { isStr } from '../util/json';
+import { JobManipulator } from '../mmb/job-manipulator';
 import { Net } from '../util/net';
+
+const StrLField = LabeledField.LineEdit<string>();
 
 interface JobEntry extends Api.JobInfo {
     ok: boolean,
@@ -25,6 +22,7 @@ interface JobEntry extends Api.JobInfo {
 
 interface State {
     jobs: JobEntry[];
+    newJobName: string;
     error: string;
 }
 
@@ -51,6 +49,7 @@ function jobListItemToEntry(item: Api.JobListItem): JobEntry {
 }
 
 export class JobList extends React.Component<JobList.Props, State> {
+    private createJobAborter: AbortController | null = null;
     private deleteJobAborter: AbortController | null = null;
     private listJobsAborter: AbortController | null = null;
     private selectJobAborter: AbortController | null = null;
@@ -60,100 +59,77 @@ export class JobList extends React.Component<JobList.Props, State> {
 
         this.state = {
             jobs: [],
+            newJobName: '',
             error: '',
         };
-
-        this.onSelectJobClicked = this.onSelectJobClicked.bind(this);
-        this.onDeleteJobClicked = this.onDeleteJobClicked.bind(this);
     }
 
-    private onDeleteJobClicked(id: string) {
-        Net.abortFetch(this.deleteJobAborter);
-
-        const { promise, aborter } = JobQuery.del(id);
-        this.deleteJobAborter = aborter;
-        promise.then(resp => {
-            resp.json().then(json => {
-                if (Net.isFetchAborted(aborter))
-                    return;
-
-                const r = Response.parse(json, ResponseDeserializers.toEmpty);
-
-                if (Response.isError(r)) {
-                    this.setState({
-                        ...this.state,
-                        error: Util.formatError(resp.status, 'Cannot delete job', r.message),
-                    });
-                } else {
-                    this.refresh();
-                    this.props.jobDeleted(id);
-                }
-            }).catch(e => {
-                this.setState({
-                    ...this.state,
-                    error: Util.formatError(resp.status, 'Cannot delete job', e.toString()),
-                });
-            });
-        }).catch(e => {
-            if (Net.isAbortError(e))
-                return;
+    private async createJob(name: string) {
+        if (this.state.newJobName === '') {
             this.setState({
                 ...this.state,
-                error: Util.formatError(undefined, 'Cannot delete job', e.toString()),
+                error: 'Job must have a name',
             });
-        });
-    }
-
-    private onSelectJobClicked(id?: string) {
-        if (id === undefined) {
-            this.props.onSelectJob(undefined);
             return;
         }
 
-        this.selectJob(id);
+        Net.abortFetch(this.createJobAborter);
+
+        const task = JobManipulator.create(name);
+        this.createJobAborter = task.aborter;
+
+        try {
+            const jobInfo = await task.performer();
+            if (!jobInfo)
+                return;
+            this.props.onSelectJob(jobInfo.id);
+        } catch (e) {
+            this.setState({
+                ...this.state,
+                error: e.toString(),
+            });
+        }
     }
 
-    private refresh() {
+    private async deleteJob(id: string) {
+        Net.abortFetch(this.deleteJobAborter);
+
+        const task = JobManipulator.del(id)
+        this.deleteJobAborter = task.aborter;
+
+        try {
+            await task.performer();
+            this.refresh();
+        } catch (e) {
+            this.setState({
+                ...this.state,
+                error: e.toString(),
+            });
+        }
+    }
+
+    private async refresh() {
         Net.abortFetch(this.listJobsAborter);
 
-        const { promise, aborter } = JobQuery.list();
-        this.listJobsAborter = aborter;
-        promise.then(resp => {
-            resp.json().then(json => {
-                if (Net.isFetchAborted(aborter))
-                    return;
+        const task = JobManipulator.list();
+        this.listJobsAborter = task.aborter;
 
-                const r = Response.parse(json, ResponseDeserializers.toJobList);
-
-                if (Response.isError(r)) {
-                    this.setState({
-                        ...this.state,
-                        jobs: [],
-                        error: Util.formatError(resp.status, 'Cannot fetch list of jobs', r.message),
-                    });
-                } else if (Response.isOk(r)) {
-                    this.setState({
-                        ...this.state,
-                        jobs: r.data.map((item) => jobListItemToEntry(item)),
-                        error: '',
-                    });
-                }
-            }).catch(e => {
-                this.setState({
-                    ...this.state,
-                    jobs: [],
-                    error: Util.formatError(resp.status, 'Cannot fetch list of jobs', e.toString()),
-                });
-            });
-        }).catch(e => {
-            if (Net.isAbortError(e))
+        try {
+            const list = await task.performer();
+            if (!list)
                 return;
             this.setState({
                 ...this.state,
-                jobs: [],
-                error: Util.formatError(undefined, 'Cannot fetch list of jobs', e.toString()),
+                jobs: list.map(item => jobListItemToEntry(item)),
+                error: '',
             });
-        });
+        } catch (e) {
+            this.setState({
+                ...this.state,
+                jobs: [],
+                error: e.toString(),
+            });
+        }
     }
 
     private renderInner() {
@@ -178,8 +154,8 @@ export class JobList extends React.Component<JobList.Props, State> {
                             state={e.state}
                             created_on={e.created_on}
                             notifyCloned={(_id: string) => this.refresh()}
-                            onSelect={() => this.onSelectJobClicked(e.id)}
-                            onDelete={() => this.onDeleteJobClicked(e.id)} />
+                            onSelect={() => this.selectJob(e.id)}
+                            onDelete={() => this.deleteJob(e.id)} />
                         )}
                 </div>
             );
@@ -191,78 +167,7 @@ export class JobList extends React.Component<JobList.Props, State> {
         if (job === undefined)
             throw new Error(`Job ${id} does not exist`);
 
-        Net.abortFetch(this.selectJobAborter);
-
-        const queryFunc = (() => {
-            switch (job.commands_mode) {
-            case 'Synthetic':
-                return JobQuery.commands;
-            case 'Raw':
-                return JobQuery.commands_raw;
-            }
-        })();
-
-        const { promise, aborter } = queryFunc(id);
-        this.selectJobAborter = aborter;
-        promise.then(resp => {
-            resp.json().then(json => {
-                if (Net.isFetchAborted(aborter))
-                    return;
-
-                if (job.commands_mode === 'Synthetic') {
-                    const r = Response.parse(json, jsonCommandsFromJson);
-
-                    if (Response.isError(r)) {
-                        this.setState({
-                            ...this.state,
-                            error: Util.formatError(resp.status, 'Cannot select job', r.message),
-
-                        });
-                    } else if (Response.isOk(r)) {
-                        this.setState({
-                            ...this.state,
-                            error: '',
-                        });
-                        this.props.onSelectJob(job, MIM.jsonCommandsToValues(job.name, job.available_stages, r.data));
-                    }
-                } else {
-                    const r = Response.parse(
-                                json,
-                                (v: unknown): string => {
-                                    if (!isStr(v))
-                                        throw new Error('Object is not a string');
-                                    return v;
-                                }
-                              );
-
-                    if (Response.isError(r)) {
-                        this.setState({
-                            ...this.state,
-                            error: Util.formatError(resp.status, 'Cannot select job', r.message),
-
-                        });
-                    } else if (Response.isOk(r)) {
-                        this.setState({
-                            ...this.state,
-                            error: '',
-                        });
-                        this.props.onSelectJob(job, MIM.rawCommandsToValues(job.name, job.available_stages, r.data));
-                    }
-                }
-            }).catch(e => {
-                this.setState({
-                    ...this.state,
-                    error: Util.formatError(resp.status, 'Cannot select job', e.toString()),
-                });
-            });
-        }).catch(e => {
-            if (Net.isAbortError(e))
-                return;
-            this.setState({
-                ...this.state,
-                error: Util.formatError(undefined, 'Cannot select job', e.toString()),
-            });
-        });
+        this.props.onSelectJob(id);
     }
 
     componentDidMount() {
@@ -270,6 +175,7 @@ export class JobList extends React.Component<JobList.Props, State> {
     }
 
     componentWillUnmount() {
+        Net.abortFetch(this.createJobAborter);
         Net.abortFetch(this.deleteJobAborter);
         Net.abortFetch(this.listJobsAborter);
         Net.abortFetch(this.selectJobAborter);
@@ -282,26 +188,28 @@ export class JobList extends React.Component<JobList.Props, State> {
                 <div className='job-items-container'>
                     {this.renderInner()}
                 </div>
+                <StrLField
+                    id='new-job-name'
+                    label='New job name'
+                    style='left'
+                    value={this.state.newJobName}
+                    updateNotifier={v => this.setState({ ...this.state, newJobName: v })}
+                />
                 <PushButton
                     className='pushbutton-common pushbutton-default pushbutton-clr-default pushbutton-hclr-green'
                     value='+ New job'
-                    onClick={() => this.onSelectJobClicked(undefined)} />
+                    onClick={() => this.createJob(this.state.newJobName)} />
             </div>
         );
     }
 }
 
 export namespace JobList {
-    export interface JobDeleted {
-        (id: string): void;
-    }
-
     export interface OnSelectJob {
-        (info?: Api.JobInfo, setup?: MIM.Values): void;
+        (id: string): void;
     }
 
     export interface Props {
         onSelectJob: OnSelectJob;
-        jobDeleted: JobDeleted;
     }
 }

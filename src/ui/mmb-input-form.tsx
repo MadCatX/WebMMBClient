@@ -55,39 +55,11 @@ export class MmbInputForm extends Form<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTy
     }
 
     commandsToJob() {
-        const name = this.getName();
-        const commands = JsonCommandsSerializer.serialize(this.makeParams());
-
-        return { name, commands };
+        return JsonCommandsSerializer.serialize(this.makeParams());
     }
 
     rawCommandsToJob() {
-        const name = this.getName();
-        const commands = this.getScalar<string>(this.state, 'mol-in-raw-commands', '');
-
-        return { name, commands };
-    }
-
-    private getName() {
-        const name = this.getScalar(this.state, 'mol-in-job-name', '');
-
-        const ne = this.emptyErrors();
-        if (name === undefined || name === '') {
-            ne.set('mol-in-no-name', ['Job must have a name']);
-
-            this.setState({
-                ...this.state,
-                errors: new Map([...this.state.errors, ...ne]),
-            });
-            throw new Error('No name');
-        } else {
-            ne.set('mol-in-no-name', []);
-            this.setState({
-                ...this.state,
-                errors: new Map([...this.state.errors, ...ne]),
-            });
-            return name; // FIXME: setting state and returning is nasty
-        }
+        return this.getScalar<string>(this.state, 'mol-in-raw-commands', '');
     }
 
     private importGuidedToRaw() {
@@ -127,6 +99,15 @@ export class MmbInputForm extends Form<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTy
     }
 
     componentDidUpdate(prevProps: MmbInputForm.Props) {
+        if (prevProps.initialValues !== this.props.initialValues) {
+            // FIXME: This is beyond nasty!!!
+            this.setState({
+                ...this.state,
+                ...this.initialBaseState(),
+            });
+            return;
+        }
+
         const v = this.emptyValues();
         if (this.props.availableStages.length !== prevProps.availableStages.length) {
             v.set('mol-in-gp-stage', this.props.availableStages.length);
