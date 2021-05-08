@@ -14,7 +14,7 @@ import { Viewer } from './viewer';
 import { ErrorBox } from './common/error-box';
 import { LabeledField } from './common/controlled/labeled-field';
 import * as Api from '../mmb/api';
-import { JobManipulator } from '../mmb/job-manipulator';
+import { JobTasks } from '../mmb/job-tasks';
 import { Tasks } from '../mmb/tasks';
 import { MmbInputModel as MIM } from '../model/mmb-input-model';
 import { Net } from '../util/net';
@@ -190,19 +190,19 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
         Net.abortFetch(this.jobQueryAborter);
 
         try {
-            const taskInfo = JobManipulator.fetchInfo(this.props.jobId);
+            const taskInfo = JobTasks.fetchInfo(this.props.jobId);
             this.jobQueryAborter = taskInfo.aborter;
 
             const jobInfo = await taskInfo.performer();
             if (!jobInfo)
                 return; // TODO: Report an error?
 
-            const taskMmbOutput = JobManipulator.fetchMmbOutput(jobInfo.id);
+            const taskMmbOutput = JobTasks.fetchMmbOutput(jobInfo.id);
             this.jobQueryAborter = taskMmbOutput.aborter;
 
             const mmbOutputPromise = taskMmbOutput.performer();
 
-            const taskCommands = jobInfo.commands_mode === 'Raw' ? JobManipulator.commandsRaw(this.props.jobId) : JobManipulator.commands(this.props.jobId);
+            const taskCommands = jobInfo.commands_mode === 'Raw' ? JobTasks.commandsRaw(this.props.jobId) : JobTasks.commands(this.props.jobId);
             this.commandsQueryAborter = taskCommands.aborter;
 
             const mmbOutput = await mmbOutputPromise;
@@ -242,7 +242,7 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
     private async queryJobStatus() {
         Net.abortFetch(this.jobQueryAborter);
 
-        const task = JobManipulator.fetchInfo(this.props.jobId);
+        const task = JobTasks.fetchInfo(this.props.jobId);
         this.jobQueryAborter = task.aborter;
 
         try {
@@ -251,7 +251,7 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
                 return;
 
             try {
-                const task2 = JobManipulator.fetchMmbOutput(this.props.jobId);
+                const task2 = JobTasks.fetchMmbOutput(this.props.jobId);
                 this.jobQueryAborter = task2.aborter;
 
                 const mmbOutput = await task2.performer();
@@ -302,7 +302,7 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
         Net.abortFetch(this.startJobAborter);
 
         const commands = await this.mmbInputFormRef.current.commandsToJob();
-        const task = JobManipulator.start(this.props.jobId, commands);
+        const task = JobTasks.start(this.props.jobId, commands);
 
         this.startJobCommon(task);
     }
@@ -342,7 +342,7 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
         Net.abortFetch(this.startJobAborter);
 
         const commands = this.mmbInputFormRef.current.rawCommandsToJob();
-        const task = JobManipulator.startRaw(this.props.jobId, commands);
+        const task = JobTasks.startRaw(this.props.jobId, commands);
 
         this.startJobCommon(task);
     }
@@ -361,7 +361,7 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
 
         Net.abortFetch(this.stopJobAborter);
 
-        const task = JobManipulator.stop(this.props.jobId);
+        const task = JobTasks.stop(this.props.jobId);
         this.stopJobAborter = task.aborter;
 
         try {

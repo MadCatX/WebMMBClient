@@ -11,7 +11,7 @@ import { JobQuery } from './job-query';
 import { ResponseDeserializers } from './response-deserializers';
 import { Tasks as T } from './tasks';
 
-export namespace JobManipulator {
+export namespace JobTasks {
     export function commands(id: string) {
         return T.task(() => JobQuery.commands(id), ResponseDeserializers.toJobCommands, 'Cannot query synthetic job commands');
     }

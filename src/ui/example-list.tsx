@@ -9,9 +9,7 @@
 import * as React from 'react';
 import { PushButton } from './common/push-button';
 import * as Api from '../mmb/api';
-import { AppQuery } from '../mmb/app-query';
-import { Response } from '../mmb/response';
-import { ResponseDeserializers } from '../mmb/response-deserializers';
+import { AppTasks } from '../mmb/app-tasks';
 import { Net } from '../util/net';
 
 interface State {
@@ -20,7 +18,7 @@ interface State {
 }
 
 export class ExampleList extends React.Component<ExampleList.Props, State> {
-    //private activateExampleAborter: AbortController | null = null;
+    private activateExampleAborter: AbortController | null = null;
     private listExamplesAborter: AbortController | null = null;
 
     constructor(props: ExampleList.Props) {
@@ -54,121 +52,52 @@ export class ExampleList extends React.Component<ExampleList.Props, State> {
         );
     }
 
-    private activateExample(name: string) {
-        // TODO: Create a new job from the example
-    }
-
-    /*
-    private activateExample(name: string) {
+    private async activateExample(name: string) {
         Net.abortFetch(this.activateExampleAborter);
 
-        const { promise, aborter } = AppQuery.activateExample(name);
+        const { aborter, performer } = AppTasks.activateExample(name);
         this.activateExampleAborter = aborter;
-        promise.then(resp => {
-            resp.json().then(json => {
-                if (Net.isFetchAborted(aborter))
-                    return;
 
-                const r = Response.parse(json, ResponseDeserializers.toJobInfo)
-                if (Response.isError(r)) {
-                    this.setState({
-                        ...this.state,
-                        error: r.message
-                    });
-                } else if (Response.isOk(r)) {
-                    const info = r.data;
+        try {
+            const jobInfo = await performer();
+            if (!jobInfo)
+                return;
 
-                    // Stage 2 - Get the commands
-                    const { promise, aborter } = JobQuery.commands(info.id);
-                    this.activateExampleAborter = aborter;
-                    promise.then(resp => {
-                        resp.json().then(json => {
-                            if (Net.isFetchAborted(aborter))
-                                return;
-
-                            const rr = Response.parse(json, jsonCommandsFromJson);
-                            if (Response.isError(rr)) {
-                                JobQuery.del(info.id);
-                                this.setState({
-                                    ...this.state,
-                                    error: rr.message
-                                });
-                            } else if (Response.isOk(rr)) {
-                                this.props.onExampleSelected(info, MIM.jsonCommandsToValues(info.name, info.available_stages, rr.data));
-                            }
-                        }).catch(e => {
-                            JobQuery.del(info.id);
-                            this.setState({
-                                ...this.state,
-                                error: e.toString()
-                            })
-                        });
-                    }).catch(e => {
-                        this.setState({
-                            ...this.state,
-                            error: e.toString(),
-                        })
-                    });
-                }
-            }).catch(e => {
-                this.setState({
-                    ...this.state,
-                    error: e.toString()
-                });
-            })
-        }).catch(e => {
+            this.props.onExampleSelected(jobInfo.id);
+        } catch (e) {
             this.setState({
                 ...this.state,
-                error: e.toString()
+                error: e.toString(),
             });
-        });
+        }
     }
-    */
 
     componentDidMount() {
         Net.abortFetch(this.listExamplesAborter);
 
-        const { promise, aborter } = AppQuery.listExamples();
+        const { aborter, performer } = AppTasks.listExamples();
         this.listExamplesAborter = aborter;
-        promise.then(resp => {
-            resp.json().then(json => {
-                if (Net.isFetchAborted(this.listExamplesAborter))
-                    return;
 
-                const r = Response.parse(json, ResponseDeserializers.toExampleList);
-
-                if (Response.isError(r)) {
-                    this.setState({
-                        ...this.state,
-                        error: r.message,
-                        examples: [],
-                    });
-                } else if (Response.isOk(r)) {
-                    this.setState({
-                        ...this.state,
-                        error: '',
-                        examples: r.data
-                    });
-                }
-            }).catch(e => {
-                this.setState({
-                    ...this.state,
-                    error: e.toString(),
-                    examples: []
-                });
-            })
-        }).catch(e => {
-            if (Net.isAbortError(e))
+        performer().then(examples => {
+            if (!examples)
                 return;
+
+            this.setState({
+                ...this.state,
+                error: '',
+                examples,
+            });
+        }).catch(e => {
             this.setState({
                 ...this.state,
                 error: e.toString(),
-                examples: []
+                examples: [],
             });
         });
     }
 
     componentWillUnmount() {
+        Net.abortFetch(this.activateExampleAborter);
         Net.abortFetch(this.listExamplesAborter);
     }
 
