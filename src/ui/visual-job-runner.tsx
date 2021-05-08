@@ -15,6 +15,7 @@ import { ErrorBox } from './common/error-box';
 import { LabeledField } from './common/controlled/labeled-field';
 import * as Api from '../mmb/api';
 import { JobManipulator } from '../mmb/job-manipulator';
+import { Tasks } from '../mmb/tasks';
 import { MmbInputModel as MIM } from '../model/mmb-input-model';
 import { Net } from '../util/net';
 
@@ -306,7 +307,7 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
         this.startJobCommon(task);
     }
 
-    private async startJobCommon(task: JobManipulator.Task<Api.JobInfo>) {
+    private async startJobCommon(task: Tasks.Task<Api.JobInfo>) {
         this.startJobAborter = task.aborter;
 
         try {
