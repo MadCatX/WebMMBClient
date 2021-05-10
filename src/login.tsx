@@ -8,7 +8,7 @@
 
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { AuthQuery } from './mmb/auth-query';
+import { AuthReqeust } from './mmb/auth-request';
 import { LoginModel as LM } from './model/login-model';
 import { Form } from './ui/common/form/form';
 import { LabeledField } from './ui/common/form/labeled-field';
@@ -39,7 +39,7 @@ export class Login extends Form<LM.ErrorKeys, LM.ValueKeys, LM.ValueTypes, LM.Pr
 
         Net.abortFetch(this.aborter);
 
-        const { promise, aborter } = AuthQuery.logIn(session_id);
+        const { promise, aborter } = AuthReqeust.logIn(session_id);
         this.aborter = aborter;
         promise.then(resp => {
             if (resp.status === 200) {

@@ -8,8 +8,8 @@
 
 import * as React from 'react';
 import { PushButton } from './common/push-button';
-import { AuthQuery } from '../mmb/auth-query';
-import {TooltippedField} from './common/tooltipped-field';
+import { TooltippedField } from './common/tooltipped-field';
+import { AuthReqeust } from '../mmb/auth-request';
 
 interface State {
     copiedNote: boolean;
@@ -38,7 +38,7 @@ export class Logout extends React.Component<Logout.Props, State> {
     }
 
     private logOut() {
-        AuthQuery.logOut().promise.then(resp => {
+        AuthReqeust.logOut().promise.then(resp => {
             if (resp.status === 200)
                 window.location.href = resp.url;
         }).catch(e => {

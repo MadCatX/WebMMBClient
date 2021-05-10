@@ -9,7 +9,7 @@
 import { AuthRequest } from './api';
 import { Request } from './request';
 
-export namespace AuthQuery {
+export namespace AuthReqeust {
     export function logIn(session_id: string) {
         const req: AuthRequest = { auth_type: 'LogIn', session_id };
         return Request.auth(req);
