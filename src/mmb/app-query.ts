@@ -18,4 +18,8 @@ export namespace AppQuery {
     export function listExamples() {
         return Q.query(() => AppRequest.listExamples(), ResponseDeserializers.toExampleList, 'Cannot get list of examples');
     }
+
+    export function sessionInfo() {
+        return Q.query(() => AppRequest.sessionInfo(), ResponseDeserializers.toSessionInfo, 'Cannot get session info');
+    }
 }

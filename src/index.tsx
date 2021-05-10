@@ -15,11 +15,9 @@ import { Logout } from './ui/logout';
 import { TabsBar } from './ui/tabs-bar';
 import { VisualJobRunner } from './ui/visual-job-runner';
 import { ExternalResourcesLoader } from './external-resources-loader';
-import { AppRequest } from './mmb/app-request';
-import { Response } from './mmb/response';
-import { ResponseDeserializers } from './mmb/response-deserializers';
 import { Net } from './util/net';
 import { versionInfo } from './version';
+import {AppQuery} from './mmb/app-query';
 
 type Tabs = 'job-list' | 'job-control' | 'example-list';
 
@@ -118,31 +116,19 @@ export class Main extends React.Component<Props, State> {
     componentDidMount() {
         Net.abortFetch(this.sessionInfoAborter);
 
-        const { promise, aborter } = AppRequest.sessionInfo();
+        const { aborter, performer } = AppQuery.sessionInfo();
         this.sessionInfoAborter = aborter;
 
-        promise.then(resp => {
-            console.log('Requesting session info');
-
-            resp.json().then(json => {
-                if (Net.isFetchAborted(aborter))
-                    return;
-
-                const r = Response.parse(json, ResponseDeserializers.toSessionInfo);
-
-                if (Response.isError(r)) {
-                    throw new Error(`${resp.status}: Failed to get session info, ${r.message}`);
-                } else if (Response.isOk(r)) {
-                    this.setState({
-                        ...this.state,
-                        session_id: r.data.id,
-                    });
-                }
-            }).catch(e => console.error(e.toString));
-        }).catch(e => {
-            if (Net.isAbortError(e))
+        performer().then(info => {
+            if (!info)
                 return;
-            console.error(e.toString())
+
+            this.setState({
+                ...this.state,
+                session_id: info.id,
+            });
+        }).catch(e => {
+            console.error(e);
         });
     }
 
