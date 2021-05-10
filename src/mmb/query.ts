@@ -10,14 +10,14 @@ import { Request } from './request';
 import { Response } from './response';
 import { Net } from '../util/net';
 
-export namespace Tasks {
-    export interface TaskPerformer<T> {
+export namespace Query {
+    export interface QueryPerformer<T> {
         (): Promise<T|null>;
     }
 
-    export interface Task<T> {
+    export interface Query<T> {
         aborter: AbortController;
-        performer: TaskPerformer<T>;
+        performer: QueryPerformer<T>;
     }
 
     export interface QueryFunc {
@@ -60,7 +60,7 @@ export namespace Tasks {
         return r.data;
     }
 
-    export function task<T>(queryFunc: QueryFunc, respParser: Response.DataParser<T>, errorPrefix?: string) {
+    export function query<T>(queryFunc: QueryFunc, respParser: Response.DataParser<T>, errorPrefix?: string) {
         const pending = queryFunc();
         const performer = async () => {
             try {

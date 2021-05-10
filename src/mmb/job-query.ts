@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020 WebMMB contributors, licensed under MIT, See LICENSE file for details.
+ * Copyright (c) 2020-2021 WebMMB contributors, licensed under MIT, See LICENSE file for details.
  *
  * @author Michal Malý (michal.maly@ibt.cas.cz)
  * @author Samuel C. Flores (samuelfloresc@gmail.com)
@@ -7,94 +7,48 @@
  */
 
 import * as Api from './api';
-import { Request } from './request';
+import { JobRequest } from './job-request';
+import { ResponseDeserializers } from './response-deserializers';
+import { Query as Q } from './query';
 
 export namespace JobQuery {
-    export function commands(jobId: string)  {
-        const req: Api.ApiRequest<Api.SimpleJobRqData> = {
-            req_type: 'JobCommands',
-            data: { id: jobId },
-        };
-        return Request.api(req);
+    export function commands(id: string) {
+        return Q.query(() => JobRequest.commands(id), ResponseDeserializers.toJobCommands, 'Cannot query synthetic job commands');
     }
 
-    export function commands_raw(jobId: string)  {
-        const req: Api.ApiRequest<Api.SimpleJobRqData> = {
-            req_type: 'JobCommandsRaw',
-            data: { id: jobId },
-        };
-        return Request.api(req);
-    }
-
-    export function clone(id: string, name: string) {
-        const req: Api.ApiRequest<Api.CloneJobRqData> = {
-            req_type: 'CloneJob',
-            data: { id, name },
-        };
-        return Request.api(req);
+    export function commandsRaw(id: string) {
+        return Q.query(() => JobRequest.commands_raw(id), ResponseDeserializers.toJobCommandsRaw, 'Cannot query raw job commands');
     }
 
     export function create(name: string) {
-        const req: Api.ApiRequest<Api.CreateJobRqData> = {
-            req_type: 'CreateJob',
-            data: { name },
-        };
-        return Request.api(req);
+        return Q.query(() => JobRequest.create(name), ResponseDeserializers.toJobInfo, 'Cannot create job');
     }
 
     export function del(id: string) {
-        const req: Api.ApiRequest<Api.SimpleJobRqData> = {
-            req_type: 'DeleteJob',
-            data: { id },
-        };
-        return Request.api(req);
+        return Q.query(() => JobRequest.del(id), ResponseDeserializers.toEmpty, 'Cannot delete job');
+    }
+
+    export function fetchInfo(id: string) {
+        return Q.query(() => JobRequest.status(id), ResponseDeserializers.toJobInfo, 'Cannot query job info');
+    }
+
+    export function fetchMmbOutput(id: string) {
+        return Q.query(() => JobRequest.mmbOutput(id), ResponseDeserializers.toMmbOutput, 'Cannot query MMB output');
     }
 
     export function list() {
-        const req: Api.ApiRequest<null> = {
-            req_type: 'ListJobs',
-            data: null,
-        };
-        return Request.api(req);
-    }
-
-    export function mmbOutput(id: string) {
-        const req: Api.ApiRequest<Api.SimpleJobRqData> = {
-            req_type: 'MmbOutput',
-            data: { id },
-        };
-        return Request.api(req);
-    }
-
-    export function status(jobId: string) {
-        const req: Api.ApiRequest<Api.SimpleJobRqData> = {
-            req_type: 'JobStatus',
-            data: { id: jobId },
-        };
-        return Request.api(req);
+        return Q.query(() => JobRequest.list(), ResponseDeserializers.toJobList, 'Cannot query list of jobs');
     }
 
     export function start(id: string, commands: Api.JsonCommands) {
-        const req: Api.ApiRequest<Api.StartJobRqData> = {
-            req_type: 'StartJob',
-            data: { id, commands },
-        };
-        return Request.api(req);
+        return Q.query(() => JobRequest.start(id, commands), ResponseDeserializers.toJobInfo, 'Cannot start job');
     }
 
     export function startRaw(id: string, commands: string) {
-        const req: Api.ApiRequest<Api.StartJobRawRqData> = {
-            req_type: 'StartJobRaw',
-            data: { id, commands },
-        };
-        return Request.api(req);
+        return Q.query(() => JobRequest.startRaw(id, commands), ResponseDeserializers.toJobInfo, 'Cannot start raw job');
     }
 
-    export function stop(jobId: string) {
-        const req: Api.ApiRequest<Api.SimpleJobRqData> = {
-            req_type: 'StopJob',
-            data: { id: jobId },
-        };
-        return Request.api(req);
+    export function stop(id: string) {
+        return Q.query(() => JobRequest.stop(id), ResponseDeserializers.toJobInfo, 'Cannot stop job');
     }
 }

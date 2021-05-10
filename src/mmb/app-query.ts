@@ -6,28 +6,16 @@
  * @author Jiří Černý (jiri.cerny@ibt.cas.cz)
  */
 
-import * as Api from './api';
-import { Request } from './request';
+import { AppRequest } from './app-request';
+import { ResponseDeserializers } from './response-deserializers';
+import { Query as Q } from './query';
 
 export namespace AppQuery {
     export function activateExample(name: string) {
-        const req: Api.ApiRequest<Api.SimpleJobRqData> = {
-            req_type: 'ActivateExample',
-            data: { id: name }
-        };
-        return Request.api(req);
+        return Q.query(() => AppRequest.activateExample(name), ResponseDeserializers.toJobInfo, 'Cannot activate example');
     }
 
     export function listExamples() {
-        const req: Api.ApiRequest<null> = {
-            req_type: 'ListExamples',
-            data: null,
-        };
-        return Request.api(req);
-    }
-
-    export function sessionInfo() {
-        const req: Api.ApiRequest<null> = { req_type: 'SessionInfo', data: null };
-        return Request.api(req);
+        return Q.query(() => AppRequest.listExamples(), ResponseDeserializers.toExampleList, 'Cannot get list of examples');
     }
 }

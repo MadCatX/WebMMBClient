@@ -9,7 +9,7 @@
 import * as React from 'react';
 import { PushButton } from './common/push-button';
 import * as Api from '../mmb/api';
-import { AppTasks } from '../mmb/app-tasks';
+import { AppQuery } from '../mmb/app-query';
 import { Net } from '../util/net';
 
 interface State {
@@ -55,7 +55,7 @@ export class ExampleList extends React.Component<ExampleList.Props, State> {
     private async activateExample(name: string) {
         Net.abortFetch(this.activateExampleAborter);
 
-        const { aborter, performer } = AppTasks.activateExample(name);
+        const { aborter, performer } = AppQuery.activateExample(name);
         this.activateExampleAborter = aborter;
 
         try {
@@ -75,7 +75,7 @@ export class ExampleList extends React.Component<ExampleList.Props, State> {
     componentDidMount() {
         Net.abortFetch(this.listExamplesAborter);
 
-        const { aborter, performer } = AppTasks.listExamples();
+        const { aborter, performer } = AppQuery.listExamples();
         this.listExamplesAborter = aborter;
 
         performer().then(examples => {

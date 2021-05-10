@@ -15,7 +15,7 @@ import { Logout } from './ui/logout';
 import { TabsBar } from './ui/tabs-bar';
 import { VisualJobRunner } from './ui/visual-job-runner';
 import { ExternalResourcesLoader } from './external-resources-loader';
-import { AppQuery } from './mmb/app-query';
+import { AppRequest } from './mmb/app-request';
 import { Response } from './mmb/response';
 import { ResponseDeserializers } from './mmb/response-deserializers';
 import { Net } from './util/net';
@@ -118,7 +118,7 @@ export class Main extends React.Component<Props, State> {
     componentDidMount() {
         Net.abortFetch(this.sessionInfoAborter);
 
-        const { promise, aborter } = AppQuery.sessionInfo();
+        const { promise, aborter } = AppRequest.sessionInfo();
         this.sessionInfoAborter = aborter;
 
         promise.then(resp => {

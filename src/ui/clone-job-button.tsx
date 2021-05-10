@@ -9,7 +9,7 @@
 import * as React from 'react';
 import { PushButton } from './common/push-button';
 import * as Api from '../mmb/api';
-import { JobQuery } from '../mmb/job-query';
+import { JobRequest } from '../mmb/job-request';
 import { Response } from '../mmb/response';
 import { ResponseDeserializers } from '../mmb/response-deserializers';
 import { Net } from '../util/net';
@@ -38,7 +38,7 @@ export class CloneJobButton extends React.Component<CloneJobButton.Props, State>
     private clone() {
         Net.abortFetch(this.aborter);
 
-        const { promise, aborter } = JobQuery.clone(this.props.id, this.state.name);
+        const { promise, aborter } = JobRequest.clone(this.props.id, this.state.name);
         this.aborter = aborter;
         promise.then(resp => {
             resp.json().then(json => {

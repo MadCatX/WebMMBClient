@@ -11,7 +11,7 @@ import { JobItem } from './job-item';
 import { LabeledField } from './common/controlled/labeled-field';
 import { PushButton } from './common/push-button';
 import * as Api from '../mmb/api';
-import { JobTasks } from '../mmb/job-tasks';
+import { JobQuery } from '../mmb/job-query';
 import { Net } from '../util/net';
 
 const StrLField = LabeledField.LineEdit<string>();
@@ -75,7 +75,7 @@ export class JobList extends React.Component<JobList.Props, State> {
 
         Net.abortFetch(this.createJobAborter);
 
-        const task = JobTasks.create(name);
+        const task = JobQuery.create(name);
         this.createJobAborter = task.aborter;
 
         try {
@@ -94,7 +94,7 @@ export class JobList extends React.Component<JobList.Props, State> {
     private async deleteJob(id: string) {
         Net.abortFetch(this.deleteJobAborter);
 
-        const task = JobTasks.del(id)
+        const task = JobQuery.del(id)
         this.deleteJobAborter = task.aborter;
 
         try {
@@ -111,7 +111,7 @@ export class JobList extends React.Component<JobList.Props, State> {
     private async refresh() {
         Net.abortFetch(this.listJobsAborter);
 
-        const task = JobTasks.list();
+        const task = JobQuery.list();
         this.listJobsAborter = task.aborter;
 
         try {

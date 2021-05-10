@@ -14,8 +14,8 @@ import { Viewer } from './viewer';
 import { ErrorBox } from './common/error-box';
 import { LabeledField } from './common/controlled/labeled-field';
 import * as Api from '../mmb/api';
-import { JobTasks } from '../mmb/job-tasks';
-import { Tasks } from '../mmb/tasks';
+import { JobQuery } from '../mmb/job-query';
+import { Query } from '../mmb/query';
 import { MmbInputModel as MIM } from '../model/mmb-input-model';
 import { Net } from '../util/net';
 
@@ -190,19 +190,19 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
         Net.abortFetch(this.jobQueryAborter);
 
         try {
-            const taskInfo = JobTasks.fetchInfo(this.props.jobId);
+            const taskInfo = JobQuery.fetchInfo(this.props.jobId);
             this.jobQueryAborter = taskInfo.aborter;
 
             const jobInfo = await taskInfo.performer();
             if (!jobInfo)
                 return; // TODO: Report an error?
 
-            const taskMmbOutput = JobTasks.fetchMmbOutput(jobInfo.id);
+            const taskMmbOutput = JobQuery.fetchMmbOutput(jobInfo.id);
             this.jobQueryAborter = taskMmbOutput.aborter;
 
             const mmbOutputPromise = taskMmbOutput.performer();
 
-            const taskCommands = jobInfo.commands_mode === 'Raw' ? JobTasks.commandsRaw(this.props.jobId) : JobTasks.commands(this.props.jobId);
+            const taskCommands = jobInfo.commands_mode === 'Raw' ? JobQuery.commandsRaw(this.props.jobId) : JobQuery.commands(this.props.jobId);
             this.commandsQueryAborter = taskCommands.aborter;
 
             const mmbOutput = await mmbOutputPromise;
@@ -242,7 +242,7 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
     private async queryJobStatus() {
         Net.abortFetch(this.jobQueryAborter);
 
-        const task = JobTasks.fetchInfo(this.props.jobId);
+        const task = JobQuery.fetchInfo(this.props.jobId);
         this.jobQueryAborter = task.aborter;
 
         try {
@@ -251,7 +251,7 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
                 return;
 
             try {
-                const task2 = JobTasks.fetchMmbOutput(this.props.jobId);
+                const task2 = JobQuery.fetchMmbOutput(this.props.jobId);
                 this.jobQueryAborter = task2.aborter;
 
                 const mmbOutput = await task2.performer();
@@ -302,12 +302,12 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
         Net.abortFetch(this.startJobAborter);
 
         const commands = await this.mmbInputFormRef.current.commandsToJob();
-        const task = JobTasks.start(this.props.jobId, commands);
+        const task = JobQuery.start(this.props.jobId, commands);
 
         this.startJobCommon(task);
     }
 
-    private async startJobCommon(task: Tasks.Task<Api.JobInfo>) {
+    private async startJobCommon(task: Query.Query<Api.JobInfo>) {
         this.startJobAborter = task.aborter;
 
         try {
@@ -342,7 +342,7 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
         Net.abortFetch(this.startJobAborter);
 
         const commands = this.mmbInputFormRef.current.rawCommandsToJob();
-        const task = JobTasks.startRaw(this.props.jobId, commands);
+        const task = JobQuery.startRaw(this.props.jobId, commands);
 
         this.startJobCommon(task);
     }
@@ -361,7 +361,7 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
 
         Net.abortFetch(this.stopJobAborter);
 
-        const task = JobTasks.stop(this.props.jobId);
+        const task = JobQuery.stop(this.props.jobId);
         this.stopJobAborter = task.aborter;
 
         try {
