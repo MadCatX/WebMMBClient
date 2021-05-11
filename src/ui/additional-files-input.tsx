@@ -56,7 +56,7 @@ export class AdditionalFilesInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys
             this.setState({ ...this.state, errors: ['File already exists'] } );
             return;
         }
-        files.push(new AdditionalFile(this.state.currentFile));
+        files.push(AdditionalFile.fromFile(this.state.currentFile));
 
         this.setState({ ...this.state, errors: [] });
         FU.updateValue(data, { key: 'mol-in-additional-files-added', value: files });
@@ -80,7 +80,7 @@ export class AdditionalFilesInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys
 
     private uploadFiles() {
         const files = FU.getArray<AdditionalFile[]>(this.props.ctxData, 'mol-in-additional-files-added');
-        const toUpload = files.filter(f => f.isUploaded === false).map(f => f.file);
+        const toUpload = files.filter(f => f.isUploaded === false && f.file).map(f => f.file!);
 
         const xfrs = new Map<string, Transfer>();
         for (const f of toUpload) {

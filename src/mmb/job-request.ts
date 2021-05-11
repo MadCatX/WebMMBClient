@@ -58,6 +58,14 @@ export namespace JobRequest {
         return Request.api(req);
     }
 
+    export function listAdditionalFiles(id: string) {
+        const req: Api.ApiRequest<Api.SimpleJobRqData> = {
+            req_type: 'ListAdditionalFiles',
+            data: { id },
+        }
+        return Request.api(req);
+    }
+
     export function mmbOutput(id: string) {
         const req: Api.ApiRequest<Api.SimpleJobRqData> = {
             req_type: 'MmbOutput',

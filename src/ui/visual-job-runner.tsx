@@ -16,6 +16,7 @@ import { LabeledField } from './common/controlled/labeled-field';
 import * as Api from '../mmb/api';
 import { JobQuery } from '../mmb/job-query';
 import { Query } from '../mmb/query';
+import { AdditionalFile } from '../model/additional-file';
 import { MmbInputModel as MIM } from '../model/mmb-input-model';
 import { Net } from '../util/net';
 
@@ -56,6 +57,7 @@ interface State {
 export class VisualJobRunner extends React.Component<VisualJobRunner.Props, State> {
     private mmbInputFormRef: React.RefObject<MmbInputForm>;
     private commandsQueryAborter: AbortController | null = null;
+    private additionalFilesAborter: AbortController | null = null;
     private jobQueryAborter: AbortController | null = null;
     private startJobAborter: AbortController | null = null;
     private stopJobAborter: AbortController | null = null;
@@ -200,16 +202,21 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
             if (!jobInfo)
                 return; // TODO: Report an error?
 
-            const taskMmbOutput = JobQuery.fetchMmbOutput(jobInfo.id);
-            this.jobQueryAborter = taskMmbOutput.aborter;
+            const qMmbOutput = JobQuery.fetchMmbOutput(jobInfo.id);
+            this.jobQueryAborter = qMmbOutput.aborter;
+            const mmbOutputPromise = qMmbOutput.performer();
 
-            const mmbOutputPromise = taskMmbOutput.performer();
+            const qCommands = jobInfo.commands_mode === 'Raw' ? JobQuery.commandsRaw(this.props.jobId) : JobQuery.commands(this.props.jobId);
+            this.commandsQueryAborter = qCommands.aborter;
+            const commandsPromise = qCommands.performer();
 
-            const taskCommands = jobInfo.commands_mode === 'Raw' ? JobQuery.commandsRaw(this.props.jobId) : JobQuery.commands(this.props.jobId);
-            this.commandsQueryAborter = taskCommands.aborter;
+            const qAdditionalFiles = JobQuery.listAdditionalFiles(jobInfo.id);
+            this.additionalFilesAborter = qAdditionalFiles.aborter;
+            const additionalFilesPromise = qAdditionalFiles.performer();
 
             const mmbOutput = await mmbOutputPromise;
-            const commands = await taskCommands.performer();
+            const commands = await commandsPromise;
+            const additionalFiles = await additionalFilesPromise;
             const setup = (() => {
                 if (!commands || commands.is_empty)
                     return MIM.defaultSetupValues();
@@ -223,6 +230,15 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
             let newState: Partial<State> = { ...this.jobInfoOkBlock(jobInfo) };
             if (mmbOutput)
                 newState = { ...newState, ...this.mmbOutputOkBlock(mmbOutput) };
+
+            if (additionalFiles) {
+                const files: AdditionalFile[] = [];
+                for (const f of additionalFiles) {
+                    const size = parseInt(f.size);
+                    files.push(AdditionalFile.fromInfo(f.name, size));
+                }
+                setup.set('mol-in-additional-files-added', files);
+            }
 
             if (commands)
                 newState = { ...newState, setup };
@@ -417,6 +433,7 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
 
     componentWillUnmount() {
         Net.abortFetch(this.commandsQueryAborter);
+        Net.abortFetch(this.additionalFilesAborter);
         Net.abortFetch(this.jobQueryAborter);
         Net.abortFetch(this.startJobAborter);
         Net.abortFetch(this.stopJobAborter);

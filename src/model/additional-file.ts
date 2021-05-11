@@ -7,12 +7,32 @@
  */
 
 export class AdditionalFile {
-    public isUploaded = false;
+    public isUploaded: boolean;
+    public readonly file: File|null;
     public readonly name: string;
     public readonly size: number;
 
-    constructor(public readonly file: File) {
-        this.name = file.name;
-        this.size = file.size;
+    private constructor(file: File|null, name?: string, size?: number) {
+        this.file = file;
+
+        if (this.file) {
+            this.name = this.file.name;
+            this.size = this.file.size;
+            this.isUploaded = false;
+        } else {
+            if (!name || !size)
+                throw new Error('Invalid initialization of AdditionalFile');
+            this.name = name;
+            this.size = size;
+            this.isUploaded = true;
+        }
+    }
+
+    static fromFile(file: File) {
+        return new AdditionalFile(file);
+    }
+
+    static fromInfo(name: string, size: number) {
+        return new AdditionalFile(null, name, size);
     }
 }

@@ -8,11 +8,12 @@
 
 import * as Api from './api';
 import { isJsonCommands, jsonCommandsFromJson } from './commands';
-import { checkProps, checkType, isArr, isBool, isInt, isObj, isStr, TypeChecker } from '../util/json';
+import { assignAll, checkProps, checkType, isArr, isBool, isInt, isObj, isStr, TypeChecker } from '../util/json';
 import { Num } from '../util/num';
 
 const NOT_AN_OBJ = 'Input variable is not an object';
 
+const AdditionalFile: Api.AdditionalFile = { name: '', size: '0' };
 const ExampleListItemObj: Api.ExampleListItem = {
     name: '',
     description: '',
@@ -37,6 +38,24 @@ const JobListItemObj: Api.JobListItem = {
     info: JobInfoObj,
 };
 const SessionInfoObj: Api.SessionInfo = { id: '' };
+
+function isAdditionalFile(v: unknown): v is Api.AdditionalFile {
+    if (!isObj(v))
+        return false;
+
+    try {
+        checkProps(v, AdditionalFile);
+
+        const tObj = v as Api.AdditionalFile;
+        checkType(tObj, 'name', isStr);
+        checkType(tObj, 'size', isStr);
+
+        return true;
+    } catch (e) {
+        console.error(e);
+        return false;
+    }
+}
 
 function isExampleListItem(v: unknown): v is Api.ExampleListItem {
     if (!isObj(v))
@@ -192,16 +211,35 @@ function isJobStep(v: unknown): v is Api.JobStep {
     return !isNaN(parseInt(v as string)) || v === 'preparing';
 }
 
+function mkObj<T extends object>(src: Record<string, unknown>, template: T): T {
+    const ret = Object.create(template);
+    assignAll(ret, src, template);
+    return ret;
+}
+
 export namespace ResponseDeserializers {
     interface TypeConverter<T> {
         (obj: unknown): T;
     }
 
     function toList<T>(obj: unknown, checker: TypeChecker<T>, converter: TypeConverter<T>): T[] {
-        if (isArr(obj, checker)) {
+        if (isArr(obj, checker))
             return obj.map(item => converter(item));
-        } else
-            throw new Error();
+        throw new Error();
+    }
+
+    export function toAdditionalFile(obj: unknown): Api.AdditionalFile {
+        if (isAdditionalFile(obj))
+            return mkObj(obj, AdditionalFile);
+        throw new Error('Object is not AdditionalFile');
+    }
+
+    export function toAdditionalFileList(obj: unknown): Api.AdditionalFile[] {
+        try {
+            return toList(obj, isAdditionalFile, toAdditionalFile);
+        } catch (e) {
+            throw new Error('Object is not an array of AdditionalFile objects');
+        }
     }
 
     export function toEmpty(obj: unknown): Api.Empty {
@@ -214,10 +252,9 @@ export namespace ResponseDeserializers {
     }
 
     export function toExampleListItem(obj: unknown): Api.ExampleListItem {
-        if (isExampleListItem(obj)) {
-            return { name: obj.name, description: obj.description }
-        } else
-            throw new Error('Object is not ExampleListItem');
+        if (isExampleListItem(obj))
+            return mkObj(obj, ExampleListItemObj);
+        throw new Error('Object is not ExampleListItem');
     }
 
     export function toExampleList(obj: unknown): Api.ExampleListItem[] {
@@ -229,12 +266,8 @@ export namespace ResponseDeserializers {
     }
 
     export function toFileTransferInfo(obj: unknown): Api.FileTransferInfo {
-        if (isFileTransferInfo(obj)) {
-            return {
-                id: obj.id,
-            };
-        }
-
+        if (isFileTransferInfo(obj))
+            return mkObj(obj, FileTransferInfo);
         throw new Error('Object is not FileTransferInfo');
     }
 
@@ -275,13 +308,9 @@ export namespace ResponseDeserializers {
     }
 
     function toJobListItem(obj: unknown): Api.JobListItem {
-        if (isJobListItem(obj)) {
-            return {
-                ok: obj.ok,
-                info: obj.info,
-            };
-        } else
-            throw new Error('Object is not JobListItem');
+        if (isJobListItem(obj))
+            return mkObj(obj, JobListItemObj);
+        throw new Error('Object is not JobListItem');
     }
 
     export function toJobList(obj: unknown): Api.JobListItem[] {

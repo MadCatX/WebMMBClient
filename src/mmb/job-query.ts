@@ -40,6 +40,10 @@ export namespace JobQuery {
         return Q.query(() => JobRequest.list(), ResponseDeserializers.toJobList, 'Cannot query list of jobs');
     }
 
+    export function listAdditionalFiles(id: string) {
+        return Q.query(() => JobRequest.listAdditionalFiles(id), ResponseDeserializers.toAdditionalFileList, 'Cannot query list of additional files');
+    }
+
     export function start(id: string, commands: Api.JsonCommands) {
         return Q.query(() => JobRequest.start(id, commands), ResponseDeserializers.toJobInfo, 'Cannot start job');
     }

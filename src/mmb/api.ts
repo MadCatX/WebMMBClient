@@ -7,21 +7,22 @@
  */
 
 type ApiRequestType =
-    'StartJob'        |
-    'StartJobRaw'     |
-    'StopJob'         |
-    'CreateJob'       |
-    'DeleteJob'       |
-    'JobStatus'       |
-    'ListJobs'        |
-    'MmbOutput'       |
-    'JobCommands'     |
-    'JobCommandsRaw'  |
-    'SessionInfo'     |
-    'CloneJob'        |
-    'ListExamples'    |
-    'ActivateExample' |
-    'FileTransfer';
+    'StartJob'           |
+    'StartJobRaw'        |
+    'StopJob'            |
+    'CreateJob'          |
+    'DeleteJob'          |
+    'JobStatus'          |
+    'ListJobs'           |
+    'MmbOutput'          |
+    'JobCommands'        |
+    'JobCommandsRaw'     |
+    'SessionInfo'        |
+    'CloneJob'           |
+    'ListExamples'       |
+    'ActivateExample'    |
+    'FileTransfer'       |
+    'ListAdditionalFiles';
 
 type AuthRequestType =
     'LogIn' |
@@ -137,6 +138,11 @@ export const ErrorResponseObj: ErrorResponse = { success: false, message: '' };
 export type OkResponse<T> = {
     success: boolean,
     data: T,
+}
+
+export type AdditionalFile = {
+    name: string,
+    size: string,
 }
 
 const Empty = {};
