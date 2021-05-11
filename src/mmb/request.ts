@@ -53,7 +53,7 @@ export namespace Request {
     }
 
     export function xfr(req: TransferChunk): Pending {
-        const payload = new Uint8Array([...req.job_id, ...req.transfer_id, ...req.data]);
+        const payload = new Uint8Array([...req.job_id, ...req.transfer_id, ...req.challenge, ...req.data]);
 
         const aborter = new AbortController();
         const promise = fetch(

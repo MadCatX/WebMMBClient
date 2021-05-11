@@ -18,7 +18,7 @@ const ExampleListItemObj: Api.ExampleListItem = {
     name: '',
     description: '',
 };
-const FileTransferInfo: Api.FileTransferInfo = { id: '', };
+const FileTransferAck: Api.FileTransferAck = { id: '', challenge: new Uint8Array() };
 const JobCommands: Api.JobCommands = { is_empty: true, commands: null };
 const JobCommandsRaw: Api.JobCommandsRaw = { is_empty: true, commands: null };
 
@@ -72,15 +72,29 @@ function isExampleListItem(v: unknown): v is Api.ExampleListItem {
     }
 }
 
-function isFileTransferInfo(v: unknown): v is Api.FileTransferInfo {
+function isFileTransferAck(v: unknown): v is Api.FileTransferAck {
     if (!isObj(v))
         return false;
 
     try {
-        checkProps(v, FileTransferInfo);
+        checkProps(v, FileTransferAck);
 
-        const tObj = v as Api.FileTransferInfo;
+        const tObj = v as Api.FileTransferAck;
         checkType(tObj, 'id', isStr);
+        checkType(
+            tObj,
+            'challenge',
+            (v: unknown): v is Uint8Array => {
+                return isArr<number>(
+                    v,
+                    (v: unknown): v is number => {
+                        if (!isInt(v))
+                            return false;
+                        return v >= 0 && v <= 255;
+                    }
+                )
+            }
+        );
 
         return true;
     } catch (e) {
@@ -265,10 +279,10 @@ export namespace ResponseDeserializers {
         }
     }
 
-    export function toFileTransferInfo(obj: unknown): Api.FileTransferInfo {
-        if (isFileTransferInfo(obj))
-            return mkObj(obj, FileTransferInfo);
-        throw new Error('Object is not FileTransferInfo');
+    export function toFileTransferAck(obj: unknown): Api.FileTransferAck {
+        if (isFileTransferAck(obj))
+            return mkObj(obj, FileTransferAck);
+        throw new Error('Object is not FileTransferAck');
     }
 
     export function toJobCommands(obj: unknown): Api.JobCommands {

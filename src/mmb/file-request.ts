@@ -10,8 +10,6 @@
 import * as Api from './api';
 import { Request } from './request';
 
-const utf8Enc = new TextEncoder();
-
 export namespace FileRequest {
     export function cancelUpload(jobId: string, transferId: string) {
         const req: Api.ApiRequest<Api.FileOperationRqData> = {
@@ -65,22 +63,11 @@ export namespace FileRequest {
         return Request.api(req);
     }
 
-    export function uploadChunk(jobId: string, transferId: string, data: Uint8Array) {
-        const job_id = utf8Enc.encode(jobId);
-        const transfer_id = utf8Enc.encode(transferId);
-
-        const req: Api.TransferChunk = {
-            job_id,
-            transfer_id,
-            data,
-        };
-        return Request.xfr(req);
-    }
-
-    export function uploadChunkUint8(jobId: Uint8Array, transferId: Uint8Array, data: Uint8Array) {
+    export function uploadChunk(jobId: Uint8Array, transferId: Uint8Array, challenge: Uint8Array, data: Uint8Array) {
         const req: Api.TransferChunk = {
             job_id: jobId,
             transfer_id: transferId,
+            challenge,
             data,
         };
         return Request.xfr(req);

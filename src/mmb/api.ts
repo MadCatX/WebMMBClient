@@ -84,6 +84,7 @@ export type AuthRequest = {
 export type TransferChunk = {
     job_id: Uint8Array,
     transfer_id: Uint8Array,
+    challenge: Uint8Array,
     data: Uint8Array,
 }
 
@@ -153,8 +154,9 @@ export type ExampleListItem = {
     description: string,
 }
 
-export type FileTransferInfo = {
+export type FileTransferAck = {
     id: string,
+    challenge: Uint8Array,
 }
 
 export type JobCommands = {

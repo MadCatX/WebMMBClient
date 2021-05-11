@@ -24,14 +24,10 @@ export namespace FileQuery {
     }
 
     export function initUpload(jobId: string, fileName: string) {
-        return Q.query(() => FileRequest.initUpload(jobId, fileName), ResponseDeserializers.toFileTransferInfo, 'Cannot initiate file upload');
+        return Q.query(() => FileRequest.initUpload(jobId, fileName), ResponseDeserializers.toFileTransferAck, 'Cannot initiate file upload');
     }
 
-    export function uploadChunk(jobId: string, transferId: string, data: Uint8Array) {
-        return Q.query(() => FileRequest.uploadChunk(jobId, transferId, data), ResponseDeserializers.toEmpty, 'Cannot upload file chunk');
-    }
-
-    export function uploadChunkUint8(jobId: Uint8Array, transferId: Uint8Array, data: Uint8Array) {
-        return Q.query(() => FileRequest.uploadChunkUint8(jobId, transferId, data), ResponseDeserializers.toEmpty, 'Cannot upload file chunk');
+    export function uploadChunk(jobId: Uint8Array, transferId: Uint8Array, challenge: Uint8Array, data: Uint8Array) {
+        return Q.query(() => FileRequest.uploadChunk(jobId, transferId, challenge, data), ResponseDeserializers.toFileTransferAck, 'Cannot upload file chunk');
     }
 }

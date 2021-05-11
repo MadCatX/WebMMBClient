@@ -22,29 +22,29 @@ function cancelUpload(jobId: string, transferId: string) {
     });
 }
 
-function sendChunks(data: Uint8Array, jobId: Uint8Array, transferId: Uint8Array) {
+function sendChunks(data: Uint8Array, jobId: Uint8Array, transferId: Uint8Array, challenge: Uint8Array) {
     const nChunks = Math.floor(data.length / CHUNK_SIZE) + 1;
 
-    return new Promise<void>((resolve, reject) => {
-        const sender = (idx: number): void => {
+    return new Promise<Uint8Array>((resolve, reject) => {
+        const sender = (idx: number, challenge: Uint8Array): void => {
             const end = (idx + 1) * CHUNK_SIZE > data.length ? data.length : (idx + 1) * CHUNK_SIZE;
             const chunk = data.slice(idx * CHUNK_SIZE, end);
 
-            FileQuery.uploadChunkUint8(jobId, transferId, chunk).performer().then(resp => {
-                if (!resp) {
+            FileQuery.uploadChunk(jobId, transferId, challenge, chunk).performer().then(ack => {
+                if (!ack) {
                     reject('Transfer was aborted before all chunks were sent');
                     return;
                 }
 
                 idx++;
                 if (idx < nChunks)
-                    sender(idx);
+                    sender(idx, ack.challenge);
                 else
-                    resolve();
+                    resolve(ack.challenge);
             }).catch(e => reject(e));
         }
 
-        sender(0);
+        sender(0, challenge);
     });
 }
 
@@ -65,22 +65,23 @@ export namespace FileUploader {
 
             const initQuery = FileQuery.initUpload(jobId, file.name);
 
-            initQuery.performer().then(transferInfo => {
-                if (!transferInfo) {
+            initQuery.performer().then(ack=> {
+                if (!ack) {
                     errRep(file, 'Transfer was aborted before it started');
                     return;
                 }
 
-                const transferId = transferInfo.id;
+                const transferId = ack.id;
                 const transferIdUint8 = utf8Enc.encode(transferId);
                 let bytesRead = 0;
+                let challenge = ack.challenge;
                 reader.read().then(function readFunc({done, value}) {
                     if (done) {
                         reader.cancel();
                         if (bytesRead < file.size)
                             return;
 
-                        const finiQuery = FileQuery.finishUpload(jobId, transferInfo.id);
+                        const finiQuery = FileQuery.finishUpload(jobId, transferId);
                         finiQuery.performer().then(() => {
                             progRep(file, reader, transferId, 1, true);
                         }).catch(e => {
@@ -92,8 +93,9 @@ export namespace FileUploader {
                     bytesRead += value.length;
                     const doneRatio = bytesRead / file.size;
 
-                    sendChunks(value, jobIdUint8, transferIdUint8).then(
-                        () => {
+                    sendChunks(value, jobIdUint8, transferIdUint8, challenge).then(
+                        chal => {
+                            challenge = chal;
                             progRep(file, reader, transferId, doneRatio, false);
                             reader.read().then(readFunc).catch(e => {
                                 reader.cancel();
