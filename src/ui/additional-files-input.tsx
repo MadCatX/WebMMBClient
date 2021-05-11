@@ -98,6 +98,7 @@ export class AdditionalFilesInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys
         this.setState({ ...this.state, currentTransfers: xfrs });
 
         FileUploader.upload(
+            this.props.jobId,
             toUpload,
             (file, reader, doneRatio, isDone) => {
                 const currXfrs = this.state.currentTransfers;
@@ -209,5 +210,6 @@ export class AdditionalFilesInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys
 
 export namespace AdditionalFilesInput {
     export interface Props extends FormBlock.Props<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes> {
+        jobId: string;
     }
 }

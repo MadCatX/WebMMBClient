@@ -17,6 +17,7 @@ const ExampleListItemObj: Api.ExampleListItem = {
     name: '',
     description: '',
 };
+const FileTransferInfo: Api.FileTransferInfo = { id: '', };
 const JobCommands: Api.JobCommands = { is_empty: true, commands: null };
 const JobCommandsRaw: Api.JobCommandsRaw = { is_empty: true, commands: null };
 
@@ -45,6 +46,23 @@ function isExampleListItem(v: unknown): v is Api.ExampleListItem {
         checkProps(v, ExampleListItemObj);
         checkType(v, 'name', isStr);
         checkType(v, 'description', isStr);
+        return true;
+    } catch (e) {
+        console.error(e);
+        return false;
+    }
+}
+
+function isFileTransferInfo(v: unknown): v is Api.FileTransferInfo {
+    if (!isObj(v))
+        return false;
+
+    try {
+        checkProps(v, FileTransferInfo);
+
+        const tObj = v as Api.FileTransferInfo;
+        checkType(tObj, 'id', isStr);
+
         return true;
     } catch (e) {
         console.error(e);
@@ -208,6 +226,16 @@ export namespace ResponseDeserializers {
         } catch (_) {
             throw new Error('Object is not ExampleList');
         }
+    }
+
+    export function toFileTransferInfo(obj: unknown): Api.FileTransferInfo {
+        if (isFileTransferInfo(obj)) {
+            return {
+                id: obj.id,
+            };
+        }
+
+        throw new Error('Object is not FileTransferInfo');
     }
 
     export function toJobCommands(obj: unknown): Api.JobCommands {

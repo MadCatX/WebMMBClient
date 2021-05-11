@@ -39,7 +39,8 @@ export namespace MmbInputModel {
     export type UiMode = 'simple' | 'advanced' | 'maverick';
 
     export interface Props extends FormModel.Props<ValueKeys, ValueTypes> {
-        jobName?: string;
+        jobId: string;
+        jobName: string;
     }
 
     export type ContextData = FormModel.ContextData<ErrorKeys, ValueKeys, ValueTypes>;

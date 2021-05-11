@@ -37,6 +37,7 @@ function forceResize() {
 }
 
 interface State {
+    jobId: string;
     jobName: string;
     jobState: Api.JobState;
     jobStep: Api.JobStep;
@@ -64,6 +65,7 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
         super(props);
 
         this.state = {
+            jobId: '',
             jobName: '',
             jobState: 'NotStarted',
             jobStep: 'none',
@@ -151,6 +153,7 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
                     </div>
                     <MmbInputForm
                         ref={this.mmbInputFormRef}
+                        jobId={this.state.jobId}
                         jobName={this.state.jobName}
                         availableStages={stages}
                         currentStage={this.state.jobCurrentStage}

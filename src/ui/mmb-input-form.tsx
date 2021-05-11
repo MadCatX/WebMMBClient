@@ -217,7 +217,7 @@ export class MmbInputForm extends Form<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTy
                              ?
                              <>
                                  <MobilizersInput ctxData={ctxData} />
-                                 <AdditionalFilesInput ctxData={ctxData} />
+                                 <AdditionalFilesInput ctxData={ctxData} jobId={this.props.jobId} />
                              </>
                              :
                              undefined

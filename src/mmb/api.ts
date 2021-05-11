@@ -21,7 +21,7 @@ type ApiRequestType =
     'CloneJob'        |
     'ListExamples'    |
     'ActivateExample' |
-    'UploadFile';
+    'FileTransfer';
 
 type AuthRequestType =
     'LogIn' |
@@ -31,7 +31,7 @@ export type JobState = 'NotStarted' | 'Running' | 'Finished' | 'Failed';
 export type JobStep = number | 'preparing' | 'none';
 export type JobTotalSteps = number | 'none';
 export type JobCommandsMode = 'None' | 'Synthetic' | 'Raw';
-export type UploadFileRequestType = 'Start' | 'Continue' | 'Finish';
+export type FileTransferRequestType = 'Init' | 'Finish';
 
 /* JSON commands */
 
@@ -80,6 +80,13 @@ export type AuthRequest = {
     session_id: string,
 }
 
+/* This request is transferred as raw bytes instead of JSON */
+export type TransferChunk = {
+    job_id: Uint8Array,
+    transfer_id: Uint8Array,
+    data: Uint8Array,
+}
+
 export type CloneJobRqData = {
     id: string,
     name: string,
@@ -87,6 +94,13 @@ export type CloneJobRqData = {
 
 export type CreateJobRqData = {
     name: string,
+}
+
+export type FileTransferRqData = {
+    req_type: FileTransferRequestType,
+    job_id: string,
+    transfer_id: string,
+    file_name: string,
 }
 
 export type SimpleJobRqData = {
@@ -106,13 +120,6 @@ export type StartJobRqData = {
 export type StartJobRawRqData = {
     id: string,
     commands: string,
-}
-
-export type UploadFileRqData = {
-    id: string;
-    req_type: UploadFileRequestType,
-    file_name: string,
-    data: string,
 }
 
 /* Responses */
@@ -139,6 +146,10 @@ export type Empty = typeof Empty;
 export type ExampleListItem = {
     name: string,
     description: string,
+}
+
+export type FileTransferInfo = {
+    id: string,
 }
 
 export type JobCommands = {
