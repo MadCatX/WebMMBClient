@@ -172,7 +172,6 @@ export namespace JsonCommandsSerializer {
         mobilizers: [],
         adv_params: {},
         set_default_MD_parameters: false,
-        extra_files: [],
     };
 
     function advancedParameters<K extends (string extends K ? never : string)>(advParams: CommandsSerializer.AdvancedParameters<K>) {
@@ -216,50 +215,6 @@ export namespace JsonCommandsSerializer {
         });
 
         return defs;
-    }
-
-    async function extraFiles<K extends (string extends K ? never : string)>(advParams: CommandsSerializer.AdvancedParameters<K>) {
-        const exfs: Api.ExtraFile[] = [];
-
-        const pruneRegex = new RegExp('data:(.+?)/(.+?);base64,');
-
-        for (const [name, value] of advParams.values.entries()) {
-            const param = advParams.parameters.get(name)!;
-
-            if (P.isFile(param)) {
-                const f = value as File|null;
-                if (f === null)
-                    throw new Error('File object is null');
-
-                const reader = new FileReader();
-                const p = new Promise((resolve, reject) => {
-                    reader.onerror = () => {
-                        reader.abort();
-                        reject(`Failed to load file ${f.name}`);
-                    };
-                    reader.onload = () => {
-                        let bin = reader.result as string;
-                        if (bin === null)
-                            throw new Error('No data');
-
-                        const header = bin.match(pruneRegex);
-                        if (header === null)
-                            reject('Failed to extract base64-encoded file content');
-                        else {
-                            bin = bin.toString().replace(header[0], '');
-                            resolve(bin);
-                        }
-                    };
-
-                    reader.readAsDataURL(f);
-                });
-
-                const data = await p as string;
-                exfs.push({ key: name, name: f.name, data });
-            }
-        }
-
-        return exfs;
     }
 
     function mdParams(cmds: Api.JsonCommands, md: MdParameters) {
@@ -333,7 +288,6 @@ export namespace JsonCommandsSerializer {
         cmds.base_interactions = baseInteractions(params.baseInteractions);
         cmds.ntcs = ntcs(params.ntcs);
         cmds.mobilizers = mobilizers(params.mobilizers);
-        cmds.extra_files = await extraFiles(params.advParams);
 
         return cmds;
     }

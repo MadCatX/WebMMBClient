@@ -65,7 +65,6 @@ export type JsonCommands = {
     mobilizers: MobilizerParameter[],
     adv_params: JsonAdvancedParameters,
     set_default_MD_parameters: boolean,
-    extra_files: ExtraFile[];
 };
 
 /* Requests */
