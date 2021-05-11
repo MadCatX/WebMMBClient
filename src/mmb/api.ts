@@ -32,7 +32,7 @@ export type JobState = 'NotStarted' | 'Running' | 'Finished' | 'Failed';
 export type JobStep = number | 'preparing' | 'none';
 export type JobTotalSteps = number | 'none';
 export type JobCommandsMode = 'None' | 'Synthetic' | 'Raw';
-export type FileOperationRequestType = 'InitUpload' | 'FinishUpload' | 'Delete';
+export type FileOperationRequestType = 'InitUpload' | 'FinishUpload' | 'CancelUpload' | 'Delete';
 
 /* JSON commands */
 

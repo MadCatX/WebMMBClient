@@ -11,6 +11,10 @@ import { ResponseDeserializers } from './response-deserializers';
 import { Query as Q } from './query';
 
 export namespace FileQuery {
+    export function cancelUpload(jobId: string, transferId: string) {
+        return Q.query(() => FileRequest.cancelUpload(jobId, transferId), ResponseDeserializers.toEmpty, 'Cannot cancel file transfer');
+    }
+
     export function del(jobId: string, fileName: string) {
         return Q.query(() => FileRequest.del(jobId, fileName), ResponseDeserializers.toEmpty, 'Cannot delete file');
     }

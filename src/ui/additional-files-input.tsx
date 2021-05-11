@@ -105,14 +105,22 @@ export class AdditionalFilesInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys
         FileUploader.upload(
             this.props.jobId,
             toUpload,
-            (file, reader, doneRatio, isDone) => {
+            (file, reader, transferId, doneRatio, isDone) => {
                 const currXfrs = this.state.currentTransfers;
                 const xfr = currXfrs.get(file.name)!;
 
                 if (xfr.cancel) {
                     reader.cancel();
-                    xfr.state = 'canceled';
-                    this.setState({ ...this.state, currentTransfers: currXfrs });
+                    FileQuery.cancelUpload(this.props.jobId, transferId).performer().then(() => {
+                        xfr.state = 'canceled';
+                        this.setState({ ...this.state, currentTransfers: currXfrs });
+                    }).catch(e => {
+                        this.setState({
+                            ...this.state,
+                            currentTransfers: currXfrs,
+                            errors: [e.toString()],
+                        });
+                    });
                     return;
                 }
 

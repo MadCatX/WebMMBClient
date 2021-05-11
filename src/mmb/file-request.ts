@@ -13,6 +13,19 @@ import { Request } from './request';
 const utf8Enc = new TextEncoder();
 
 export namespace FileRequest {
+    export function cancelUpload(jobId: string, transferId: string) {
+        const req: Api.ApiRequest<Api.FileOperationRqData> = {
+            req_type: 'FileOperation',
+            data: {
+                req_type: 'CancelUpload',
+                job_id: jobId,
+                transfer_id: transferId,
+                file_name: '',
+            }
+        };
+        return Request.api(req);
+    }
+
     export function del(jobId: string, fileName: string) {
         const req: Api.ApiRequest<Api.FileOperationRqData> = {
             req_type: 'FileOperation',
