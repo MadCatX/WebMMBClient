@@ -16,6 +16,7 @@ import { FormUtil } from '../model/common/form';
 import { FilePicker } from './common/controlled/file-picker';
 import { FormBlock } from './common/form/form-block';
 import { FileUploader } from '../mmb/file-uploader';
+import { FileQuery } from '../mmb/file-query';
 
 const FU = new FormUtil<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes>();
 const AddedTable = MIM.TWDR<AdditionalFile[]>();
@@ -71,11 +72,15 @@ export class AdditionalFilesInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys
     }
 
     private fileRemoved(file: AdditionalFile) {
-        let files = FU.getArray<AdditionalFile[]>(this.props.ctxData, 'mol-in-additional-files-added');
-        files = files.filter(f => f.name !== file.name);
+        FileQuery.del(this.props.jobId, file.name).performer().then(() => {
+            let files = FU.getArray<AdditionalFile[]>(this.props.ctxData, 'mol-in-additional-files-added');
+            files = files.filter(f => f.name !== file.name);
 
-        this.setState({ ...this.state, errors: [] });
-        FU.updateValue(this.props.ctxData, { key: 'mol-in-additional-files-added', value: files } );
+            this.setState({ ...this.state, errors: [] });
+            FU.updateValue(this.props.ctxData, { key: 'mol-in-additional-files-added', value: files } );
+        }).catch(e => {
+            this.setState({ ...this.state, errors: [e.toString()] });
+        });
     }
 
     private uploadFiles() {

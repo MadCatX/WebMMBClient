@@ -13,11 +13,24 @@ import { Request } from './request';
 const utf8Enc = new TextEncoder();
 
 export namespace FileRequest {
-    export function finishUpload(jobId: string, transferId: string) {
-        const req: Api.ApiRequest<Api.FileTransferRqData> = {
-            req_type: 'FileTransfer',
+    export function del(jobId: string, fileName: string) {
+        const req: Api.ApiRequest<Api.FileOperationRqData> = {
+            req_type: 'FileOperation',
             data: {
-                req_type: 'Finish',
+                req_type: 'Delete',
+                job_id: jobId,
+                transfer_id: '',
+                file_name: fileName,
+            },
+        };
+        return Request.api(req);
+    }
+
+    export function finishUpload(jobId: string, transferId: string) {
+        const req: Api.ApiRequest<Api.FileOperationRqData> = {
+            req_type: 'FileOperation',
+            data: {
+                req_type: 'FinishUpload',
                 job_id: jobId,
                 transfer_id: transferId,
                 file_name: '',
@@ -27,10 +40,10 @@ export namespace FileRequest {
     }
 
     export function initUpload(jobId: string, fileName: string) {
-        const req: Api.ApiRequest<Api.FileTransferRqData> = {
-            req_type: 'FileTransfer',
+        const req: Api.ApiRequest<Api.FileOperationRqData> = {
+            req_type: 'FileOperation',
             data: {
-                req_type: 'Init',
+                req_type: 'InitUpload',
                 job_id: jobId,
                 transfer_id: '',
                 file_name: fileName,

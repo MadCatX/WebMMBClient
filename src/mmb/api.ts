@@ -21,7 +21,7 @@ type ApiRequestType =
     'CloneJob'           |
     'ListExamples'       |
     'ActivateExample'    |
-    'FileTransfer'       |
+    'FileOperation'      |
     'ListAdditionalFiles';
 
 type AuthRequestType =
@@ -32,7 +32,7 @@ export type JobState = 'NotStarted' | 'Running' | 'Finished' | 'Failed';
 export type JobStep = number | 'preparing' | 'none';
 export type JobTotalSteps = number | 'none';
 export type JobCommandsMode = 'None' | 'Synthetic' | 'Raw';
-export type FileTransferRequestType = 'Init' | 'Finish';
+export type FileOperationRequestType = 'InitUpload' | 'FinishUpload' | 'Delete';
 
 /* JSON commands */
 
@@ -96,8 +96,8 @@ export type CreateJobRqData = {
     name: string,
 }
 
-export type FileTransferRqData = {
-    req_type: FileTransferRequestType,
+export type FileOperationRqData = {
+    req_type: FileOperationRequestType,
     job_id: string,
     transfer_id: string,
     file_name: string,
