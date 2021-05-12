@@ -81,10 +81,10 @@ export type AuthRequest = {
 }
 
 /* This request is transferred as raw bytes instead of JSON */
-export type TransferChunk = {
+export type FileTransferChunk = {
     job_id: Uint8Array,
     transfer_id: Uint8Array,
-    challenge: Uint8Array,
+    index: Uint8Array,
     data: Uint8Array,
 }
 
@@ -156,7 +156,6 @@ export type ExampleListItem = {
 
 export type FileTransferAck = {
     id: string,
-    challenge: Uint8Array,
 }
 
 export type JobCommands = {

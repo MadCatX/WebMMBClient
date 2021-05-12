@@ -9,6 +9,7 @@
 
 import * as Api from './api';
 import { Request } from './request';
+import { Uint } from '../util/uint';
 
 export namespace FileRequest {
     export function cancelUpload(jobId: string, transferId: string) {
@@ -63,11 +64,11 @@ export namespace FileRequest {
         return Request.api(req);
     }
 
-    export function uploadChunk(jobId: Uint8Array, transferId: Uint8Array, challenge: Uint8Array, data: Uint8Array) {
-        const req: Api.TransferChunk = {
+    export function uploadChunk(jobId: Uint8Array, transferId: Uint8Array, index: number, data: Uint8Array) {
+        const req: Api.FileTransferChunk = {
             job_id: jobId,
             transfer_id: transferId,
-            challenge,
+            index: Uint.toUint32Le(index),
             data,
         };
         return Request.xfr(req);

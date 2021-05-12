@@ -22,15 +22,15 @@ function cancelUpload(jobId: string, transferId: string) {
     });
 }
 
-function sendChunks(data: Uint8Array, jobId: Uint8Array, transferId: Uint8Array, challenge: Uint8Array) {
+function sendChunks(data: Uint8Array, jobId: Uint8Array, transferId: Uint8Array, index: number) {
     const nChunks = Math.floor(data.length / CHUNK_SIZE) + 1;
 
-    return new Promise<Uint8Array>((resolve, reject) => {
-        const sender = (idx: number, challenge: Uint8Array): void => {
+    return new Promise<number>((resolve, reject) => {
+        const sender = (idx: number, index: number): void => {
             const end = (idx + 1) * CHUNK_SIZE > data.length ? data.length : (idx + 1) * CHUNK_SIZE;
             const chunk = data.slice(idx * CHUNK_SIZE, end);
 
-            FileQuery.uploadChunk(jobId, transferId, challenge, chunk).performer().then(ack => {
+            FileQuery.uploadChunk(jobId, transferId, index, chunk).performer().then(ack => {
                 if (!ack) {
                     reject('Transfer was aborted before all chunks were sent');
                     return;
@@ -38,13 +38,13 @@ function sendChunks(data: Uint8Array, jobId: Uint8Array, transferId: Uint8Array,
 
                 idx++;
                 if (idx < nChunks)
-                    sender(idx, ack.challenge);
+                    sender(idx, index + 1);
                 else
-                    resolve(ack.challenge);
+                    resolve(index + 1);
             }).catch(e => reject(e));
         }
 
-        sender(0, challenge);
+        sender(0, index);
     });
 }
 
@@ -74,7 +74,7 @@ export namespace FileUploader {
                 const transferId = ack.id;
                 const transferIdUint8 = utf8Enc.encode(transferId);
                 let bytesRead = 0;
-                let challenge = ack.challenge;
+                let index = 0;
                 reader.read().then(function readFunc({done, value}) {
                     if (done) {
                         reader.cancel();
@@ -93,9 +93,9 @@ export namespace FileUploader {
                     bytesRead += value.length;
                     const doneRatio = bytesRead / file.size;
 
-                    sendChunks(value, jobIdUint8, transferIdUint8, challenge).then(
-                        chal => {
-                            challenge = chal;
+                    sendChunks(value, jobIdUint8, transferIdUint8, index).then(
+                        idx => {
+                            index = idx;
                             progRep(file, reader, transferId, doneRatio, false);
                             reader.read().then(readFunc).catch(e => {
                                 reader.cancel();

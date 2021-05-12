@@ -18,7 +18,7 @@ const ExampleListItemObj: Api.ExampleListItem = {
     name: '',
     description: '',
 };
-const FileTransferAck: Api.FileTransferAck = { id: '', challenge: new Uint8Array() };
+const FileTransferAck: Api.FileTransferAck = { id: '', };
 const JobCommands: Api.JobCommands = { is_empty: true, commands: null };
 const JobCommandsRaw: Api.JobCommandsRaw = { is_empty: true, commands: null };
 
@@ -81,20 +81,6 @@ function isFileTransferAck(v: unknown): v is Api.FileTransferAck {
 
         const tObj = v as Api.FileTransferAck;
         checkType(tObj, 'id', isStr);
-        checkType(
-            tObj,
-            'challenge',
-            (v: unknown): v is Uint8Array => {
-                return isArr<number>(
-                    v,
-                    (v: unknown): v is number => {
-                        if (!isInt(v))
-                            return false;
-                        return v >= 0 && v <= 255;
-                    }
-                )
-            }
-        );
 
         return true;
     } catch (e) {

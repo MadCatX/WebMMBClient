@@ -6,7 +6,7 @@
  * @author Jiří Černý (jiri.cerny@ibt.cas.cz)
  */
 
-import { ApiRequest, AuthRequest, TransferChunk } from './api';
+import { ApiRequest, AuthRequest, FileTransferChunk } from './api';
 
 export namespace Request {
     export interface Pending {
@@ -52,8 +52,8 @@ export namespace Request {
         return { promise, aborter };
     }
 
-    export function xfr(req: TransferChunk): Pending {
-        const payload = new Uint8Array([...req.job_id, ...req.transfer_id, ...req.challenge, ...req.data]);
+    export function xfr(req: FileTransferChunk): Pending {
+        const payload = new Uint8Array([...req.job_id, ...req.transfer_id, ...req.index, ...req.data]);
 
         const aborter = new AbortController();
         const promise = fetch(
