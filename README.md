@@ -7,7 +7,7 @@ WebMMBClient is the default frontend for the WebMMB service. While WebMMBClient 
 For the server part of WebMMB, see [WebMMBServer](https://github.com/MadCatX/WebMMBServer).
 
 ## Installation
-In order to build WebMMB, [Node.js](https://nodejs.org/en/) and [npm](https://www.npmjs.com/) must be installed. WebMMB depends on [Molstar viewer plugin](https://github.com/MadCatX/molstar). to display molecular structures. The plugin will be fetched and built automatically. To build WebMMB, `cd` into the directory with WebMMB sources and issue the following commands
+In order to build WebMMBClient, [Node.js](https://nodejs.org/en/) and [npm](https://www.npmjs.com/) must be installed. WebMMBClient depends on [Molstar viewer plugin](https://github.com/MadCatX/molstar) to display molecular structures. The plugin will be fetched and built automatically. To build WebMMBClient, `cd` into the directory with WebMMBClient sources and issue the following commands
 
     git submodule update --init --recursive
     npm install
@@ -17,9 +17,9 @@ For a development build, use
 
     npm run build-install-all-dev
 
-instead. This will compile WebMMB and all of its dependencies. Compiled WebMMB will be copied into the `dist/` directory.
+instead. This will compile WebMMBClient and all of its dependencies. Compiled WebMMBClient will be copied into the `dist/` directory.
 
-To rebuild just WebMMB without dependencies, use
+To rebuild just WebMMBClient without dependencies, use
 
     npm run build
 
