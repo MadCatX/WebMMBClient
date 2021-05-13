@@ -1,6 +1,10 @@
-# WebMMB
+# WebMMB and WebMMBClient
 
-WebMMB is a web-based UI for the [MacroMoleculeBuilder (MMB)](https://github.com/samuelflores/MMB) tool. The tool requires the [WebMMBServer](https://github.com/MadCatX/WebMMBServer) backend to function.
+WebMMB is a web-based service for the [MacroMoleculeBuilder (MMB)](https://github.com/samuelflores/MMB) structural biology tool.
+
+WebMMBClient is the default frontend for the WebMMB service. While WebMMBClient currently serves as a technology demo it provides sufficient functionality for building macromolecule structures with MMB.
+
+For the server part of WebMMB, see [WebMMBServer](https://github.com/MadCatX/WebMMBServer).
 
 ## Installation
 In order to build WebMMB, [Node.js](https://nodejs.org/en/) and [npm](https://www.npmjs.com/) must be installed. WebMMB depends on [Molstar viewer plugin](https://github.com/MadCatX/molstar). to display molecular structures. The plugin will be fetched and built automatically. To build WebMMB, `cd` into the directory with WebMMB sources and issue the following commands
