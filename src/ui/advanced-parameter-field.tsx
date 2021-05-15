@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020 WebMMB contributors, licensed under MIT, See LICENSE file for details.
+ * Copyright (c) 2020-2021 WebMMB contributors, licensed under MIT, See LICENSE file for details.
  *
  * @author Michal Malý (michal.maly@ibt.cas.cz)
  * @author Samuel C. Flores (samuelfloresc@gmail.com)
@@ -11,132 +11,77 @@ import { Parameter as P } from '../model/parameter';
 import { PushButton } from './common/push-button';
 import { Num } from '../util/num';
 
-abstract class AbstractParameterField<K extends (string extends K ? never : string), R extends P.Parameter<K>, T, S = {}> extends React.Component<AbstractParameterField.Props<K, R, T>, S> {
-    protected abstract renderInner(): React.ReactFragment;
+interface Getter<K extends (string extends K ? never : string), T> {
+    (name: K): T|undefined;
+}
 
+interface Updater<K extends (string extends K ? never : string), T> {
+    (name: K, value: T): void;
+}
+
+class NumericArgument<K extends (string extends K ? never : string)> extends React.Component<Argument.Props<K, P.IntegralArgument|P.RealArgument, number|undefined>> {
     render() {
-        return (
-            <div className='adv-param-field-grid'>
-                <div>{this.props.parameter.name}</div>
-                {this.renderInner()}
-                <PushButton
-                    className='pushbutton-common pushbutton-delete'
-                    value='-'
-                    onClick={e => {
-                        e.preventDefault();
-                        this.props.deleter(this.props.parameter.name);
-                    }} />
-            </div>
-        );
-    }
-}
-
-namespace AbstractParameterField {
-    export interface Deleter<K extends (string extends K ? never : string)> {
-        (name: K): void;
-    }
-
-    export interface Updater<K extends (string extends K ? never : string), T> {
-        (name: K, value: T): void;
-    }
-
-    export interface Props<K extends (string extends K ? never : string), R extends P.Parameter<K>, T> {
-        parameter: R;
-        deleter: Deleter<K>;
-        updater: Updater<K, T>;
-        value: T;
-    }
-}
-
-interface NumInputParameterFieldState {
-    value: string;
-}
-
-abstract class NumInputParameterField<K extends (string extends K ? never : string), R extends P.Parameter<K>> extends AbstractParameterField<K, R, number, NumInputParameterFieldState> {
-    constructor(props: AbstractParameterField.Props<K, R, number>) {
-        super(props);
-
-        this.state = {
-            value: this.props.value.toString(),
-        };
-    }
-
-    renderInner() {
         return (
             <input
                 type='text'
-                value={this.state.value}
+                value={this.props.getter(this.props.name) ?? ''}
                 onChange={e => {
                     const value = e.currentTarget.value;
                     const num = Num.parseFloatStrict(value);
                     if (!isNaN(num)) {
-                        this.setState({...this.state, value });
-                        this.props.updater(this.props.parameter.name, num);
-                    }
+                        this.props.argument.isValid(num);
+                        this.props.updater(this.props.name, num);
+                    } else if (value === '')
+                        this.props.updater(this.props.name, undefined);
+                }}
+                className='line-edit' />
+            );
+    }
+}
+
+class BooleanArgument<K extends (string extends K ? never : string)> extends React.Component<Argument.Props<K, P.BooleanArgument, boolean>> {
+    render() {
+        return (
+            <input
+                type='checkbox'
+                checked={this.props.getter(this.props.name) ?? false}
+                onChange={e => { this.props.updater(this.props.name, e.currentTarget.checked) }}
+                className='check-box' />
+        );
+    }
+}
+
+class TextualArgument<K extends (string extends K ? never : string)> extends React.Component<Argument.Props<K, P.TextualArgument, string>> {
+    render() {
+        return (
+            <input
+                type='text'
+                value={this.props.getter(this.props.name) ?? ''}
+                onChange={e => {
+                    const v = e.currentTarget.value;
+                    if (this.props.argument.isValid(v) || v === '')
+                        this.props.updater(this.props.name, v);
                 }}
                 className='line-edit' />
         );
     }
 }
 
-export class GIntegralParameterField<K extends (string extends K ? never : string)> extends NumInputParameterField<K, P.IntegralParameter<K>> {
-}
-
-export class GRealParameterField<K extends (string extends K ? never : string)> extends NumInputParameterField<K, P.RealParameter<K>> {
-}
-
-export class GTextualParameterField<K extends (string extends K ? never : string)> extends AbstractParameterField<K, P.TextualParameter<K>, string> {
-    constructor(props: AbstractParameterField.Props<K, P.TextualParameter<K>, string>) {
-        super(props);
+class OptionsArgument<K extends (string extends K ? never : string)> extends React.Component<Argument.Props<K, P.OptionsArgument<string>, string>> {
+    private update(v: string) {
+        if (this.props.argument.isValid(v))
+            this.props.updater(this.props.name, v);
     }
 
-    renderInner() {
-        return (
-            <input
-                type='text'
-                value={this.props.value}
-                onChange={e => this.props.updater(this.props.parameter.name, e.currentTarget.value) }
-                className='line-edit' />
-        );
-    }
-}
-
-export class GBooleanParameterField<K extends (string extends K ? never : string)> extends AbstractParameterField<K, P.BooleanParameter<K>, boolean> {
-    constructor(props: AbstractParameterField.Props<K, P.BooleanParameter<K>, boolean>) {
-        super(props);
-    }
-
-    renderInner() {
-        return (
-            <input
-                type='checkbox'
-                checked={this.props.value}
-                onChange={e => { this.props.updater(this.props.parameter.name, e.currentTarget.checked) }}
-                className='check-box' />
-        );
-    }
-}
-
-export namespace BooleanParameterField {
-    export interface Props<K extends (string extends K ? never : string)> {
-        param: P.BooleanParameter<K>;
-    }
-}
-
-export class GOptionsParameterField<K extends (string extends K ? never : string)> extends AbstractParameterField<K, P.Parameter<K>, string> {
-    constructor(props: AbstractParameterField.Props<K, P.Parameter<K>, string>) {
-        super(props);
-    }
-
-    renderInner() {
+    render() {
         return (
             <select
-                onChange={e => this.props.updater(this.props.parameter.name, e.currentTarget.value)}
-                onBlur={e => this.props.updater(this.props.parameter.name, e.currentTarget.value)}
-                value={this.props.value}
+                value={this.props.getter(this.props.name)}
+                onChange={e => this.update(e.currentTarget.value)}
+                onBlur={e => this.update(e.currentTarget.value)}
                 className='combo-box'
             >
-                {this.props.parameter.options()!.map(o => {
+                {this.props.argument.options()!.map(o => {
                     return (
                         <option
                             key={o}
@@ -150,47 +95,177 @@ export class GOptionsParameterField<K extends (string extends K ? never : string
     }
 }
 
-export class GFileParameterField<K extends (string extends K ? never : string)> extends AbstractParameterField<K, P.Parameter<K>, File | null> {
-    constructor(props: AbstractParameterField.Props<K, P.Parameter<K>, File | null>) {
-        super(props);
+namespace Argument {
+    export interface Props<K extends (string extends K ? never : string), A, T> {
+        name: K;
+        argument: A;
+        getter: Getter<K, T>;
+        updater: Updater<K, T>;
+    }
+}
+
+class GNumericAdvancedParameter<K extends (string extends K ? never : string)> extends React.Component<AdvancedParameter.Props<K, number|undefined, P.Range>> {
+    private getArgument(): P.IntegralArgument|P.RealArgument {
+        const p = this.props.parameter;
+        if (P.isStatic(p)) {
+            const arg = p.getArgument();
+            if (P.isIntegralArg(arg) || P.isRealArg(arg))
+                return arg;
+        } else if (P.isDynamicIntegral(p) || P.isDynamicReal(p))
+            return p.getArgument(this.props.dynVals);
+        throw new Error('Invalid argument type');
     }
 
-    renderInner() {
+    render() {
         return (
-            <input
-                type='file'
-                onChange={e => {
-                    const files = e.currentTarget.files;
-                    if (files === null)
-                        this.props.updater(this.props.parameter.name, null);
-                    else
-                        this.props.updater(this.props.parameter.name, files.item(0));
-                }}
-                className='file-upload' />
+            <div className='adv-param-field-grid'>
+                <div>{this.props.parameter.name}</div>
+                <NumericArgument
+                    name={this.props.parameter.name}
+                    getter={this.props.getter}
+                    updater={this.props.updater}
+                    argument={this.getArgument()}
+                />
+                <PushButton
+                    className='pushbutton-common pushbutton-delete'
+                    value='-'
+                    onClick={() => {
+                        this.props.deleter(this.props.parameter.name);
+                    }} />
+            </div>
         );
     }
 }
 
-export function IntegralParameterField<K extends (string extends K ? never : string)>() {
-    return GIntegralParameterField as new(props: AbstractParameterField.Props<K, P.IntegralParameter<K>, number>) => GIntegralParameterField<K>;
+class GBooleanAdvancedParameter<K extends (string extends K ? never : string)> extends React.Component<AdvancedParameter.Props<K, boolean, void>> {
+    private getArgument() {
+        const p = this.props.parameter;
+        if (P.isStatic(p)) {
+            const arg = p.getArgument();
+            if (P.isBooleanArg(arg))
+                return arg;
+        } else if (P.isDynamicBoolean(p))
+            return p.getArgument();
+        throw new Error('Invalid argument type');
+    }
+
+    render() {
+        return (
+            <div className='adv-param-field-grid'>
+                <div>{this.props.parameter.name}</div>
+                <BooleanArgument
+                    name={this.props.parameter.name}
+                    getter={this.props.getter}
+                    updater={this.props.updater}
+                    argument={this.getArgument()}
+                />
+                <PushButton
+                    className='pushbutton-common pushbutton-delete'
+                    value='-'
+                    onClick={() => {
+                        this.props.deleter(this.props.parameter.name);
+                    }} />
+            </div>
+        );
+    }
 }
 
-export function RealParameterField<K extends (string extends K ? never : string)>() {
-    return GRealParameterField as new(props: AbstractParameterField.Props<K, P.RealParameter<K>, number>) => GRealParameterField<K>;
+class GTextualAdvancedParameter<K extends (string extends K ? never : string)> extends React.Component<AdvancedParameter.Props<K, string, P.TextualValidator>> {
+    private getArgument() {
+        const p = this.props.parameter;
+        if (P.isStatic(p)) {
+            const arg = p.getArgument();
+            if (P.isTextualArg(arg))
+                return arg;
+        } else if (P.isDynamicTextual(p))
+            return p.getArgument(this.props.dynVals);
+        throw new Error('Invalid argument type');
+    }
+
+    render() {
+        return (
+            <div className='adv-param-field-grid'>
+                <div>{this.props.parameter.name}</div>
+                <TextualArgument
+                    name={this.props.parameter.name}
+                    getter={this.props.getter}
+                    updater={this.props.updater}
+                    argument={this.getArgument()}
+                />
+                <PushButton
+                    className='pushbutton-common pushbutton-delete'
+                    value='-'
+                    onClick={() => {
+                        this.props.deleter(this.props.parameter.name);
+                    }} />
+            </div>
+        );
+    }
 }
 
-export function TextualParameterField<K extends (string extends K ? never : string)>() {
-    return GTextualParameterField as new(props: AbstractParameterField.Props<K, P.TextualParameter<K>, string>) => GTextualParameterField<K>;
+class GOptionsAdvancedParameter<K extends (string extends K ? never : string)> extends React.Component<AdvancedParameter.Props<K, string, string[]>> {
+    private getArgument() {
+        const p = this.props.parameter;
+        if (P.isStatic(p)) {
+            const arg = p.getArgument();
+            if (P.isOptionsArg(arg))
+                return arg;
+        } else if (P.isDynamicOptions(p))
+            return p.getArgument(this.props.dynVals);
+        throw new Error('Invalid argument type');
+    }
+
+    render() {
+        return (
+            <div className='adv-param-field-grid'>
+                <div>{this.props.parameter.name}</div>
+                <OptionsArgument
+                    name={this.props.parameter.name}
+                    getter={this.props.getter}
+                    updater={this.props.updater}
+                    argument={this.getArgument()}
+                />
+                <PushButton
+                    className='pushbutton-common pushbutton-delete'
+                    value='-'
+                    onClick={() => {
+                        this.props.deleter(this.props.parameter.name);
+                    }} />
+            </div>
+        );
+    }
 }
 
-export function BooleanParameterField<K extends (string extends K ? never : string)>() {
-    return GBooleanParameterField as new(props: AbstractParameterField.Props<K, P.BooleanParameter<K>, boolean>) => GBooleanParameterField<K>;
+export namespace AdvancedParameter {
+    export interface Deleter<K extends (string extends K ? never : string)> {
+        (name: K): void;
+    }
+
+    export interface Updater<K extends (string extends K ? never : string), T> {
+        (name: K, value: T): void;
+    }
+
+    export interface Props<K extends (string extends K ? never : string), T, E> {
+        parameter: P.Parameter<K>;
+        getter: Getter<K, T>;
+        updater: Updater<K, T>;
+        deleter: Deleter<K>;
+        dynVals: E|undefined;
+    }
 }
 
-export function OptionsParameterField<K extends (string extends K ? never : string)>() {
-    return GOptionsParameterField as new(props: AbstractParameterField.Props<K, P.Parameter<K>, string>) => GOptionsParameterField<K>;
+export function NumericAdvancedParameter<K extends (string extends K ? never : string)>() {
+    return GNumericAdvancedParameter as new(props: AdvancedParameter.Props<K, number, P.Range>) => GNumericAdvancedParameter<K>;
 }
 
-export function FileParameterField<K extends (string extends K ? never : string)>() {
-    return GFileParameterField as new(props: AbstractParameterField.Props<K, P.Parameter<K>, File | null>) => GFileParameterField<K>;
+export function BooleanAdvancedParameter<K extends (string extends K ? never : string)>() {
+    return GBooleanAdvancedParameter as new(props: AdvancedParameter.Props<K, boolean, void>) => GBooleanAdvancedParameter<K>;
+}
+
+export function TextualAdvancedParameter<K extends (string extends K ? never : string)>() {
+    return GTextualAdvancedParameter as new(props: AdvancedParameter.Props<K, string, P.TextualValidator>) => GTextualAdvancedParameter<K>;
+}
+
+export function OptionsAdvancedParameter<K extends (string extends K ? never : string)>() {
+    return GOptionsAdvancedParameter as new(props: AdvancedParameter.Props<K, string, string[]>) => GOptionsAdvancedParameter<K>;
 }

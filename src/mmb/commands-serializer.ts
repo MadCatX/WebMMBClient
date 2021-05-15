@@ -50,14 +50,9 @@ export namespace TextCommandsSerializer {
         for (const [name, value] of advParams.values.entries()) {
             const param = advParams.parameters.get(name)!;
 
-            if (P.isBoolean(param))
+            if (param.getType() === 'boolean')
                 ret.push(`${name} ${CommandsSerializer.trueFalse(value as boolean)}`);
-            else if (P.isFile(param)) {
-                if (value === null)
-                    ret.push(`${name} -- No file --`);
-                else
-                    ret.push(`${name} ${(value as File).name}`);
-            } else
+            else
                 ret.push(`${name} ${value}`);
         }
 
@@ -180,18 +175,22 @@ export namespace JsonCommandsSerializer {
         for (const [name, value] of advParams.values.entries()) {
             const param = advParams.parameters.get(name)!;
 
-            if (P.isIntegral(param))
-                defs[name] = Num.parseIntStrict(value);
-            else if (P.isReal(param))
-                defs[name] = Num.parseFloatStrict(value);
-            else if (P.isBoolean(param))
-                defs[name] = value as boolean;
-            else if (P.isFile(param)) {
-                if (value === null)
-                    throw new Error('File object is null');
-                defs[name] = (value as File).name;
-            } else
-                throw new Error('Unknown advanced parameter type');
+            switch (param.getType()) {
+                case 'integral':
+                    defs[name] = Num.parseIntStrict(value);
+                    break;
+                case 'real':
+                    defs[name] = Num.parseFloatStrict(value);
+                    break;
+                case 'boolean':
+                    defs[name] = value as boolean;
+                    break;
+                case 'options':
+                    defs[name] = value as string;
+                    break;
+                default:
+                    throw new Error('Unknown advanced parameter type');
+            }
         }
 
         return defs;

@@ -7,7 +7,7 @@
  */
 
 import * as React from 'react';
-import { BooleanParameterField, IntegralParameterField, OptionsParameterField, RealParameterField, TextualParameterField, FileParameterField } from './advanced-parameter-field';
+import * as AP from './advanced-parameter-field';
 import { MmbInputModel as MIM } from '../model/mmb-input-model';
 import { FormUtil } from '../model/common/form';
 import { ErrorBox } from './common/error-box';
@@ -16,15 +16,14 @@ import { FormBlock } from './common/form/form-block';
 import { ParameterNames, Parameters } from '../mmb/available-parameters';
 import { Parameter as P } from '../model/parameter';
 import { Num } from '../util/num';
+import {AdditionalFile} from '../model/additional-file';
 
 const FU = new FormUtil<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes>();
 
-const IntParamField = IntegralParameterField<ParameterNames>();
-const RealParamField = RealParameterField<ParameterNames>();
-const TextParamField = TextualParameterField<ParameterNames>();
-const BoolParamField = BooleanParameterField<ParameterNames>();
-const OptsParamField = OptionsParameterField<ParameterNames>();
-const FileParamField = FileParameterField<ParameterNames>();
+const NumAdvParam = AP.NumericAdvancedParameter<ParameterNames>();
+const BoolAdvParam = AP.BooleanAdvancedParameter<ParameterNames>();
+const TextAdvParam = AP.TextualAdvancedParameter<ParameterNames>();
+const OptsAdvParam = AP.OptionsAdvancedParameter<ParameterNames>();
 
 interface State {
     name: ParameterNames;
@@ -64,24 +63,56 @@ export class AdvancedMmbOptions extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, 
         }
     }
 
-    private getDefault(param: P.Parameter<ParameterNames>): any {
-        if (P.isReal(param))
-            return param.default();
-        else if (P.isIntegral(param))
-            return param.default();
-        else if (P.isBoolean(param))
-            return param.default();
-        else if (P.isTextual(param))
-            return '';
-        else if (P.isOptions(param))
-            return param.default();
-        else if (P.isFile(param))
-            return param.default();
+    private dynValsFor(param: P.Parameter<ParameterNames>): any|undefined {
+        const name = param.name;
+
+        if (name === 'densityFileName' ||
+            name === 'electroDensityFileName' ||
+            name === 'inQVectorFileName' ||
+            name === 'leontisWesthofInFileName' ||
+            name === 'tinkerParameterFileName') {
+            const files = FU.getArray<AdditionalFile[]>(this.props.ctxData, 'mol-in-additional-files-added');
+            return files.map(f => f.name);
+        } else
+            return undefined;
+    }
+
+    private getArgument(param: P.Parameter<ParameterNames>) {
+        if (P.isStatic(param)) {
+            const arg = param.getArgument();
+            if (P.isIntegralArg(arg) ||
+                P.isRealArg(arg) ||
+                P.isBooleanArg(arg) ||
+                P.isTextualArg(arg) ||
+                P.isOptionsArg(arg))
+                return arg;
+        } else if (P.isDynamicIntegral(param) ||
+                   P.isDynamicReal(param)) {
+            const dynVals = this.dynValsFor(param);
+            return param.getArgument(dynVals);
+        } else if (P.isDynamicBoolean(param)) {
+            return param.getArgument();
+        } else if (P.isDynamicTextual(param)) {
+            const dynVals = this.dynValsFor(param);
+            return param.getArgument(dynVals);
+        } else if (P.isDynamicOptions(param)) {
+            const dynVals = this.dynValsFor(param);
+            return param.getArgument(dynVals);
+        }
 
         throw new Error('Invalid parameter type');
     }
 
-    private updateParameter<T>(name: ParameterNames, value: T) {
+    private getDefault(param: P.Parameter<ParameterNames>) {
+        return this.getArgument(param).default();
+    }
+
+    private getValue<T>(name: ParameterNames): T|undefined {
+        const values = FU.getScalar(this.props.ctxData, 'mol-adv-params', new Map<ParameterNames, unknown>());
+        return values.get(name) as T;
+    }
+
+    private updateValue<T>(name: ParameterNames, value: T) {
         const values = FU.getScalar(this.props.ctxData, 'mol-adv-params', new Map<ParameterNames, unknown>());
 
         values.set(name, value);
@@ -93,65 +124,57 @@ export class AdvancedMmbOptions extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, 
 
         return (
             <div>
-                {Array.from(values.entries()).map(e => {
-                    const param = Parameters.get(e[0])!;
+                {Array.from(values.entries()).map(([k, _v]) => {
+                    const param = Parameters.get(k)!;
 
-                    if (P.isIntegral(param)) {
-                        return (
-                            <IntParamField
-                                key={param.name}
-                                parameter={param}
-                                value={e[1] as number}
-                                deleter={this.deleteParameter}
-                                updater={(n, v) => this.updateParameter(n, v)} />
-                        );
-                    } else if (P.isReal(param)) {
-                        return (
-                            <RealParamField
-                                key={param.name}
-                                parameter={param}
-                                value={e[1]! as number}
-                                deleter={this.deleteParameter}
-                                updater={(n, v) => this.updateParameter(n, v)} />
-                        );
-                    } else if (P.isTextual(param)) {
-                        return (
-                            <TextParamField
-                                key={param.name}
-                                parameter={param}
-                                value={e[1]! as string}
-                                deleter={this.deleteParameter}
-                                updater={(n, v) => this.updateParameter(n, v)} />
-                        );
-                    } else if (P.isBoolean(param)) {
-                        return (
-                            <BoolParamField
-                                key={param.name}
-                                parameter={param}
-                                value={e[1]! as boolean}
-                                deleter={this.deleteParameter}
-                                updater={(n, v) => this.updateParameter(n, v)} />
-                        );
-                    } else if (P.isOptions(param)) {
-                        return (
-                            <OptsParamField
-                                key={param.name}
-                                parameter={param}
-                                value={e[1]! as string}
-                                deleter={this.deleteParameter}
-                                updater={(n, v) => this.updateParameter(n, v)} />
-                        );
-                    } else if (P.isFile(param)) {
-                        return (
-                            <FileParamField
-                                key={param.name}
-                                parameter={param}
-                                value={e[1]! as File|null}
-                                deleter={this.deleteParameter}
-                                updater={(n, v) => this.updateParameter(n, v)} />
-                        );
-                    } else
-                        throw new Error('Unknown parameter type');
+                    const type = param.getType();
+                    switch (type) {
+                        case 'integral':
+                        case 'real':
+                            return (
+                                <NumAdvParam
+                                    parameter={param}
+                                    deleter={name => this.deleteParameter(name)}
+                                    getter={name => this.getValue(name)}
+                                    updater={(name: ParameterNames, value: number|undefined) => this.updateValue(name, value)}
+                                    dynVals={this.dynValsFor(param)}
+                                    key={param.name}
+                                />
+                            );
+                        case 'boolean':
+                            return (
+                                <BoolAdvParam
+                                    parameter={param}
+                                    deleter={name => this.deleteParameter(name)}
+                                    getter={name => this.getValue(name)}
+                                    updater={(name: ParameterNames, value: boolean) => this.updateValue(name, value)}
+                                    dynVals={this.dynValsFor(param)}
+                                    key={param.name}
+                                />
+                            );
+                        case 'textual':
+                            return (
+                                <TextAdvParam
+                                    parameter={param}
+                                    deleter={name => this.deleteParameter(name)}
+                                    getter={name => this.getValue(name)}
+                                    updater={(name: ParameterNames, value: string) => this.updateValue(name, value)}
+                                    dynVals={this.dynValsFor(param)}
+                                    key={param.name}
+                                />
+                            );
+                        case 'options':
+                            return (
+                                <OptsAdvParam
+                                    parameter={param}
+                                    deleter={name => this.deleteParameter(name)}
+                                    getter={name => this.getValue(name)}
+                                    updater={(name: ParameterNames, value: string) => this.updateValue(name, value)}
+                                    dynVals={this.dynValsFor(param)}
+                                    key={param.name}
+                                />
+                            );
+                    }
                 })}
             </div>
         );
@@ -165,27 +188,30 @@ export class AdvancedMmbOptions extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, 
 
         for (const [name, value] of values) {
             const param = Parameters.get(name)!;
+            const arg = this.getArgument(param);
 
-            if (P.isReal(param)) {
-                const num = Num.parseFloatStrict(value);
-                if (!param.isValid(num))
-                    errors.push(`${name} is invalid`);
-            } else if (P.isIntegral(param)) {
+            if (P.isIntegralArg(arg)) {
                 const num = Num.parseIntStrict(value);
-                if (!param.isValid(num))
+                if (!arg.isValid(num))
                     errors.push(`${name} is invalid`);
-            } else if (P.isTextual(param)) {
-                if (!(param.chkType(value) && param.isValid(value)))
+            } else if (P.isRealArg(arg)) {
+                const num = Num.parseFloatStrict(value);
+                if (!arg.isValid(num))
                     errors.push(`${name} is invalid`);
-            } else if (P.isBoolean(param)) {
-                if (!(param.chkType(value) && param.isValid(value)))
+            } else if (P.isTextualArg(arg)) {
+                if (!(arg.chkType(value) && arg.isValid(value)))
                     errors.push(`${name} is invalid`);
-            } else if (P.isOptions(param)) {
-                if (!(param.chkType(value) && param.isValid(value)))
+            } else if (P.isBooleanArg(arg)) {
+                if (!(arg.chkType(value) && arg.isValid(value)))
                     errors.push(`${name} is invalid`);
-            } else if (P.isFile(param)) {
-                if (!(param.chkType(value) && param.isValid(value)))
-                    errors.push(`${name} is invalid`);
+            } else if (P.isOptionsArg(arg)) {
+                if (!(arg.chkType(value) && arg.isValid(value))) {
+                    const def = this.getDefault(param);
+                    if (def !== undefined)
+                        this.updateValue(param.name, def);
+                    else
+                        errors.push(`${name} is invalid`);
+                }
             }
         }
 

@@ -7,17 +7,24 @@
  */
 
 export namespace Parameter {
-    export type Type = 'integral' | 'real' | 'boolean' | 'textual' | 'options' | 'file';
+    export type Type = 'integral' | 'real' | 'boolean' | 'textual' | 'options';
+    export type Kind = 'static' | 'dynamic';
 
-    export abstract class Parameter<K extends (string extends K ? never : string)> {
-        constructor(readonly name: K, readonly description: string, readonly type: Type) {
+    export abstract class Argument {
+        constructor(readonly type: Type) {
         }
-
-        public abstract options(): string[] | undefined;
     }
 
-    abstract class TypeCheckedParameter<K extends (string extends K ? never : string), T> extends Parameter<K> {
-        public abstract chkType(v: unknown): v is T;
+    abstract class TypedArgument<T, P, SELF> extends Argument {
+        constructor(readonly type: Type) {
+            super(type);
+        }
+
+        abstract asDynamic(params: P|undefined): SELF;
+        abstract chkType(v: unknown): v is T;
+        abstract default(): T|undefined;
+        abstract isValid(v: T): boolean;
+        abstract options(): string[]|undefined;
     }
 
     export type LimitCondition = 'exclusive' | 'inclusive';
@@ -25,17 +32,17 @@ export namespace Parameter {
         constructor(readonly value: number, readonly condition: LimitCondition) {
         }
 
-        public abstract meets(v: number): boolean;
+        abstract meets(v: number): boolean;
     }
 
     export class Min extends Limit {
-        public meets(v: number) {
+        meets(v: number) {
             return this.condition === 'inclusive' ? v >= this.value : v > this.value;
         }
     }
 
     export class Max extends Limit {
-        public meets(v: number) {
+        meets(v: number) {
             return this.condition === 'inclusive' ? v <= this.value : v < this.value;
         }
     }
@@ -44,7 +51,7 @@ export namespace Parameter {
         constructor(readonly min?: Min, readonly max?: Max) {
         }
 
-        public isWithin(v: number) {
+        isWithin(v: number) {
             if (this.min !== undefined && !this.min.meets(v))
                 return false;
             if (this.max !== undefined && !this.max.meets(v))
@@ -58,22 +65,26 @@ export namespace Parameter {
     export const EZeroIOneRange = new Range(new Min(0, 'exclusive'), new Max(1, 'inclusive'));
     export const IZeroIOneRange = new Range(new Min(0, 'inclusive'), new Max(1, 'inclusive'));
 
-    export class IntegralParameter<K extends (string extends K ? never : string)> extends TypeCheckedParameter<K, number> {
-        constructor(name: K, description: string, readonly range = FullRange) {
-            super(name, description, 'integral');
+    export class IntegralArgument extends TypedArgument<number, Range, IntegralArgument> {
+        constructor(readonly range = FullRange) {
+            super('integral');
         }
 
-        public chkType(v: unknown): v is number {
+        asDynamic(range: Range|undefined) {
+            return new IntegralArgument(range);
+        }
+
+        chkType(v: unknown): v is number {
             return typeof v === 'number';
         }
 
-        public default(): number {
+        default(): number {
             if (this.range.min === undefined)
                 return 0;
             return this.range.min.value;
         }
 
-        public isValid(v: number) {
+        isValid(v: number) {
             if (isNaN(v))
                 return false;
             if (Math.round(v) !== v)
@@ -82,7 +93,7 @@ export namespace Parameter {
             return this.range.isWithin(v);
         }
 
-        public options() {
+        options() {
             if (this.range.min === undefined || this.range.max === undefined)
                 return undefined;
 
@@ -99,50 +110,58 @@ export namespace Parameter {
 
     }
 
-    export class RealParameter<K extends (string extends K ? never : string)> extends TypeCheckedParameter<K, number> {
-        constructor(name: K, description: string, readonly range = FullRange) {
-            super(name, description, 'real');
+    export class RealArgument extends TypedArgument<number, Range, RealArgument> {
+        constructor(readonly range = FullRange) {
+            super('real');
         }
 
-        public chkType(v: unknown): v is number {
+        asDynamic(range: Range|undefined) {
+            return new RealArgument(range ? range : this.range);
+        }
+
+        chkType(v: unknown): v is number {
             return typeof v === 'number';
         }
 
-        public default(): number {
+        default(): number {
             if (this.range.min === undefined)
                 return 0;
             return this.range.min.value;
         }
 
-        public isValid(v: number) {
+        isValid(v: number) {
             if (isNaN(v))
                 return false;
             return this.range.isWithin(v);
         }
 
-        public options() {
+        options() {
             return undefined;
         }
     }
 
-    export class BooleanParameter<K extends (string extends K ? never : string)> extends TypeCheckedParameter<K, boolean> {
-        constructor(name: K, description: string) {
-            super(name, description, 'boolean');
+    export class BooleanArgument extends TypedArgument<boolean, void, BooleanArgument> {
+        constructor() {
+            super('boolean');
         }
 
-        public chkType(v: unknown): v is boolean {
+        asDynamic() {
+            return new BooleanArgument();
+        }
+
+        chkType(v: unknown): v is boolean {
             return typeof v === 'boolean';
         }
 
-        public default(): boolean {
+        default(): boolean {
             return false;
         }
 
-        public isValid(_v: boolean) {
+        isValid(_v: boolean) {
             return true;
         }
 
-        public options() {
+        options() {
             return [ 'false', 'true' ];
         }
     }
@@ -152,97 +171,166 @@ export namespace Parameter {
     }
     export const AllOkTextualValidator = (_s: string) => true;
 
-    export class TextualParameter<K extends (string extends K ? never : string)> extends TypeCheckedParameter<K, string> {
-        constructor(name: K, description: string, readonly validator: TextualValidator = AllOkTextualValidator) {
-            super(name, description, 'textual');
+    export class TextualArgument extends TypedArgument<string, TextualValidator, TextualArgument> {
+        constructor(readonly validator: TextualValidator = AllOkTextualValidator) {
+            super('textual');
         }
 
-        public chkType(v: unknown): v is string {
+        asDynamic(validator: TextualValidator|undefined) {
+            return new TextualArgument(validator ? validator : this.validator);
+        }
+
+        chkType(v: unknown): v is string {
             return typeof v === 'string';
         }
 
-        public isValid(v: string) {
+        default(): string {
+            return '';
+        }
+
+        isValid(v: string) {
             return this.validator(v);
         }
 
-        public options() {
+        options() {
             return undefined;
         }
     }
 
-    export class OptionsParameter<K extends (string extends K ? never : string), O extends (string extends O ? never : string)> extends TypeCheckedParameter<K, O> {
-        constructor(name: K, description: string, readonly opts: O[]) {
-            super(name, description, 'options');
+    export class OptionsArgument<O extends string> extends TypedArgument<O, O[], OptionsArgument<O>> {
+        constructor(readonly opts: O[]) {
+            super('options');
         }
 
-        public chkType(v: unknown): v is O {
+        asDynamic(opts: O[]|undefined) {
+            return new OptionsArgument(opts ? opts : this.opts);
+        }
+
+        chkType(v: unknown): v is O {
             if (typeof v !== 'string')
                 return false;
             return this.opts.some(o => o === v);
         }
 
-        public default(): O {
+        default(): O|undefined {
             return this.opts[0];
         }
 
-        public isValid(v: string) {
+        isValid(v: string) {
             return this.opts.includes(v as O);
         }
 
-        public options() {
+        options() {
             return this.opts;
         }
     }
 
-    export class FileParameter<K extends (string extends K ? never : string)> extends TypeCheckedParameter<K, File | null> {
+    export abstract class Parameter<K extends (string extends K ? never : string)> {
+        constructor(readonly name: K, readonly description: string, readonly kind: Kind) {
+        }
+
+        abstract getType(): Type;
+    }
+
+    abstract class DynamicParameter<K extends (string extends K ? never : string), T, P, ARG extends TypedArgument<T, P, ARG>> extends Parameter<K> {
+        constructor(readonly name: K, readonly description: string, private readonly argument: ARG) {
+            super(name, description, 'dynamic');
+        }
+
+        getArgument(params: P|undefined): ARG {
+            return this.argument.asDynamic(params);
+        }
+
+        getType() {
+            return this.argument.type;
+        }
+    }
+
+    export class IntegralDynamicParameter<K extends (string extends K ? never : string)> extends DynamicParameter<K, number, Range, IntegralArgument> {
         constructor(name: K, description: string) {
-            super(name, description, 'file');
-        }
-
-        public chkType(v: unknown): v is File {
-            if (v === null)
-                return false;
-            if (typeof v !== 'object')
-                return false;
-
-            /* TODO: We could use a more robust check here */
-            return true;
-        }
-
-        public default() {
-            return null;
-        }
-
-        public isValid(_v: File) {
-            return true;
-        }
-
-        public options() {
-            return undefined;
+            super(name, description, new IntegralArgument())
         }
     }
 
-    export function isIntegral<K extends (string extends K ? never : string)>(param: Parameter<K>): param is IntegralParameter<K> {
-        return param.type === 'integral';
+    export class RealDynamicParameter<K extends (string extends K ? never : string)> extends DynamicParameter<K, number, Range, RealArgument> {
+        constructor(name: K, description: string) {
+            super(name, description, new RealArgument())
+        }
     }
 
-    export function isReal<K extends (string extends K ? never : string)>(param: Parameter<K>): param is RealParameter<K> {
-        return param.type === 'real';
+    export class BooleanDynamicParameter<K extends (string extends K ? never : string)> extends DynamicParameter<K, boolean, void, BooleanArgument> {
+        constructor(name: K, description: string) {
+            super(name, description, new BooleanArgument())
+        }
     }
 
-    export function isBoolean<K extends (string extends K ? never : string)>(param: Parameter<K>): param is BooleanParameter<K> {
-        return param.type === 'boolean';
+    export class TextualDynamicParameter<K extends (string extends K ? never : string)> extends DynamicParameter<K, string, TextualValidator, TextualArgument> {
+        constructor(name: K, description: string) {
+            super(name, description, new TextualArgument())
+        }
     }
 
-    export function isTextual<K extends (string extends K ? never : string)>(param: Parameter<K>): param is TextualParameter<K> {
-        return param.type === 'textual';
+    export class OptionsDynamicParameter<K extends (string extends K ? never : string), O extends string> extends DynamicParameter<K, O, O[], OptionsArgument<O>> {
+        constructor(name: K, description: string) {
+            super(name, description, new OptionsArgument([]))
+        }
     }
 
-    export function isOptions<K extends (string extends K ? never : string), O extends (string extends O ? never : string)>(param: Parameter<K>): param is OptionsParameter<K, O> {
-        return param.type === 'options';
+    export class StaticParameter<K extends (string extends K ? never : string)> extends Parameter<K> {
+        constructor(readonly name: K, readonly description: string, private readonly argument: Argument) {
+            super(name, description, 'static');
+        }
+
+        getArgument() {
+            return this.argument;
+        }
+
+        getType() {
+            return this.argument.type;
+        }
     }
 
-    export function isFile<K extends (string extends K ? never : string)>(param: Parameter<K>): param is FileParameter<K> {
-        return param.type === 'file';
+    export function isDynamicIntegral<K extends (string extends K ? never : string)>(param: Parameter<K>): param is IntegralDynamicParameter<K> {
+        return param.getType() === 'integral' && param.kind === 'dynamic';
+    }
+
+    export function isDynamicReal<K extends (string extends K ? never : string)>(param: Parameter<K>): param is RealDynamicParameter<K> {
+        return param.getType() === 'real' && param.kind === 'dynamic';
+    }
+
+    export function isDynamicBoolean<K extends (string extends K ? never : string)>(param: Parameter<K>): param is BooleanDynamicParameter<K> {
+        return param.getType() === 'boolean' && param.kind === 'dynamic';
+    }
+
+    export function isDynamicTextual<K extends (string extends K ? never : string)>(param: Parameter<K>): param is TextualDynamicParameter<K> {
+        return param.getType() === 'textual' && param.kind === 'dynamic';
+    }
+
+    export function isDynamicOptions<K extends (string extends K ? never : string), O extends string>(param: Parameter<K>): param is OptionsDynamicParameter<K, O> {
+        return param.getType() === 'options' && param.kind === 'dynamic';
+    }
+
+    export function isStatic<K extends (string extends K ? never : string)>(param: Parameter<K>): param is StaticParameter<K> {
+        return param.kind === 'static';
+    }
+
+    export function isIntegralArg(arg: Argument): arg is IntegralArgument {
+        return arg.type === 'integral';
+    }
+
+    export function isRealArg(arg: Argument): arg is RealArgument {
+        return arg.type === 'real';
+    }
+
+    export function isBooleanArg(arg: Argument): arg is BooleanArgument {
+        return arg.type === 'boolean';
+    }
+
+    export function isTextualArg(arg: Argument): arg is TextualArgument {
+        return arg.type === 'textual';
+    }
+
+    export function isOptionsArg<O extends (string extends O ? never : string)>(arg: Argument): arg is OptionsArgument<O> {
+        return arg.type === 'options';
     }
 }

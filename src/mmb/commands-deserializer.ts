@@ -64,35 +64,41 @@ export namespace JsonCommandsDeserializer {
 
             const value = commands.adv_params[key];
             const param = Parameters.get(key as ParameterNames)!;
-            if (P.isIntegral(param)) {
-                const num = Num.parseIntStrict(value);
-                if (param.isValid(num))
-                    advParams[key] = num;
-                else
-                    throw new Error(`Advanced parameter ${key} has invalid value ${value}`);
-            } else if (P.isReal(param)) {
-                const num = Num.parseFloatStrict(value);
-                if (param.isValid(num))
-                    advParams[key] = num;
-                else
-                    throw new Error(`Advanced parameter ${key} has invalid value ${value}`);
-            } else if (P.isBoolean(param)) {
-                if (param.chkType(value))
-                    advParams[key] = value;
-                else
-                    throw new Error(`Advanced parameter ${key} has invalid value ${value}`);
-            } else if (P.isTextual(param)) {
-                if (param.chkType(value))
-                    advParams[key] = value;
-                else
-                    throw new Error(`Advanced parameter ${key} has invalid value ${value}`);
-            } else if (P.isOptions(param)) {
-                if (param.chkType(value))
-                    advParams[key] = value;
-                else
-                    throw new Error(`Advanced parameter ${key} has invalid value ${value}`);
-            } else if (P.isFile(param))
-                advParams[key] = null; /* We cannot deserialize file parameters */
+
+            if (P.isStatic(param)) {
+                const arg = param.getArgument();
+                if (P.isIntegralArg(arg)) {
+                    const num = Num.parseIntStrict(value);
+                    if (arg.isValid(num))
+                        advParams[key] = num;
+                    else
+                        throw new Error(`Advanced parameter ${key} has invalid value ${value}`);
+                } else if (P.isRealArg(arg)) {
+                    const num = Num.parseFloatStrict(value);
+                    if (arg.isValid(num))
+                        advParams[key] = num;
+                    else
+                        throw new Error(`Advanced parameter ${key} has invalid value ${value}`);
+                } else if (P.isBooleanArg(arg)) {
+                    if (arg.chkType(value))
+                        advParams[key] = value;
+                    else
+                        throw new Error(`Advanced parameter ${key} has invalid value ${value}`);
+                } else if (P.isTextualArg(arg)) {
+                    if (arg.chkType(value))
+                        advParams[key] = value;
+                    else
+                        throw new Error(`Advanced parameter ${key} has invalid value ${value}`);
+                } else if (P.isOptionsArg(arg)) {
+                    if (arg.chkType(value))
+                        advParams[key] = value;
+                    else
+                        throw new Error(`Advanced parameter ${key} has invalid value ${value}`);
+                }
+            } else {
+                // TODO: Proper sanity checks on dynamic parameters
+                advParams[key] = value;
+            }
         }
 
         return advParams;
