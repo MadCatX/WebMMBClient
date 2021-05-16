@@ -206,39 +206,37 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
             this.jobQueryAborter = qMmbOutput.aborter;
             const mmbOutputPromise = qMmbOutput.performer();
 
-            const qCommands = jobInfo.commands_mode === 'Raw' ? JobQuery.commandsRaw(this.props.jobId) : JobQuery.commands(this.props.jobId);
-            this.commandsQueryAborter = qCommands.aborter;
-            const commandsPromise = qCommands.performer();
-
             const qAdditionalFiles = JobQuery.listAdditionalFiles(jobInfo.id);
             this.additionalFilesAborter = qAdditionalFiles.aborter;
             const additionalFilesPromise = qAdditionalFiles.performer();
 
+            const qCommands = jobInfo.commands_mode === 'Raw' ? JobQuery.commandsRaw(this.props.jobId) : JobQuery.commands(this.props.jobId);
+            this.commandsQueryAborter = qCommands.aborter;
+            const commandsPromise = qCommands.performer();
+
             const mmbOutput = await mmbOutputPromise;
-            const commands = await commandsPromise;
             const additionalFiles = await additionalFilesPromise;
+            const commands = await commandsPromise;
             const setup = (() => {
                 if (!commands || commands.is_empty)
                     return MIM.defaultSetupValues();
-                return jobInfo.commands_mode === 'Raw'
-                       ?
-                       MIM.rawCommandsToValues(jobInfo.name, jobInfo.available_stages, (commands as Api.JobCommandsRaw).commands!)
-                       :
-                       MIM.jsonCommandsToValues(jobInfo.name, jobInfo.available_stages, (commands as Api.JobCommands).commands!);
+
+                const files: AdditionalFile[] = [];
+                if (additionalFiles) {
+                    for (const f of additionalFiles) {
+                        const size = parseInt(f.size);
+                        files.push(AdditionalFile.fromInfo(f.name, size));
+                    }
+                }
+
+                if (jobInfo.commands_mode === 'Raw')
+                    return MIM.rawCommandsToValues(jobInfo.name, jobInfo.available_stages, (commands as Api.JobCommandsRaw).commands!, files);
+                return MIM.jsonCommandsToValues(jobInfo.name, jobInfo.available_stages, (commands as Api.JobCommands).commands!, files);
             })();
 
             let newState: Partial<State> = { ...this.jobInfoOkBlock(jobInfo) };
             if (mmbOutput)
                 newState = { ...newState, ...this.mmbOutputOkBlock(mmbOutput) };
-
-            if (additionalFiles) {
-                const files: AdditionalFile[] = [];
-                for (const f of additionalFiles) {
-                    const size = parseInt(f.size);
-                    files.push(AdditionalFile.fromInfo(f.name, size));
-                }
-                setup.set('mol-in-additional-files-added', files);
-            }
 
             if (commands)
                 newState = { ...newState, setup };

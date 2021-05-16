@@ -7,6 +7,7 @@
  */
 
 import { Parameters, ParameterNames } from '../mmb/available-parameters';
+import { AdditionalFile } from '../model/additional-file';
 import { BaseInteraction } from '../model/base-interaction';
 import { Compound } from '../model/compound';
 import { DoubleHelix } from '../model/double-helix';
@@ -55,7 +56,7 @@ export namespace JsonCommandsDeserializer {
         return n;
     }
 
-    export function toAdvancedParameters(commands: Api.JsonCommands): Api.JsonAdvancedParameters {
+    export function toAdvancedParameters(commands: Api.JsonCommands, files: AdditionalFile[]): Api.JsonAdvancedParameters {
         const advParams = {} as Api.JsonAdvancedParameters;
 
         for (const key in commands.adv_params) {
@@ -96,7 +97,14 @@ export namespace JsonCommandsDeserializer {
                         throw new Error(`Advanced parameter ${key} has invalid value ${value}`);
                 }
             } else {
-                // TODO: Proper sanity checks on dynamic parameters
+                if (key === 'densityFileName' ||
+                    key === 'electroDensityFileName' ||
+                    key === 'inQVectorFileName' ||
+                    key === 'leontisWesthofInFileName' ||
+                    key === 'tinkerParameterFileName') {
+                    if (!files.find(f => f.name === value))
+                        throw new Error(`Advanced parameter ${key} has invalid value ${value}`);
+                }
                 advParams[key] = value;
             }
         }

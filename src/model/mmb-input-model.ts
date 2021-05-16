@@ -132,7 +132,7 @@ export namespace MmbInputModel {
         return options;
     }
 
-    export function jsonCommandsToValues(name: string, stages: number[], commands: JsonCommands) {
+    export function jsonCommandsToValues(name: string, stages: number[], commands: JsonCommands, files: AdditionalFile[]) {
         const map = new Map<ValueKeys, V<ValueTypes>>();
 
         const global = JsonCommandsDeserializer.toGlobal(commands);
@@ -145,7 +145,7 @@ export namespace MmbInputModel {
         const mobilizers = JsonCommandsDeserializer.toMobilizers(commands);
         const rep = JsonCommandsDeserializer.toReporting(commands);
         const advParams = (() => {
-            const obj = JsonCommandsDeserializer.toAdvancedParameters(commands);
+            const obj = JsonCommandsDeserializer.toAdvancedParameters(commands, files);
             const map = new Map<ParameterNames, unknown>();
 
             for (const prop in obj) {
@@ -167,18 +167,20 @@ export namespace MmbInputModel {
         map.set('mol-in-ntcs-added', ntcs);
         map.set('mol-in-mobilizers-added', mobilizers);
         map.set('mol-adv-params', advParams);
+        map.set('mol-in-additional-files-added', files);
         map.set('mol-in-job-name', name);
 
         return map;
     }
 
-    export function rawCommandsToValues(name: string, stages: number[], raw_commands: string) {
+    export function rawCommandsToValues(name: string, stages: number[], raw_commands: string, files: AdditionalFile[]) {
         const map = defaultSetupValues();
 
         const stage = stages[stages.length - 1];
 
         map.set('mol-in-gp-stage', stage);
         map.set('mol-in-job-name', name);
+        map.set('mol-in-additional-files-added', files);
 
         map.set('mol-in-raw-commands', raw_commands);
 
