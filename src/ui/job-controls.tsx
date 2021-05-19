@@ -8,7 +8,7 @@
 
 import * as React from 'react';
 import { PushButton } from './common/push-button';
-import { JobState } from '../mmb/api';
+import * as Api from '../mmb/api';
 
 export class JobControls extends React.Component<JobControls.Props> {
     render() {
@@ -53,6 +53,6 @@ export namespace JobControls {
         handleStart: () => void;
         handleStatus: () => void;
         handleStop: () => void;
-        jobState: JobState;
+        jobState: Api.JobState;
     }
 }

@@ -16,36 +16,10 @@ import { Net } from '../util/net';
 
 const StrLField = LabeledField.LineEdit<string>();
 
-interface JobEntry extends Api.JobInfo {
-    ok: boolean,
-}
-
 interface State {
-    jobs: JobEntry[];
+    jobs: Api.JobList;
     newJobName: string;
     error: string;
-}
-
-function jobListItemToEntry(item: Api.JobListItem): JobEntry {
-    if (item.ok) {
-        return {
-            ok: true,
-            ...item.info,
-        };
-    } else {
-        return {
-            ok: false,
-            id: '',
-            name: '',
-            state: 'NotStarted',
-            step: 0,
-            total_steps: 0,
-            available_stages: new Array<number>(),
-            current_stage: null,
-            created_on: 0,
-            commands_mode: 'Synthetic',
-        };
-    }
 }
 
 export class JobList extends React.Component<JobList.Props, State> {
@@ -79,10 +53,10 @@ export class JobList extends React.Component<JobList.Props, State> {
         this.createJobAborter = task.aborter;
 
         try {
-            const jobInfo = await task.performer();
-            if (!jobInfo)
+            const jobCreated = await task.performer();
+            if (!jobCreated)
                 return;
-            this.props.onSelectJob(jobInfo.id);
+            this.props.onSelectJob(jobCreated.id);
         } catch (e) {
             this.setState({
                 ...this.state,
@@ -115,12 +89,12 @@ export class JobList extends React.Component<JobList.Props, State> {
         this.listJobsAborter = task.aborter;
 
         try {
-            const list = await task.performer();
-            if (!list)
+            const jobs = await task.performer();
+            if (!jobs)
                 return;
             this.setState({
                 ...this.state,
-                jobs: list.map(item => jobListItemToEntry(item)),
+                jobs,
                 error: '',
             });
         } catch (e) {
@@ -146,24 +120,24 @@ export class JobList extends React.Component<JobList.Props, State> {
                         <div></div>
                         <div></div>
                     </div>
-                    {sorted.map((e, n) =>
-                        <JobItem
-                            key={`job-item-${n}`}
-                            id={e.id}
-                            name={e.name}
-                            state={e.state}
-                            created_on={e.created_on}
-                            notifyCloned={(_id: string) => this.refresh()}
-                            onSelect={() => this.selectJob(e.id)}
-                            onDelete={() => this.deleteJob(e.id)} />
-                        )}
+                    {sorted.map(e =>
+                            <JobItem
+                                key={e.id}
+                                id={e.id}
+                                name={e.name}
+                                state={e.state}
+                                created_on={e.created_on}
+                                notifyCloned={(_id: string) => this.refresh()}
+                                onSelect={() => this.selectJob(e.id)}
+                                onDelete={() => this.deleteJob(e.id)} />
+                    )}
                 </div>
             );
         }
     }
 
     private selectJob(id: string) {
-        const job = this.state.jobs.find(e => e.id === id);
+        const job = this.state.jobs.find(e => e ? e.id === id : undefined);
         if (job === undefined)
             throw new Error(`Job ${id} does not exist`);
 

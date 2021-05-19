@@ -24,8 +24,26 @@ export namespace Query {
         (): Request.Pending;
     }
 
+    export class ResponseError {
+        readonly name = 'ResponseError';
+
+        constructor(public readonly status: number, public readonly message: string, private readonly prefix?: string) {
+        }
+
+        toString() {
+            if (this.prefix)
+                return `${this.prefix}: ${formatReqError(this.message, this.status)}`;
+            else
+                return formatReqError(this.message, this.status);
+        }
+    }
+
     function formatReqError(message: string, httpStatus: number) {
         return `${httpStatus} - ${message}`
+    }
+
+    export function isResponseError(v: object): v is ResponseError {
+        return v.hasOwnProperty('name') && (v as ResponseError).name === 'ResponseError';
     }
 
     async function handleReq<T extends Response>(promise: Promise<T>, aborter: AbortController): Promise<{ status: number, json: Record<string, unknown> }> {
@@ -50,10 +68,10 @@ export namespace Query {
         }
     }
 
-    function handleResp<T>(json: Record<string, unknown>, parser: Response.DataParser<T>, status: number) {
+    function handleResp<T>(json: Record<string, unknown>, parser: Response.DataParser<T>, status: number, errorPrefix?: string) {
         const r = Response.parse(json, parser);
         if (Response.isError(r))
-            throw new Error(formatReqError(r.message, status));
+            throw new ResponseError(status, r.message, errorPrefix);
         if (!Response.isOk(r))
             throw new Error('Unexpected response payload type');
 
@@ -65,12 +83,10 @@ export namespace Query {
         const performer = async () => {
             try {
                 const { status, json } = await handleReq(pending.promise, pending.aborter);
-                return handleResp(json, respParser, status);
+                return handleResp(json, respParser, status, errorPrefix);
             } catch (e) {
                 if (Net.isAbortError(e))
                     return null;
-                if (errorPrefix)
-                    throw new Error(`${errorPrefix}: ${e.message}`);
                 else
                     throw e;
             }

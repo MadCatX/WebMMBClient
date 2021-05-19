@@ -21,22 +21,22 @@ const ExampleListItemObj: Api.ExampleListItem = {
 const FileTransferAck: Api.FileTransferAck = { id: '', };
 const JobCommands: Api.JobCommands = { is_empty: true, commands: null };
 const JobCommandsRaw: Api.JobCommandsRaw = { is_empty: true, commands: null };
-
-const JobInfoObj: Api.JobInfo = {
+const JobCreated: Api.JobCreated = { id: '' };
+const JobInfo: Api.JobInfo = {
     id: '',
     name: '',
     state: 'NotStarted',
-    step: 'none',
-    total_steps: 0,
     available_stages: [] as number[],
     current_stage: null,
     created_on: 0,
     commands_mode: 'Synthetic',
+    progress: null,
 };
-const JobListItemObj: Api.JobListItem = {
-    ok: false,
-    info: JobInfoObj,
-};
+const JobProgress: Api.JobProgress = {
+    step: 'none',
+    total_steps: 0,
+}
+
 const SessionInfoObj: Api.SessionInfo = { id: '' };
 
 function isAdditionalFile(v: unknown): v is Api.AdditionalFile {
@@ -89,14 +89,16 @@ function isFileTransferAck(v: unknown): v is Api.FileTransferAck {
     }
 }
 
-function isJobListItem(v: unknown): v is Api.JobListItem {
+function isJobCreated(v: unknown): v is Api.JobCreated {
     if (!isObj(v))
         return false;
 
     try {
-        checkProps(v, JobListItemObj);
-        checkType(v, 'ok', isBool);
-        return isJobInfo(v.info);
+        checkProps(v, JobCreated);
+
+        const tObj = v as Api.JobCreated;
+        checkType(tObj, 'id', isStr);
+        return true;
     } catch (e) {
         console.error(e);
         return false;
@@ -108,7 +110,7 @@ function isJobInfo(v: unknown): v is Api.JobInfo {
         return false;
 
     try {
-        checkProps(v, JobInfoObj);
+        checkProps(v, JobInfo);
     } catch (e) {
         console.error(e);
         return false;
@@ -119,8 +121,6 @@ function isJobInfo(v: unknown): v is Api.JobInfo {
         checkType(tObj, 'id', isStr);
         checkType(tObj, 'name', isStr);
         checkType(tObj, 'state', isJobState);
-        checkType(tObj, 'step', isJobStep);
-        checkType(tObj, 'total_steps', isInt);
         checkType(tObj, 'available_stages', (v: unknown): v is number[] => isArr<number>(v, isInt));
         checkType(tObj, 'current_stage', (v: unknown): v is number|null => {
             if (v === null)
@@ -129,12 +129,31 @@ function isJobInfo(v: unknown): v is Api.JobInfo {
         });
         checkType(tObj, 'created_on', isInt);
         checkType(tObj, 'commands_mode', isJobCommandsMode);
+        if (tObj.progress !== null)
+            checkType(tObj, 'progress', isJobProgress);
     } catch (e) {
         console.error(e);
         return false;
     }
 
     return true;
+}
+
+function isJobProgress(v: unknown): v is Api.JobProgress {
+    if (!isObj(v))
+        return false;
+
+    try {
+        checkProps(v, JobProgress);
+
+        const tObj = v as Api.JobProgress;
+        checkType(tObj, 'step', isJobStep);
+        checkType(tObj, 'total_steps', isInt);
+        return true;
+    } catch (e) {
+        console.error(e);
+        return false;
+    }
 }
 
 function isJobCommands(v: unknown): v is Api.JobCommands {
@@ -290,32 +309,33 @@ export namespace ResponseDeserializers {
         throw new Error('Object is not JobCommandsRaw');
     }
 
+    export function toJobCreated(obj: unknown): Api.JobCreated {
+        if (isJobCreated(obj))
+            return mkObj(obj, JobCreated);
+
+        throw new Error('Object is not JobCreated');
+    }
+
     export function toJobInfo(obj: unknown): Api.JobInfo {
         if (isJobInfo(obj)) {
+            const progress = obj.progress ? mkObj(obj.progress, JobProgress) : null;
             return {
                 id: obj.id,
                 name: obj.name,
                 state: obj.state,
-                step: obj.step,
-                total_steps: obj.total_steps,
                 available_stages: obj.available_stages,
                 current_stage: obj.current_stage,
                 created_on: Num.parseIntStrict(obj.created_on),  // On-wire value is a string to prevent rounding
                 commands_mode: obj.commands_mode,
+                progress,
             };
         } else
             throw new Error('Object is not JobInfo');
     }
 
-    function toJobListItem(obj: unknown): Api.JobListItem {
-        if (isJobListItem(obj))
-            return mkObj(obj, JobListItemObj);
-        throw new Error('Object is not JobListItem');
-    }
-
-    export function toJobList(obj: unknown): Api.JobListItem[] {
+    export function toJobList(obj: unknown): Api.JobList {
         try {
-            return toList(obj, isJobListItem, toJobListItem);
+            return toList(obj, isJobInfo, toJobInfo);
         } catch (_) {
             throw new Error('Object is not JobListItem array');
         }
@@ -338,5 +358,4 @@ export namespace ResponseDeserializers {
 
         return { id: tObj.id };
     }
-
 }

@@ -21,7 +21,7 @@ export namespace JobQuery {
     }
 
     export function create(name: string) {
-        return Q.query(() => JobRequest.create(name), ResponseDeserializers.toJobInfo, 'Cannot create job');
+        return Q.query(() => JobRequest.create(name), ResponseDeserializers.toJobCreated, 'Cannot create job');
     }
 
     export function del(id: string) {
@@ -45,14 +45,14 @@ export namespace JobQuery {
     }
 
     export function start(id: string, commands: Api.JsonCommands) {
-        return Q.query(() => JobRequest.start(id, commands), ResponseDeserializers.toJobInfo, 'Cannot start job');
+        return Q.query(() => JobRequest.start(id, commands), ResponseDeserializers.toEmpty, 'Cannot start job');
     }
 
     export function startRaw(id: string, commands: string) {
-        return Q.query(() => JobRequest.startRaw(id, commands), ResponseDeserializers.toJobInfo, 'Cannot start raw job');
+        return Q.query(() => JobRequest.startRaw(id, commands), ResponseDeserializers.toEmpty, 'Cannot start raw job');
     }
 
     export function stop(id: string) {
-        return Q.query(() => JobRequest.stop(id), ResponseDeserializers.toJobInfo, 'Cannot stop job');
+        return Q.query(() => JobRequest.stop(id), ResponseDeserializers.toEmpty, 'Cannot stop job');
     }
 }

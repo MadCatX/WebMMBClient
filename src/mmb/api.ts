@@ -168,22 +168,27 @@ export type JobCommandsRaw = {
     commands: string|null;
 }
 
+export type JobCreated = {
+    id: string;
+}
+
 export type JobInfo = {
     id: string,
     name: string,
     state: JobState,
-    step: JobStep,
-    total_steps: JobTotalSteps,
     available_stages: number[],
     current_stage: number|null,
     created_on: number,
     commands_mode: JobCommandsMode,
+    progress: JobProgress|null,
 }
 
-export type JobListItem = {
-    ok: boolean,
-    info: JobInfo,
+export type JobProgress = {
+    step: JobStep,
+    total_steps: JobTotalSteps,
 }
+
+export type JobList = JobInfo[];
 
 export type SessionInfo = {
     id: string,

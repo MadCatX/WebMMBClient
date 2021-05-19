@@ -38,7 +38,6 @@ function forceResize() {
 }
 
 interface State {
-    jobId: string;
     jobName: string;
     jobState: Api.JobState;
     jobStep: Api.JobStep;
@@ -67,7 +66,6 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
         super(props);
 
         this.state = {
-            jobId: '',
             jobName: '',
             jobState: 'NotStarted',
             jobStep: 'none',
@@ -101,18 +99,17 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
     }
 
     private jobInfoOkBlock(data: Api.JobInfo) {
-        const step = data.state === 'NotStarted' ? 'none' : data.step;
-        return {
-            jobId: data.id,
+        let obj = {
             jobName: data.name,
             jobState: data.state,
-            jobStep: step,
-            jobTotalSteps: data.total_steps,
             jobAvailableStages: data.available_stages,
             jobCurrentStage: data.current_stage,
             jobCommandsMode: data.commands_mode,
             jobError: '',
         };
+        if (data.progress)
+            obj = Object.assign({ jobStep: data.progress.step, jobTotalSteps: data.progress.total_steps }, obj);
+        return obj;
     }
 
     private killAutoRefresh() {
@@ -155,7 +152,7 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
                     </div>
                     <MmbInputForm
                         ref={this.mmbInputFormRef}
-                        jobId={this.state.jobId}
+                        jobId={this.props.jobId}
                         jobName={this.state.jobName}
                         availableStages={stages}
                         currentStage={this.state.jobCurrentStage}
@@ -251,7 +248,7 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
         } catch (e) {
             this.setState({
                 ...this.state,
-                ...this.jobInfoErrorBlock(e),
+                ...this.jobInfoErrorBlock(e.toString()),
             });
         }
     }
@@ -296,7 +293,7 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
             this.setState({
                 ...this.state,
                 ...this.jobInfoErrorBlock(e.toString()),
-            })
+            });
         }
     }
 
@@ -324,14 +321,21 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
         this.startJobCommon(task);
     }
 
-    private async startJobCommon(task: Query.Query<Api.JobInfo>) {
+    private async startJobCommon(task: Query.Query<Api.Empty>) {
         this.startJobAborter = task.aborter;
 
         try {
-            const jobInfo = await task.performer();
-            if (!jobInfo)
+            const start = await task.performer();
+            if (!start)
                 return;
             this.setupAutoRefresh(this.state.autoRefreshEnabled, this.state.autoRefreshInterval, 'Running');
+
+            const task2 = JobQuery.fetchInfo(this.props.jobId);
+            this.startJobAborter = task2.aborter;
+            const jobInfo = await task2.performer();
+            if (!jobInfo)
+                return;
+
             this.setState({
                 ...this.state,
                 ...this.jobInfoOkBlock(jobInfo),
@@ -382,9 +386,17 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
         this.stopJobAborter = task.aborter;
 
         try {
-            const jobInfo = await task.performer();
+            const stop = await task.performer();
+            if (!stop)
+                return;
+
+            const task2 = JobQuery.fetchInfo(this.props.jobId);
+            this.stopJobAborter = task2.aborter;
+
+            const jobInfo = await task2.performer();
             if (!jobInfo)
                 return;
+
             this.setState({
                 ...this.state,
                 ...this.jobInfoOkBlock(jobInfo),
@@ -469,8 +481,8 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
                                     break;
                             }
                         }}
-                        handleStatus={() => this.queryJobStatus}
-                        handleStop={() => this.stopJob}
+                        handleStatus={() => this.queryJobStatus()}
+                        handleStop={() => this.stopJob()}
                         jobState={this.state.jobState} />
                 </div>
             </div>
