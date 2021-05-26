@@ -285,7 +285,8 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
                 // Failure when fetching MMB output
                 this.setState({
                     ...this.state,
-                    ...this.mmbOutputErrorBlock(e.toString())
+                    ...this.jobInfoOkBlock(jobInfo),
+                    ...this.mmbOutputErrorBlock(e.toString()),
                 });
             }
         } catch (e) {
