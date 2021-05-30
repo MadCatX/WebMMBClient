@@ -172,6 +172,15 @@ export class DoubleHelicesInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, 
             };
         }
 
+        if ((this.state.chainOne === this.state.chainTwo) && (this.state.chainOne !== undefined) &&
+            (this.state.firstResNoOne !== undefined && this.state.lastResNoOne) &&
+            (this.state.firstResNoOne > this.state.lastResNoOne)) {
+            update = {
+                ...update,
+                lastResNoOne: this.state.firstResNoOne,
+            };
+        }
+
         if (Manip.hasDefined(update))
             this.setState({ ...this.state, ...update });
     }
