@@ -12,7 +12,7 @@ import { Query as Q } from './query';
 
 export namespace AppQuery {
     export function activateExample(name: string) {
-        return Q.query(() => AppRequest.activateExample(name), ResponseDeserializers.toJobInfo, 'Cannot activate example');
+        return Q.query(() => AppRequest.activateExample(name), ResponseDeserializers.toJobCreated, 'Cannot activate example');
     }
 
     export function listExamples() {
