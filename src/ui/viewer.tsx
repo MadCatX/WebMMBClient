@@ -152,6 +152,7 @@ export class Viewer extends React.Component<Viewer.Props, State> {
                         tooltipPosition='above'
                         value={stageValue}
                         options={stageOptions}
+                        stringifier={v => v?.toString() ?? ''}
                         updateNotifier={v => this.setState({ ...this.state, selectedStage: v })} />
                     <TimeLField
                         id='mv-refresh-rate'
