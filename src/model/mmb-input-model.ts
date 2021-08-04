@@ -10,7 +10,7 @@ import { FormModel } from '../model/common/form';
 import { TableWithDeletableRows } from '../ui/common/table-with-deletable-rows';
 import { ComboBox } from '../model/common/combo-box';
 import * as AVP from '../mmb/available-parameters';
-import { JsonCommands } from '../mmb/api';
+import { DensityFitCommands, StandardCommands } from '../mmb/api';
 import { JsonCommandsDeserializer } from '../mmb/commands-deserializer';
 import { ParameterNames } from '../mmb/available-parameters';
 import { BaseInteraction } from './base-interaction';
@@ -41,6 +41,7 @@ export namespace MmbInputModel {
     export type Errors = FormModel.Errors<ErrorKeys>;
     export type Values = FormModel.Values<ValueKeys, ValueTypes>;
     export type UiMode = 'simple' | 'advanced' | 'maverick' | 'density-fit';
+    export type JobType = 'standard' | 'density-fit';
 
     export interface Props extends FormModel.Props<ValueKeys, ValueTypes> {
         jobId: string;
@@ -64,6 +65,19 @@ export namespace MmbInputModel {
         const chains = new Array<ComboBox.Option<string>>();
         compounds.forEach((comp) => chains.push({value: comp.chain, caption: comp.chain}));
         return chains;
+    }
+
+    export function densityFitCommandsToValues(commands: DensityFitCommands) {
+        const map = defaultSetupValues();
+
+        const densityFitFiles = JsonCommandsDeserializer.toDensityFitFiles(commands);
+        const files: DensityFitFile[] = [];
+        files.push(DensityFitFile.fromInfo('structure', densityFitFiles.structureFileName, 0));
+        files.push(DensityFitFile.fromInfo('density-map', densityFitFiles.densityMapFileName, 0));
+
+        map.set('mol-in-density-fit-files-added', files);
+
+        return map;
     }
 
     export function defaultFirstResNo(compounds: Compound[], chain: string): number|undefined {
@@ -136,42 +150,15 @@ export namespace MmbInputModel {
         return options;
     }
 
-    export function jsonCommandsToValues(name: string, stages: number[], commands: JsonCommands, files: AdditionalFile[]) {
-        const map = new Map<ValueKeys, V<ValueTypes>>();
+    export function jsonCommandsToValues(name: string, stages: number[], commands: DensityFitCommands|StandardCommands, files: AdditionalFile[]) {
+        const map = commands.job_type === 'DensityFit' ? densityFitCommandsToValues(commands) : standardCommandsToValues(commands, files);
 
-        const global = JsonCommandsDeserializer.toGlobal(commands);
         const stage = stages.length > 0 ? stages[stages.length - 1] : 1;
-        const md = JsonCommandsDeserializer.toMdParams(commands);
-        const compounds = JsonCommandsDeserializer.toCompounds(commands);
-        const doubleHelices = JsonCommandsDeserializer.toDoubleHelices(commands);
-        const baseInteractions = JsonCommandsDeserializer.toBaseInteractions(commands);
-        const ntcs = JsonCommandsDeserializer.toNtCs(commands);
-        const mobilizers = JsonCommandsDeserializer.toMobilizers(commands);
         const rep = JsonCommandsDeserializer.toReporting(commands);
-        const advParams = (() => {
-            const obj = JsonCommandsDeserializer.toAdvancedParameters(commands, files);
-            const map = new Map<ParameterNames, unknown>();
 
-            for (const prop in obj) {
-                map.set(prop as ParameterNames, obj[prop]);
-            }
-            return map;
-        })();
-
-        // Global
+        map.set('mol-in-gp-stage', stage);
         map.set('mol-in-gp-reporting-interval', rep.interval);
         map.set('mol-in-gp-num-reports', rep.count);
-        map.set('mol-in-gp-bisf', global.baseInteractionScaleFactor);
-        map.set('mol-in-gp-temperature', global.temperature);
-        map.set('mol-in-gp-def-md-params', md.useDefaults);
-        map.set('mol-in-gp-stage', stage);
-        map.set('mol-in-cp-added', compounds);
-        map.set('mol-in-bi-added', baseInteractions);
-        map.set('mol-in-dh-added', doubleHelices);
-        map.set('mol-in-ntcs-added', ntcs);
-        map.set('mol-in-mobilizers-added', mobilizers);
-        map.set('mol-adv-params', advParams);
-        map.set('mol-in-additional-files-added', files);
         map.set('mol-in-job-name', name);
 
         return map;
@@ -187,6 +174,42 @@ export namespace MmbInputModel {
         map.set('mol-in-additional-files-added', files);
 
         map.set('mol-in-raw-commands', raw_commands);
+
+        return map;
+    }
+
+    export function standardCommandsToValues(commands: StandardCommands, files: AdditionalFile[]) {
+        const map = new Map<ValueKeys, V<ValueTypes>>();
+
+        const global = JsonCommandsDeserializer.toGlobal(commands);
+        const md = JsonCommandsDeserializer.toMdParams(commands);
+        const compounds = JsonCommandsDeserializer.toCompounds(commands);
+        const doubleHelices = JsonCommandsDeserializer.toDoubleHelices(commands);
+        const baseInteractions = JsonCommandsDeserializer.toBaseInteractions(commands);
+        const ntcs = JsonCommandsDeserializer.toNtCs(commands);
+        const mobilizers = JsonCommandsDeserializer.toMobilizers(commands);
+        const advParams = (() => {
+            const obj = JsonCommandsDeserializer.toAdvancedParameters(commands, files);
+            const map = new Map<ParameterNames, unknown>();
+
+            for (const prop in obj) {
+                map.set(prop as ParameterNames, obj[prop]);
+            }
+            return map;
+        })();
+
+        // Global
+
+        map.set('mol-in-gp-bisf', global.baseInteractionScaleFactor);
+        map.set('mol-in-gp-temperature', global.temperature);
+        map.set('mol-in-gp-def-md-params', md.useDefaults);
+        map.set('mol-in-cp-added', compounds);
+        map.set('mol-in-bi-added', baseInteractions);
+        map.set('mol-in-dh-added', doubleHelices);
+        map.set('mol-in-ntcs-added', ntcs);
+        map.set('mol-in-mobilizers-added', mobilizers);
+        map.set('mol-adv-params', advParams);
+        map.set('mol-in-additional-files-added', files);
 
         return map;
     }

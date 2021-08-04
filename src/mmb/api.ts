@@ -31,16 +31,17 @@ type AuthRequestType =
 export type JobState = 'NotStarted' | 'Running' | 'Finished' | 'Failed';
 export type JobStep = number | 'preparing' | 'none';
 export type JobTotalSteps = number | 'none';
+export type JobType = 'Standard' | 'DensityFit';
 export type JobCommandsMode = 'None' | 'Synthetic' | 'Raw';
 export type FileOperationRequestType = 'InitUpload' | 'FinishUpload' | 'CancelUpload' | 'Delete';
 
 /* JSON commands */
-
+/*
 export type ExtraFile = {
     key: string;
     name: string;
     data: string;
-};
+};*/
 
 export type MobilizerParameter = {
     bond_mobility: string;
@@ -51,14 +52,17 @@ export type MobilizerParameter = {
 
 export type JsonAdvancedParameters = Record<string, string | boolean | number | null>;
 
-export type JsonCommands = {
-    base_interaction_scale_factor: number,
-    use_multithreaded_computation: boolean,
-    temperature: number,
-    first_stage: number,
-    last_stage: number,
+export type CommonCommands = {
     reporting_interval: number,
     num_reporting_intervals: number,
+    first_stage: number,
+    last_stage: number,
+}
+
+export type StandardCommands = CommonCommands & {
+    job_type: 'Standard',
+    base_interaction_scale_factor: number,
+    temperature: number,
     sequences: string[],
     double_helices: string[],
     base_interactions: string[],
@@ -66,7 +70,13 @@ export type JsonCommands = {
     mobilizers: MobilizerParameter[],
     adv_params: JsonAdvancedParameters,
     set_default_MD_parameters: boolean,
-};
+}
+
+export type DensityFitCommands = CommonCommands & {
+    job_type: 'DensityFit',
+    structure_file_name: string,
+    density_map_file_name: string,
+}
 
 /* Requests */
 
@@ -110,12 +120,12 @@ export type SimpleJobRqData = {
 
 export type ResumeJobRqData = {
     id: string,
-    commands: JsonCommands,
+    commands: StandardCommands|DensityFitCommands,
 }
 
 export type StartJobRqData = {
     id: string,
-    commands: JsonCommands,
+    commands: StandardCommands|DensityFitCommands,
 }
 
 export type StartJobRawRqData = {
@@ -160,7 +170,7 @@ export type FileTransferAck = {
 
 export type JobCommands = {
     is_empty: boolean;
-    commands: JsonCommands|null;
+    commands: StandardCommands|DensityFitCommands|null;
 }
 
 export type JobCommandsRaw = {

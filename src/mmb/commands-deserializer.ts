@@ -10,6 +10,7 @@ import { Parameters, ParameterNames } from '../mmb/available-parameters';
 import { AdditionalFile } from '../model/additional-file';
 import { BaseInteraction } from '../model/base-interaction';
 import { Compound } from '../model/compound';
+import { DensityFitFiles } from '../model/density-fit-files';
 import { DoubleHelix } from '../model/double-helix';
 import { EdgeInteraction } from '../model/edge-interaction';
 import { GlobalConfig } from '../model/global-config';
@@ -56,7 +57,7 @@ export namespace JsonCommandsDeserializer {
         return n;
     }
 
-    export function toAdvancedParameters(commands: Api.JsonCommands, files: AdditionalFile[]): Api.JsonAdvancedParameters {
+    export function toAdvancedParameters(commands: Api.StandardCommands, files: AdditionalFile[]): Api.JsonAdvancedParameters {
         const advParams = {} as Api.JsonAdvancedParameters;
 
         for (const key in commands.adv_params) {
@@ -112,7 +113,7 @@ export namespace JsonCommandsDeserializer {
         return advParams;
     }
 
-    export function toBaseInteractions(commands: Api.JsonCommands) {
+    export function toBaseInteractions(commands: Api.StandardCommands) {
         const baseInteractions: BaseInteraction[] = [];
 
         for (const line of commands.base_interactions) {
@@ -144,7 +145,14 @@ export namespace JsonCommandsDeserializer {
         return baseInteractions;
     }
 
-    export function toDoubleHelices(commands: Api.JsonCommands) {
+    export function toDensityFitFiles(commands: Api.DensityFitCommands) {
+        return new DensityFitFiles(
+            commands.structure_file_name,
+            commands.density_map_file_name
+        );
+    }
+
+    export function toDoubleHelices(commands: Api.StandardCommands) {
         const doubleHelices: DoubleHelix[] = [];
 
         for (const line of commands.double_helices) {
@@ -175,7 +183,7 @@ export namespace JsonCommandsDeserializer {
         return doubleHelices;
     }
 
-    export function toCompounds(commands: Api.JsonCommands) {
+    export function toCompounds(commands: Api.StandardCommands) {
         const compounds: Compound[] = [];
 
         for (const line of commands.sequences) {
@@ -201,24 +209,23 @@ export namespace JsonCommandsDeserializer {
         return compounds;
     }
 
-    export function toGlobal(commands: Api.JsonCommands) {
+    export function toGlobal(commands: Api.StandardCommands) {
         const bisf = commands.base_interaction_scale_factor;
-        const mt = commands.use_multithreaded_computation;
         const temp = commands.temperature;
 
         if (bisf < 0)
             throw new Error('Invalid baseInteractionScaleFactor value');
 
-        return new GlobalConfig(bisf, mt, temp);
+        return new GlobalConfig(bisf, temp);
     }
 
-    export function toMdParams(commands: Api.JsonCommands) {
+    export function toMdParams(commands: Api.StandardCommands) {
         const defMd = commands.set_default_MD_parameters;
 
         return new MdParameters(defMd);
     }
 
-    export function toMobilizers(commands: Api.JsonCommands) {
+    export function toMobilizers(commands: Api.StandardCommands) {
         const mobilizers: Mobilizer[] = [];
 
         for (const m of commands.mobilizers) {
@@ -241,7 +248,7 @@ export namespace JsonCommandsDeserializer {
         return mobilizers;
     }
 
-    export function toNtCs(commands: Api.JsonCommands) {
+    export function toNtCs(commands: Api.StandardCommands) {
         const ntcs: NtCConformation[] = [];
 
         for (const line of commands.ntcs) {
@@ -267,7 +274,7 @@ export namespace JsonCommandsDeserializer {
         return ntcs;
     }
 
-    export function toReporting(commands: Api.JsonCommands) {
+    export function toReporting(commands: Api.CommonCommands) {
         const count = commands.num_reporting_intervals;
         const interval = commands.reporting_interval;
 
@@ -279,7 +286,7 @@ export namespace JsonCommandsDeserializer {
         return new Reporting(interval, count);
     }
 
-    export function toStages(commands: Api.JsonCommands) {
+    export function toStages(commands: Api.CommonCommands) {
         const first = Num.parseIntStrict(commands.first_stage);
         const last = Num.parseIntStrict(commands.last_stage);
 

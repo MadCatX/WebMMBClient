@@ -44,7 +44,7 @@ export namespace JobQuery {
         return Q.query(() => JobRequest.listAdditionalFiles(id), ResponseDeserializers.toAdditionalFileList, 'Cannot query list of additional files');
     }
 
-    export function start(id: string, commands: Api.JsonCommands) {
+    export function start(id: string, commands: Api.StandardCommands | Api.DensityFitCommands) {
         return Q.query(() => JobRequest.start(id, commands), ResponseDeserializers.toEmpty, 'Cannot start job');
     }
 

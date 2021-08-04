@@ -7,7 +7,7 @@
  */
 
 import * as Api from './api';
-import { isJsonCommands, jsonCommandsFromJson } from './commands';
+import { isDensityFitCommands, isStandardCommands, commandsFromJson } from './commands';
 import { assignAll, checkProps, checkType, isArr, isBool, isInt, isObj, isStr, TypeChecker } from '../util/json';
 import { Num } from '../util/num';
 
@@ -166,9 +166,10 @@ function isJobCommands(v: unknown): v is Api.JobCommands {
         const tObj = v as Api.JobCommands;
         checkType(tObj, 'is_empty', isBool);
 
-        if (!tObj.is_empty)
-            checkType(tObj, 'commands', isJsonCommands);
-        else {
+        if (!tObj.is_empty) {
+            if (!isDensityFitCommands(tObj.commands) || !isStandardCommands(tObj.commands))
+                return false;
+        } else {
             if (tObj.commands !== null) {
                 console.error('Non-null commands in commands object that was expected empty');
                 return false;
@@ -296,7 +297,7 @@ export namespace ResponseDeserializers {
                 return obj;
             return {
                 is_empty: false,
-                commands: jsonCommandsFromJson(obj.commands)
+                commands: commandsFromJson(obj.commands)
             }
         }
 

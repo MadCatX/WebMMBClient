@@ -8,6 +8,7 @@
 
 import { BaseInteraction } from '../model/base-interaction';
 import { Compound } from '../model/compound';
+import { DensityFitFiles } from '../model/density-fit-files';
 import { DoubleHelix } from '../model/double-helix';
 import { GlobalConfig } from '../model/global-config';
 import { MdParameters } from '../model/md-parameters';
@@ -18,6 +19,7 @@ import { Reporting } from '../model/reporting';
 import { StagesSpan } from '../model/stages-span';
 import { Num } from '../util/num';
 import * as Api from './api';
+import { CommonCommands, DensityFitCommands, StandardCommands } from './api-objs';
 
 export namespace CommandsSerializer {
     export type AdvancedParameters<K extends (string extends K ? never : string)> = {
@@ -25,7 +27,18 @@ export namespace CommandsSerializer {
         values: Map<K, unknown>,
     }
 
-    export type Parameters<K extends (string extends K ? never : string)> = {
+    export type CommonParameters = {
+        reporting: Reporting,
+        stages: StagesSpan,
+    }
+
+    export type DensityFitParameters = CommonParameters & {
+        jobType: 'density-fit',
+        densityFitFiles: DensityFitFiles,
+    }
+
+    export type StandardParameters<K extends (string extends K ? never : string)> = CommonParameters & {
+        jobType: 'standard';
         baseInteractions: BaseInteraction[],
         global: GlobalConfig,
         compounds: Compound[],
@@ -33,8 +46,6 @@ export namespace CommandsSerializer {
         mdParameters: MdParameters,
         ntcs: NtCConformation[],
         mobilizers: Mobilizer[],
-        reporting: Reporting,
-        stages: StagesSpan,
         advParams: AdvancedParameters<K>,
     }
 
@@ -63,7 +74,6 @@ export namespace TextCommandsSerializer {
         return [ '',
             '# Common configuration',
             `baseInteractionScaleFactor ${config.baseInteractionScaleFactor}`,
-            `useMultithreadedComputation ${CommandsSerializer.trueFalse(config.useMultithreading)}`,
             `temperature ${config.temperature}`];
     }
 
@@ -90,9 +100,14 @@ export namespace TextCommandsSerializer {
             `lastStage ${stages.last}`];
     }
 
-    export function serialize<K extends (string extends K ? never : string)>(params: CommandsSerializer.Parameters<K>) {
-        let commands: string[] = [];
+    function serializeDensityFit(params: CommandsSerializer.DensityFitParameters, commands: string[]) {
+        commands.push(`loadSequenceFromPdb ${params.densityFitFiles.structureFileName}`);
+        commands.push(`densityFileMap ${params.densityFitFiles.densityMapFileName}`);
 
+        return commands;
+    }
+
+    function serializeStandard<K extends (string extends K ? never : string)>(params: CommandsSerializer.StandardParameters<K>, commands: string[]) {
         // Write general config
         commands = commands.concat(global(params.global));
 
@@ -148,27 +163,31 @@ export namespace TextCommandsSerializer {
         });
 
         return commands;
+
+    }
+
+    export function serialize<K extends (string extends K ? never : string)>(params: CommandsSerializer.DensityFitParameters|CommandsSerializer.StandardParameters<K>) {
+        let commands: string[] = [];
+        // Write stages
+        commands = commands.concat(stages(params.stages));
+
+        // Write reporting
+        commands = commands.concat(reporting(params.reporting));
+
+        switch (params.jobType) {
+        case 'density-fit':
+            commands = serializeDensityFit(params, commands);
+            break;
+        case 'standard':
+            commands = serializeStandard(params, commands);
+            break;
+        }
+
+        return commands;
     }
 }
 
 export namespace JsonCommandsSerializer {
-    const Commands: Api.JsonCommands = {
-        base_interaction_scale_factor: 0,
-        use_multithreaded_computation: false,
-        temperature: 0,
-        first_stage: 0,
-        last_stage: 0,
-        reporting_interval: 0,
-        num_reporting_intervals: 0,
-        sequences: [],
-        double_helices: [],
-        base_interactions: [],
-        ntcs: [],
-        mobilizers: [],
-        adv_params: {},
-        set_default_MD_parameters: false,
-    };
-
     function advancedParameters<K extends (string extends K ? never : string)>(advParams: CommandsSerializer.AdvancedParameters<K>) {
         let defs: Api.JsonAdvancedParameters = {};
 
@@ -216,7 +235,7 @@ export namespace JsonCommandsSerializer {
         return defs;
     }
 
-    function mdParams(cmds: Api.JsonCommands, md: MdParameters) {
+    function mdParams(cmds: Api.StandardCommands, md: MdParameters) {
         cmds.set_default_MD_parameters = md.useDefaults;
         return cmds;
     }
@@ -261,24 +280,21 @@ export namespace JsonCommandsSerializer {
         return defs;
     }
 
-    export async function serialize<K extends (string extends K ? never : string)>(params: CommandsSerializer.Parameters<K>) {
-        let cmds = Object.assign({}, Commands);
+    function serializeDensityFit(params: CommandsSerializer.DensityFitParameters) {
+        let cmds = Object.assign({}, DensityFitCommands);
+
+        cmds.structure_file_name = params.densityFitFiles.structureFileName;
+        cmds.density_map_file_name = params.densityFitFiles.structureFileName;
+
+        return cmds;
+    }
+
+    function serializeStandard<K extends (string extends K ? never : string)>(params: CommandsSerializer.StandardParameters<K>) {
+        let cmds = Object.assign({}, StandardCommands);
 
         // Global
         cmds.base_interaction_scale_factor = params.global.baseInteractionScaleFactor;
-        cmds.use_multithreaded_computation = params.global.useMultithreading;
         cmds.temperature = params.global.temperature;
-
-        // Advanced
-        cmds.adv_params = advancedParameters(params.advParams);
-
-        // Stages
-        cmds.first_stage = params.stages.first;
-        cmds.last_stage = params.stages.last;
-
-        // Reporting
-        cmds.reporting_interval = params.reporting.interval;
-        cmds.num_reporting_intervals = params.reporting.count;;
 
         cmds = mdParams(cmds, params.mdParameters);
 
@@ -288,6 +304,28 @@ export namespace JsonCommandsSerializer {
         cmds.ntcs = ntcs(params.ntcs);
         cmds.mobilizers = mobilizers(params.mobilizers);
 
+        // Advanced
+        cmds.adv_params = advancedParameters(params.advParams);
+
         return cmds;
+    }
+
+    export function serialize<K extends (string extends K ? never : string)>(params: CommandsSerializer.DensityFitParameters|CommandsSerializer.StandardParameters<K>) {
+        let cmds = Object.assign({}, CommonCommands);
+
+        // Stages
+        cmds.first_stage = params.stages.first;
+        cmds.last_stage = params.stages.last;
+
+        // Reporting
+        cmds.reporting_interval = params.reporting.interval;
+        cmds.num_reporting_intervals = params.reporting.count;
+
+        switch (params.jobType) {
+        case 'density-fit':
+            return Object.assign(cmds, serializeDensityFit(params));
+        case 'standard':
+            return Object.assign(cmds, serializeStandard(params));
+        }
     }
 }

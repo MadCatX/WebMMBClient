@@ -82,7 +82,7 @@ export namespace JobRequest {
         return Request.api(req);
     }
 
-    export function start(id: string, commands: Api.JsonCommands) {
+    export function start(id: string, commands: Api.StandardCommands | Api.DensityFitCommands) {
         const req: Api.ApiRequest<Api.StartJobRqData> = {
             req_type: 'StartJob',
             data: { id, commands },

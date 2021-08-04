@@ -8,23 +8,7 @@
 
 import { assignAll, checkProps, checkType, isArr, isBool, isInt, isNum, isObj, isStr } from '../util/json';
 import * as Api from './api';
-
-const JsonCommands: Api.JsonCommands = {
-    base_interaction_scale_factor: 0,
-    use_multithreaded_computation: false,
-    temperature: 0,
-    first_stage: 0,
-    last_stage: 0,
-    reporting_interval: 0,
-    num_reporting_intervals: 0,
-    sequences: [],
-    double_helices: [],
-    base_interactions: [],
-    ntcs: [],
-    mobilizers: [],
-    adv_params: {},
-    set_default_MD_parameters: false,
-};
+import { CommonCommands, DensityFitCommands, StandardCommands } from './api-objs';
 
 function isAdvancedParams(v: unknown): v is Api.JsonAdvancedParameters {
     return isObj(v);
@@ -58,22 +42,64 @@ function isStrArr(v: unknown): v is string[] {
     return isArr<string>(v, isStr);
 }
 
-export function isJsonCommands(v: unknown): v is Api.JsonCommands {
+export function isCommonCommands(v: unknown): v is Api.CommonCommands {
     if (!isObj(v))
         return false;
 
     try {
-        checkProps(v, JsonCommands);
+        checkProps(v, CommonCommands);
 
-        const tObj = v as Api.JsonCommands;
+        const tObj = v as Api.CommonCommands;
 
-        checkType(tObj, 'base_interaction_scale_factor', isNum);
-        checkType(tObj, 'use_multithreaded_computation', isBool);
-        checkType(tObj, 'temperature', isNum);
-        checkType(tObj, 'first_stage', isInt);
-        checkType(tObj, 'last_stage', isInt);
         checkType(tObj, 'reporting_interval', isNum);
         checkType(tObj, 'num_reporting_intervals', isInt);
+        checkType(tObj, 'first_stage', isInt);
+        checkType(tObj, 'last_stage', isInt);
+
+        return true;
+    } catch (e) {
+        console.error(e);
+        return false;
+    }
+
+}
+
+export function isDensityFitCommands(v: unknown): v is Api.DensityFitCommands {
+    if (!isCommonCommands(v))
+        return false;
+
+    try {
+        checkProps(v, DensityFitCommands);
+
+        const tObj = v as Api.DensityFitCommands;
+
+        if (tObj.job_type !== 'DensityFit')
+            return false;
+
+        checkType(tObj, 'structure_file_name', isStr);
+        checkType(tObj, 'density_map_file_name', isStr);
+
+        return true;
+    } catch (e) {
+        console.error(e);
+        return false;
+    }
+}
+
+export function isStandardCommands(v: unknown): v is Api.StandardCommands {
+    if (!isCommonCommands(v))
+        return false;
+
+    try {
+        checkProps(v, StandardCommands);
+
+        const tObj = v as unknown as Api.StandardCommands;
+
+        if (tObj.job_type !== 'Standard')
+            return false;
+
+        checkType(tObj, 'base_interaction_scale_factor', isNum);
+        checkType(tObj, 'temperature', isNum);
         checkType(tObj, 'sequences', isStrArr);
         checkType(tObj, 'double_helices', isStrArr);
         checkType(tObj, 'base_interactions', isStrArr);
@@ -89,11 +115,14 @@ export function isJsonCommands(v: unknown): v is Api.JsonCommands {
     }
 }
 
-export function jsonCommandsFromJson(obj: unknown): Api.JsonCommands {
-    if (!isJsonCommands(obj))
-        throw new Error('Object is not JsonCommands');
+export function commandsFromJson(v: unknown): Api.StandardCommands | Api.DensityFitCommands {
+    if (!isCommonCommands(v))
+        throw new Error('Object is not Commands object');
 
-    let cmds = assignAll({}, obj, JsonCommands);
+    if (isStandardCommands(v))
+        return assignAll({}, v, StandardCommands);
+    else if (isDensityFitCommands(v))
+        return assignAll({}, v, DensityFitCommands);
 
-    return cmds;
+    throw new Error('Object appears to be a Commands object of unknown job type');
 }

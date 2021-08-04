@@ -35,6 +35,8 @@ import { MmbCommands } from './mmb-commands';
 import { Num } from '../util/num';
 import {PushButton} from './common/push-button';
 import {ErrorBox} from './common/error-box';
+import {DensityFitFile} from '../model/density-fit-file';
+import {DensityFitFiles} from '../model/density-fit-files';
 
 const RawCmdsTA = TextArea.Spec<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes>();
 
@@ -186,56 +188,115 @@ export class MmbInputForm extends Form<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTy
             this.setValues(new Map([...this.state.values, ...v]));
     }
 
-    private makeParams(): CommandsSerializer.Parameters<ParameterNames> {
+    private makeCommonParams(): CommandsSerializer.CommonParameters {
         let errors: string[] = [];
 
-        const bisf = Num.parseIntStrict(this.getScalar(this.state, 'mol-in-gp-bisf', ''));
         const repInt = Num.parseFloatStrict(this.getScalar(this.state, 'mol-in-gp-reporting-interval', ''));
         const numReps = Num.parseIntStrict(this.getScalar(this.state, 'mol-in-gp-num-reports', ''));
-        const temp = Num.parseFloatStrict(this.getScalar(this.state, 'mol-in-gp-temperature', ''));
-        const useDefMd = this.getScalar(this.state, 'mol-in-gp-def-md-params', false);
         const stage = this.getScalar(this.state, 'mol-in-gp-stage', NaN);
 
-        if (isNaN(bisf))
-            errors.push('Base interaction scale factor must be a number');
         if (isNaN(repInt))
             errors.push('Report interval must be a number');
         if (isNaN(numReps))
             errors.push('Number of reports must be a number');
-        if (isNaN(temp))
-            errors.push('Temperature must be a number');
         if (isNaN(stage))
             errors.push('Stage is not a valid number');
 
-        errors = errors.concat(this.getErrors(this.state, 'mol-adv-params'));
-
-        if (errors.length > 0) {
+        if (errors.length > 0)
             throw errors;
-        }
-
-        const global = new GlobalConfig(bisf, false, temp);
-        const mdParameters = new MdParameters(useDefMd);
-        const reporting = new Reporting(repInt, numReps);
-
-        const compounds = this.getArray<Compound[]>(this.state, 'mol-in-cp-added');
-        const doubleHelices = this.getArray<DoubleHelix[]>(this.state, 'mol-in-dh-added');
-        const baseInteractions = this.getArray<BaseInteraction[]>(this.state, 'mol-in-bi-added');
-        const ntcs = this.getArray<NtCConformation[]>(this.state, 'mol-in-ntcs-added');
-        const mobilizers = this.getArray<Mobilizer[]>(this.state, 'mol-in-mobilizers-added');
-        const advValues = this.getScalar(this.state, 'mol-adv-params', new Map<ParameterNames, unknown>());
 
         return {
-            global,
-            reporting,
+            reporting: new Reporting(repInt, numReps),
             stages: { first: stage, last: stage },
-            compounds,
-            doubleHelices,
-            baseInteractions,
-            ntcs,
-            mobilizers,
-            mdParameters,
-            advParams: { parameters: Parameters, values: advValues },
         };
+    }
+
+    private makeDensityFitParams(): CommandsSerializer.DensityFitParameters {
+        let errors: string[] = [];
+
+        const denFitFiles = this.getArray<DensityFitFile[]>(this.state, 'mol-in-density-fit-files-added');
+        const structFile = denFitFiles.find(f => f.type === 'structure');
+        const denMapFile = denFitFiles.find(f => f.type === 'density-map');
+
+        if (!structFile)
+            errors.push('No structure file');
+        if (!denMapFile)
+            errors.push('No density map file');
+
+        try {
+            const common = this.makeCommonParams();
+
+            if (errors.length > 0)
+                throw errors;
+
+            return {
+                jobType: 'density-fit',
+                ...common,
+                densityFitFiles: new DensityFitFiles(structFile!.name, denMapFile!.name),
+            }
+        } catch (e) {
+            errors = errors.concat(e);
+            throw errors;
+        }
+    }
+
+    private makeStandardParams(): CommandsSerializer.StandardParameters<ParameterNames> {
+        let errors: string[] = [];
+
+        const bisf = Num.parseIntStrict(this.getScalar(this.state, 'mol-in-gp-bisf', ''));
+        const temp = Num.parseFloatStrict(this.getScalar(this.state, 'mol-in-gp-temperature', ''));
+        const useDefMd = this.getScalar(this.state, 'mol-in-gp-def-md-params', false);
+
+        if (isNaN(bisf))
+            errors.push('Base interaction scale factor must be a number');
+        if (isNaN(temp))
+            errors.push('Temperature must be a number');
+
+        errors = errors.concat(this.getErrors(this.state, 'mol-adv-params'));
+
+        try {
+            const common = this.makeCommonParams();
+
+            if (errors.length > 0)
+                throw errors;
+
+            const global = new GlobalConfig(bisf, temp);
+            const mdParameters = new MdParameters(useDefMd);
+
+            const compounds = this.getArray<Compound[]>(this.state, 'mol-in-cp-added');
+            const doubleHelices = this.getArray<DoubleHelix[]>(this.state, 'mol-in-dh-added');
+            const baseInteractions = this.getArray<BaseInteraction[]>(this.state, 'mol-in-bi-added');
+            const ntcs = this.getArray<NtCConformation[]>(this.state, 'mol-in-ntcs-added');
+            const mobilizers = this.getArray<Mobilizer[]>(this.state, 'mol-in-mobilizers-added');
+            const advValues = this.getScalar(this.state, 'mol-adv-params', new Map<ParameterNames, unknown>());
+
+            return {
+                jobType: 'standard',
+                ...common,
+                global,
+                compounds,
+                doubleHelices,
+                baseInteractions,
+                ntcs,
+                mobilizers,
+                mdParameters,
+                advParams: { parameters: Parameters, values: advValues },
+            };
+        } catch (e) {
+            errors = errors.concat(e);
+            throw errors;
+        }
+    }
+
+    private makeParams(): CommandsSerializer.DensityFitParameters|CommandsSerializer.StandardParameters<ParameterNames> {
+        switch (this.props.mode) {
+        case 'simple':
+        case 'advanced':
+        case 'maverick':
+            return this.makeStandardParams();
+        case 'density-fit':
+            return this.makeDensityFitParams();
+        }
     }
 
     protected renderContent() {
