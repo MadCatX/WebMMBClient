@@ -162,7 +162,7 @@ export class MmbInputForm extends Form<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTy
             return (
                 <MmbCommands
                     commands={new Array<string>()}
-                    errors={[e.toString()]} />
+                    errors={e} />
             );
         }
     }
@@ -226,18 +226,18 @@ export class MmbInputForm extends Form<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTy
         try {
             const common = this.makeCommonParams();
 
-            if (errors.length > 0)
-                throw errors;
-
-            return {
-                jobType: 'density-fit',
-                ...common,
-                densityFitFiles: new DensityFitFiles(structFile!.name, denMapFile!.name),
+            if (errors.length === 0) {
+                return {
+                    jobType: 'density-fit',
+                    ...common,
+                    densityFitFiles: new DensityFitFiles(structFile!.name, denMapFile!.name),
+                };
             }
         } catch (e) {
             errors = errors.concat(e);
-            throw errors;
         }
+
+        throw errors;
     }
 
     private makeStandardParams(): CommandsSerializer.StandardParameters<ParameterNames> {
@@ -257,35 +257,35 @@ export class MmbInputForm extends Form<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTy
         try {
             const common = this.makeCommonParams();
 
-            if (errors.length > 0)
-                throw errors;
+            if (errors.length === 0) {
+                const global = new GlobalConfig(bisf, temp);
+                const mdParameters = new MdParameters(useDefMd);
 
-            const global = new GlobalConfig(bisf, temp);
-            const mdParameters = new MdParameters(useDefMd);
+                const compounds = this.getArray<Compound[]>(this.state, 'mol-in-cp-added');
+                const doubleHelices = this.getArray<DoubleHelix[]>(this.state, 'mol-in-dh-added');
+                const baseInteractions = this.getArray<BaseInteraction[]>(this.state, 'mol-in-bi-added');
+                const ntcs = this.getArray<NtCConformation[]>(this.state, 'mol-in-ntcs-added');
+                const mobilizers = this.getArray<Mobilizer[]>(this.state, 'mol-in-mobilizers-added');
+                const advValues = this.getScalar(this.state, 'mol-adv-params', new Map<ParameterNames, unknown>());
 
-            const compounds = this.getArray<Compound[]>(this.state, 'mol-in-cp-added');
-            const doubleHelices = this.getArray<DoubleHelix[]>(this.state, 'mol-in-dh-added');
-            const baseInteractions = this.getArray<BaseInteraction[]>(this.state, 'mol-in-bi-added');
-            const ntcs = this.getArray<NtCConformation[]>(this.state, 'mol-in-ntcs-added');
-            const mobilizers = this.getArray<Mobilizer[]>(this.state, 'mol-in-mobilizers-added');
-            const advValues = this.getScalar(this.state, 'mol-adv-params', new Map<ParameterNames, unknown>());
-
-            return {
-                jobType: 'standard',
-                ...common,
-                global,
-                compounds,
-                doubleHelices,
-                baseInteractions,
-                ntcs,
-                mobilizers,
-                mdParameters,
-                advParams: { parameters: Parameters, values: advValues },
-            };
+                return {
+                    jobType: 'standard',
+                    ...common,
+                    global,
+                    compounds,
+                    doubleHelices,
+                    baseInteractions,
+                    ntcs,
+                    mobilizers,
+                    mdParameters,
+                    advParams: { parameters: Parameters, values: advValues },
+                };
+            }
         } catch (e) {
             errors = errors.concat(e);
-            throw errors;
         }
+
+        throw errors;
     }
 
     private makeParams(): CommandsSerializer.DensityFitParameters|CommandsSerializer.StandardParameters<ParameterNames> {
