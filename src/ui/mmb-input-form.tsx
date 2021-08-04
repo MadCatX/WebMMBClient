@@ -134,7 +134,10 @@ export class MmbInputForm extends Form<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTy
         case 'density-fit':
             return (
                 <>
-                    <DensityFitInput ctxData={ctxData} />
+                    <DensityFitInput
+                        ctxData={ctxData}
+                        jobId={this.props.jobId}
+                    />
                     <GlobalParametersInput
                         ctxData={ctxData}
                         availableStages={this.props.availableStages}

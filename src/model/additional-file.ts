@@ -6,13 +6,13 @@
  * @author Jiří Černý (jiri.cerny@ibt.cas.cz)
  */
 
-export class AdditionalFile {
+export class AdditionalFileImpl {
     public isUploaded: boolean;
     public readonly file: File|null;
     public readonly name: string;
     public readonly size: number;
 
-    private constructor(file: File|null, name?: string, size?: number) {
+    protected constructor(file: File|null, name?: string, size?: number) {
         this.file = file;
 
         if (this.file) {
@@ -21,18 +21,25 @@ export class AdditionalFile {
             this.isUploaded = false;
         } else {
             if (!name || !size)
-                throw new Error('Invalid initialization of AdditionalFile');
+                throw new Error('Invalid initialization of AdditionalFileImpl');
             this.name = name;
             this.size = size;
             this.isUploaded = true;
         }
     }
+}
+
+export class AdditionalFile extends AdditionalFileImpl {
+    private constructor(file: File|null, name?: string, size?: number) {
+        super(file, name, size);
+    }
 
     static fromFile(file: File) {
-        return new AdditionalFile(file);
+        return new AdditionalFileImpl(file);
     }
 
     static fromInfo(name: string, size: number) {
-        return new AdditionalFile(null, name, size);
+        return new AdditionalFileImpl(null, name, size);
     }
 }
+

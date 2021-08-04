@@ -9,40 +9,38 @@
 import * as React from 'react';
 import { ErrorBox } from './common/error-box';
 import { FilesUploadProgress } from './common/files-upload-progress';
+import { FileUploadUtil } from './common/file-upload-util'
 import { PushButton } from './common/push-button';
 import { AdditionalFile } from '../model/additional-file';
 import { MmbInputModel as MIM } from '../model/mmb-input-model';
 import { FormUtil } from '../model/common/form';
 import { FilePicker } from './common/controlled/file-picker';
 import { FormBlock } from './common/form/form-block';
-import { FileUploader } from '../mmb/file-uploader';
 import { FileQuery } from '../mmb/file-query';
 
 const FU = new FormUtil<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes>();
 const AddedTable = MIM.TWDR<AdditionalFile[]>();
 
-interface Transfer {
-    file: File;
-    doneRatio: number;
-    state: FilesUploadProgress.UploadState;
-    cancel: boolean;
-    error: string;
-}
-
 interface State {
     currentFile: File|null;
-    currentTransfers: Map<string, Transfer>;
     errors: string[];
+    transfers: FileUploadUtil.TransferMap;
 }
 
 export class AdditionalFilesInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes, AdditionalFilesInput.Props, State> {
+    private Uploader = FileUploadUtil.Uploader(
+        'mol-in-additional-files-added',
+        (xfrs: FileUploadUtil.TransferMap) => this.uploadProgressHandler(xfrs),
+        (xfrs: FileUploadUtil.TransferMap, errors: string[]) => this.uploadErrorHandler(xfrs, errors),
+    );
+
     constructor(props: AdditionalFilesInput.Props) {
         super(props);
 
         this.state = {
             currentFile: null,
-            currentTransfers: new Map(),
             errors: [],
+            transfers: new Map(),
         };
     }
 
@@ -64,11 +62,8 @@ export class AdditionalFilesInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys
     }
 
     private cancelUpload() {
-        const currXfrs = this.state.currentTransfers;
-        for (const xfr of currXfrs.values())
-            xfr.cancel = true;
-
-        this.setState({ ...this.state, currentTransfers: currXfrs });
+        for (const k of this.state.transfers.keys())
+            this.Uploader.cancel(k);
     }
 
     private fileRemoved(file: AdditionalFile) {
@@ -83,74 +78,16 @@ export class AdditionalFilesInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys
         });
     }
 
+    private uploadErrorHandler(xfrs: FileUploadUtil.TransferMap, errors: string[]) {
+        this.setState({ ...this.state, transfers: xfrs, errors });
+    }
+
+    private uploadProgressHandler(xfrs: FileUploadUtil.TransferMap) {
+        this.setState({ ...this.state, transfers: xfrs });
+    }
+
     private uploadFiles() {
-        const files = FU.getArray<AdditionalFile[]>(this.props.ctxData, 'mol-in-additional-files-added');
-        const toUpload = files.filter(f => f.isUploaded === false && f.file).map(f => f.file!);
-
-        const xfrs = new Map<string, Transfer>();
-        for (const f of toUpload) {
-            xfrs.set(
-                f.name,
-                {
-                    file: f,
-                    doneRatio: 0,
-                    state: 'not-started',
-                    cancel: false,
-                    error: '',
-                }
-            );
-        }
-        this.setState({ ...this.state, currentTransfers: xfrs });
-
-        FileUploader.upload(
-            this.props.jobId,
-            toUpload,
-            (file, reader, transferId, doneRatio, isDone) => {
-                const currXfrs = this.state.currentTransfers;
-                const xfr = currXfrs.get(file.name)!;
-
-                if (xfr.cancel) {
-                    reader.cancel();
-                    FileQuery.cancelUpload(this.props.jobId, transferId).performer().then(() => {
-                        xfr.state = 'canceled';
-                        this.setState({ ...this.state, currentTransfers: currXfrs });
-                    }).catch(e => {
-                        this.setState({
-                            ...this.state,
-                            currentTransfers: currXfrs,
-                            errors: [e.toString()],
-                        });
-                    });
-                    return;
-                }
-
-                if (isDone) {
-                    const xfiles = FU.getArray<AdditionalFile[]>(this.props.ctxData, 'mol-in-additional-files-added');
-                    for (const f of xfiles) {
-                        if (f.name === file.name) {
-                            f.isUploaded = true;
-                            FU.updateValue(this.props.ctxData, { key: 'mol-in-additional-files-added', value: xfiles });
-
-                            xfr.state = 'done';
-                            this.setState({ ...this.state, currentTransfers: currXfrs });
-                            return;
-                        }
-                    }
-                } else {
-                    xfr.state = 'in-progress';
-                    xfr.doneRatio = doneRatio;
-                    this.setState({ ...this.state, currentTransfers: currXfrs });
-                }
-            },
-            (file, error) => {
-                const currXfrs = this.state.currentTransfers;
-                const xfr = currXfrs.get(file.name)!;
-
-                xfr.state = 'failed';
-                xfr.error = error;
-                this.setState({ ...this.state, currentTransfers: currXfrs });
-            }
-        );
+        this.Uploader.upload(this.props.ctxData, this.props.jobId);
     }
 
     componentWillUnmount() {
@@ -158,7 +95,7 @@ export class AdditionalFilesInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys
     }
 
     render() {
-        const uploadInfos = Array.from(this.state.currentTransfers).map(([name, xfr]) => {
+        const uploadInfos = Array.from(this.state.transfers).map(([name, xfr]) => {
             return (
                 {
                     fileName: name,
