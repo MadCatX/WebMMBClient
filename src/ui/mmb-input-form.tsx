@@ -76,8 +76,61 @@ export class MmbInputForm extends Form<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTy
         }
     }
 
-    private isAdv() {
-        return this.props.mode === 'advanced';
+    private makeControls(mode: MIM.UiMode, ctxData: MIM.ContextData) {
+        switch (mode) {
+        case 'simple':
+            return (
+                <>
+                    <CompoundsInput ctxData={ctxData} />
+                    <DoubleHelicesInput ctxData={ctxData} />
+                    <BaseInteractionsInput ctxData={ctxData} />
+                    <NtCsInput ctxData={ctxData} />
+                    <MobilizersInput ctxData={ctxData} />
+                    <GlobalParametersInput
+                        ctxData={ctxData}
+                        availableStages={this.props.availableStages}
+                    />
+                </>
+            );
+        case 'advanced':
+            return (
+                <>
+                    <CompoundsInput ctxData={ctxData} />
+                    <DoubleHelicesInput ctxData={ctxData} />
+                    <BaseInteractionsInput ctxData={ctxData} />
+                    <NtCsInput ctxData={ctxData} />
+                    <AdditionalFilesInput ctxData={ctxData} jobId={this.props.jobId} />
+                    <GlobalParametersInput
+                        ctxData={ctxData}
+                        availableStages={this.props.availableStages}
+                    />
+                    <AdvancedMmbOptions ctxData={ctxData} />
+                    {this.makeMmbCommands()}
+                </>
+            );
+        case 'maverick':
+            return (
+                <>
+                     <div className='pushbutton-flex-container'>
+                         <PushButton
+                             className='pushbutton-common pushbutton-flex pushbutton-hclr-default'
+                             value='Import from guided mode'
+                             onClick={() => this.importGuidedToRaw()} />
+                     </div>
+                     <div className='raw-commands-container'>
+                         <RawCmdsTA
+                             id='mmb-in-raw-commands'
+                             keyId='mol-in-raw-commands'
+                             spellcheck={false}
+                             resizeMode={'vertical'}
+                             rows={30}
+                             ctxData={ctxData} />
+                         <ErrorBox
+                             errors={this.state.errors.get('mol-raw') ?? []} />
+                     </div>
+                </>
+            );
+        }
     }
 
     private makeMmbCommands() {
@@ -186,57 +239,7 @@ export class MmbInputForm extends Form<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTy
             <this.Ctx.Provider value={ctxData}>
                 <form>
                     <JobNameInput ctxData={ctxData} name={this.props.jobName} />
-                    {this.props.mode === 'maverick'
-                     ?
-                     <>
-                         <div className='pushbutton-flex-container'>
-                             <PushButton
-                                 className='pushbutton-common pushbutton-flex pushbutton-hclr-default'
-                                 value='Import from guided mode'
-                                 onClick={() => this.importGuidedToRaw()} />
-                         </div>
-                         <div className='raw-commands-container'>
-                             <RawCmdsTA
-                                 id='mmb-in-raw-commands'
-                                 keyId='mol-in-raw-commands'
-                                 spellcheck={false}
-                                 resizeMode={'vertical'}
-                                 rows={30}
-                                 ctxData={ctxData} />
-                             <ErrorBox
-                                 errors={this.state.errors.get('mol-raw') ?? []} />
-                        </div>
-                     </>
-                     :
-                     <>
-                         <CompoundsInput ctxData={ctxData} />
-                         <DoubleHelicesInput ctxData={ctxData} />
-                         <BaseInteractionsInput ctxData={ctxData} />
-                         <NtCsInput ctxData={ctxData} />
-                         {this.isAdv()
-                             ?
-                             <>
-                                 <MobilizersInput ctxData={ctxData} />
-                                 <AdditionalFilesInput ctxData={ctxData} jobId={this.props.jobId} />
-                             </>
-                             :
-                             undefined
-                            }
-                         <GlobalParametersInput ctxData={ctxData}
-                             availableStages={this.props.availableStages} />
-                         {this.isAdv()
-                          ?
-                          (
-                              <>
-                                  <AdvancedMmbOptions ctxData={ctxData} />
-                                  {this.makeMmbCommands()}
-                              </>
-                          )
-                          :
-                          undefined
-                         }
-                     </>
-                    }
+                    {this.makeControls(this.props.mode, ctxData)}
                 </form>
             </this.Ctx.Provider>
         );
