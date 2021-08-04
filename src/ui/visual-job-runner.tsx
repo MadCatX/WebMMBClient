@@ -27,6 +27,7 @@ const UiModeMessage = {
     simple: '',
     advanced: 'Warning: Be aware that any changes made here will not be erased if you switch back to simple mode.',
     maverick: 'Warning: Commands entered in this mode will be submitted directly to MMB with no additional validation. You are on a highway to the danger zone unless you know what you are doing.',
+    'density-fit': '',
 };
 
 function forceResize() {
@@ -144,6 +145,7 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
                                 [
                                     { value: 'simple', caption: 'Simple' },
                                     { value: 'advanced', caption: 'Advanced' },
+                                    { value: 'density-fit', caption: 'Density fit' },
                                     { value: 'maverick', caption: 'Maverick' },
                                 ]
                             }

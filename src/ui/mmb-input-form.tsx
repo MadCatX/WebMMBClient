@@ -10,6 +10,7 @@ import * as React from 'react';
 import { AdvancedMmbOptions } from './advanced-mmb-options';
 import { BaseInteractionsInput } from './base-interactions-input';
 import { CompoundsInput } from './compounds-input';
+import { DensityFitInput } from './density-fit-input';
 import { DoubleHelicesInput } from './double-helices-input';
 import { GlobalParametersInput } from './global-parameters-input';
 import { MobilizersInput } from './mobilizers-input';
@@ -128,6 +129,16 @@ export class MmbInputForm extends Form<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTy
                          <ErrorBox
                              errors={this.state.errors.get('mol-raw') ?? []} />
                      </div>
+                </>
+            );
+        case 'density-fit':
+            return (
+                <>
+                    <DensityFitInput ctxData={ctxData} />
+                    <GlobalParametersInput
+                        ctxData={ctxData}
+                        availableStages={this.props.availableStages}
+                    />
                 </>
             );
         }

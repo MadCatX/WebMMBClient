@@ -36,7 +36,7 @@ export namespace MmbInputModel {
     export type V<T> = FormModel.V<T>;
     export type Errors = FormModel.Errors<ErrorKeys>;
     export type Values = FormModel.Values<ValueKeys, ValueTypes>;
-    export type UiMode = 'simple' | 'advanced' | 'maverick';
+    export type UiMode = 'simple' | 'advanced' | 'maverick' | 'density-fit';
 
     export interface Props extends FormModel.Props<ValueKeys, ValueTypes> {
         jobId: string;
