@@ -112,7 +112,7 @@ export class DensityFitInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM
                     />
                 </div>
                 <AddedTable
-                    className='mol-in-density-files-added spaced-grid'
+                    className='mol-in-density-fit-files-added spaced-grid'
                     valuesKey='mol-in-density-fit-files-added'
                     deleter={f => this.removeFile(f)}
                     columns={[
