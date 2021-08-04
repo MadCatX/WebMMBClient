@@ -99,7 +99,7 @@ export class DensityFitInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM
         return (
             <div className='section'>
                 <div className='section-caption'>Density fit data</div>
-                <div className='mol-in-density-fit-data'>
+                <div className='mol-in-density-fit-select-files'>
                     <div>Structure file (PDB/mmCif)</div>
                     <FilePicker
                         id='additional-file-picker'

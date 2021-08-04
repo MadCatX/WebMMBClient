@@ -408,6 +408,12 @@ body {
     grid-template-columns: 11em 18em 6em 6em auto;
     margin-top: 0.6em;
 }
+
+.mol-in-density-fit-select-files {
+    display: grid;
+    grid-template-columns: 0.5fr 0.0fr;
+}
+
 .mol-in-gp-input {
     display: grid;
     row-gap: 0.4em;
