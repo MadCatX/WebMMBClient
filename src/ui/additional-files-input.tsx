@@ -129,18 +129,7 @@ export class AdditionalFilesInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys
                     deleter={f => this.fileRemoved(f)}
                     columns={[
                         { caption: 'Name', k: 'name' },
-                        { caption: 'Size', k: 'size', stringify: (sz: number) => {
-                            const units = [ 'bytes', 'KiB', 'MiB', 'GiB' ];
-
-                            let idx = 0;
-                            for (; idx < units.length - 1; idx++) {
-                                if (sz < 1024)
-                                    return `${sz.toPrecision(3)} ${units[idx]}`;
-                                sz /= 1024;
-                            }
-
-                            return `${sz.toPrecision(3)} ${units[idx]}`;
-                        }},
+                        { caption: 'Size', k: 'size', stringify: FileUploadUtil.sizeToHuman },
                         { caption: 'Is uploaded', k: 'isUploaded', stringify: v => v ? 'Yes' : 'No'},
                     ]}
                     ctxData={this.props.ctxData} />

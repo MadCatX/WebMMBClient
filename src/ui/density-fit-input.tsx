@@ -12,6 +12,7 @@ import { FilesUploadProgress } from './common/files-upload-progress';
 import { FileUploadUtil } from './common/file-upload-util'
 import { FormBlock } from './common/form/form-block';
 import { PushButton } from './common/push-button';
+import { FileQuery } from '../mmb/file-query';
 import { FormUtil } from '../model/common/form';
 import { DensityFitFile } from '../model/density-fit-file';
 import { MmbInputModel as MIM } from '../model/mmb-input-model';
@@ -46,10 +47,15 @@ export class DensityFitInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM
     }
 
     private removeFile(file: DensityFitFile) {
-        let files = FU.getArray<DensityFitFile[]>(this.props.ctxData, 'mol-in-density-fit-files-added');
+        FileQuery.del(this.props.jobId, file.name).performer().then(() => {
+            let files = FU.getArray<DensityFitFile[]>(this.props.ctxData, 'mol-in-density-fit-files-added');
+            files = files.filter(f => f.name !== file.name);
 
-        files = files.filter(f => f.type != file.type);
-        FU.updateValue(this.props.ctxData, { key: 'mol-in-density-fit-files-added', value: files });
+            this.setState({ ...this.state, errors: [] });
+            FU.updateValue(this.props.ctxData, { key: 'mol-in-density-fit-files-added', value: files });
+        }).catch(e => {
+            this.setState({ ...this.state, errors: [e.toString()] });
+        });
     }
 
     private setFile(file: File, type: DensityFitFile.ContentType) {
@@ -119,18 +125,7 @@ export class DensityFitInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM
                             }
                         }},
                         { caption: 'Name', k: 'name' },
-                        { caption: 'Size', k: 'size', stringify: (sz: number) => {
-                            const units = [ 'bytes', 'KiB', 'MiB', 'GiB' ];
-
-                            let idx = 0;
-                            for (; idx < units.length - 1; idx++) {
-                                if (sz < 1024)
-                                    return `${sz.toPrecision(3)} ${units[idx]}`;
-                                sz /= 1024;
-                            }
-
-                            return `${sz.toPrecision(3)} ${units[idx]}`;
-                        }},
+                        { caption: 'Size', k: 'size', stringify: FileUploadUtil.sizeToHuman },
                         { caption: 'Is uploaded', k: 'isUploaded', stringify: v => v ? 'Yes' : 'No'},
                     ]}
                     ctxData={this.props.ctxData}

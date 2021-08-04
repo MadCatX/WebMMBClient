@@ -123,5 +123,18 @@ export namespace FileUploadUtil {
             }
         };
     }
+
+    export function sizeToHuman(size: number) {
+        const units = [ 'bytes', 'KiB', 'MiB', 'GiB' ];
+
+        let idx = 0;
+        for (; idx < units.length - 1; idx++) {
+            if (size < 1024)
+                return `${size.toPrecision(3)} ${units[idx]}`;
+            size /= 1024;
+        }
+
+        return `${size.toPrecision(3)} ${units[idx]}`;
+    }
 }
 
