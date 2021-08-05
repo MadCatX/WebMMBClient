@@ -284,7 +284,7 @@ export namespace JsonCommandsSerializer {
         let cmds = Object.assign({}, DensityFitCommands);
 
         cmds.structure_file_name = params.densityFitFiles.structureFileName;
-        cmds.density_map_file_name = params.densityFitFiles.structureFileName;
+        cmds.density_map_file_name = params.densityFitFiles.densityMapFileName;
 
         return cmds;
     }
