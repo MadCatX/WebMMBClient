@@ -54,10 +54,12 @@ export class Viewer extends React.Component<Viewer.Props, State> {
         this.load();
     }
 
-    private load() {
-        const url = this.url();
-        if (url !== undefined)
-            WebMmbViewer.load(url, 'pdb');
+    private async load() {
+        const surl = this.structureUrl();
+        if (surl !== undefined)
+            await WebMmbViewer.loadStructure(surl, 'pdb');
+        if (this.props.densityMap)
+            await WebMmbViewer.loadDensityMap(this.props.densityMap.url, this.props.densityMap.format);
     }
 
     private renderMmbOutput() {
@@ -83,7 +85,7 @@ export class Viewer extends React.Component<Viewer.Props, State> {
         WebMmbViewer.setRepresentation(repr);
     }
 
-    private url() {
+    private structureUrl() {
         if (this.props.structureUrl === undefined)
             return undefined;
         const stage = this.state.selectedStage ?? 'last';
@@ -139,8 +141,8 @@ export class Viewer extends React.Component<Viewer.Props, State> {
                     <LinkButton
                         className='pushbutton-common pushbutton-flex pushbutton-clr-default pushbutton-hclr-default'
                         classNameDisabled='pushbutton-common pushbutton-flex pushbutton-clr-default-disabled'
-                        value='Download'
-                        url={this.url()}
+                        value='Download structure'
+                        url={this.structureUrl()}
                         downloadAs={`${this.props.structureName}.${this.state.selectedStage ?? 1}.pdb`} />
                 </div>
                 <div className='viewer-setup'>
@@ -191,7 +193,10 @@ export namespace Viewer {
         errors?: string[];
     }
 
+    export type DensityMapFormat = 'ccp4';
+
     export interface Props {
+        densityMap?: { url: string, format: DensityMapFormat };
         structureUrl?: string;
         structureName?: string;
         step: number;

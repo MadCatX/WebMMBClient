@@ -92,6 +92,16 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
         this.mmbInputFormRef = React.createRef();
     }
 
+    private densityMap(): { url: string, format: Viewer.DensityMapFormat }|undefined {
+        if (this.state.uiMode === 'density-fit') {
+            return {
+                url: `/density/${this.props.username}/${this.props.jobId}`,
+                format: 'ccp4'
+            }
+        } else
+            return undefined;
+    }
+
     private jobInfoErrorBlock(errorMsg: string, step?: Api.JobStep, totalSteps?: Api.JobTotalSteps) {
         let obj = { jobState: 'Failed' as Api.JobState, jobError: errorMsg};
         if (step !== undefined)
@@ -470,6 +480,7 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
         return (
             <div className='job-runner-container'>
                 <Viewer
+                    densityMap={this.densityMap()}
                     structureUrl={this.structureUrl()}
                     structureName={this.state.jobName}
                     availableStages={this.state.jobAvailableStages}
