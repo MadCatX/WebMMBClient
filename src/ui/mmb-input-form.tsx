@@ -220,8 +220,12 @@ export class MmbInputForm extends Form<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTy
 
         if (!structFile)
             errors.push('No structure file');
+        else if (!structFile.isUploaded)
+            errors.push('Structure file has not been uploaded to server');
         if (!denMapFile)
             errors.push('No density map file');
+        else if (!denMapFile.isUploaded)
+            errors.push('Density map file has not been uploaded to server');
 
         try {
             const common = this.makeCommonParams();
