@@ -101,8 +101,8 @@ export namespace TextCommandsSerializer {
     }
 
     function serializeDensityFit(params: CommandsSerializer.DensityFitParameters, commands: string[]) {
-        commands.push(`loadSequenceFromPdb ${params.densityFitFiles.structureFileName}`);
-        commands.push(`densityFileMap ${params.densityFitFiles.densityMapFileName}`);
+        commands.push(`loadSequencesFromPdb ${params.densityFitFiles.structureFileName}`);
+        commands.push(`densityFileName ${params.densityFitFiles.densityMapFileName}`);
 
         return commands;
     }
