@@ -212,6 +212,7 @@ export class NtCsInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM.Value
                         {caption: 'First residue', k: 'firstResidueNo'},
                         {caption: 'Last residue', k: 'lastResidueNo'},
                         {caption: 'NtC', k: 'ntc'}]}
+                    hideHeader={true}
                     ctxData={this.props.ctxData} />
             </div>
         );

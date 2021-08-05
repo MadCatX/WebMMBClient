@@ -296,6 +296,7 @@ export class MobilizersInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM
                         { caption: 'Chain', k: 'chain' },
                         { caption: 'Residue span', k: 'residueSpan', stringify: (v: ResidueSpan|undefined) => v ? `${v.first} -> ${v.last}` : 'All residues' },
                     ]}
+                    hideHeader={true}
                     ctxData={this.props.ctxData} />
             </div>
         );

@@ -250,6 +250,7 @@ export class BaseInteractionsInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKey
                         {caption: 'Residue', k: 'residueTwo'},
                         {caption: 'Edge', k: 'edgeTwo'},
                         {caption: 'Orientation', k: 'orientation'}]}
+                    hideHeader={true}
                     ctxData={this.props.ctxData} />
             </div>
         );

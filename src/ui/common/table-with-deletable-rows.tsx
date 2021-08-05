@@ -15,6 +15,21 @@ type ArrayType<T> = T extends (infer AT)[] ? AT : never;
 export class GTableWithDeletableRows<KE, KV, T, U extends T & Array<any>> extends React.Component<GTableWithDeletableRows.Props<KE, KV, T, U>> {
     private FU = new FormUtil<KE, KV, T>();
 
+    private renderHeader() {
+        if (this.props.hideHeader === true)
+            return undefined;
+
+        return (
+            <>
+                {this.props.columns.map((col, n) => {
+                    const key = `col-${n}`;
+                    return (<div key={key} className='column-header'>{col.caption}</div>);
+                })}
+                <div className='column-header' key='entries'></div>
+            </>
+        );
+    }
+
     removeRow = (index: number, data: FormModel.ContextData<KE, KV, T>) => {
         const rows = data.values.get(this.props.valuesKey) as U;
         const item: ArrayType<U> = rows[index];
@@ -29,11 +44,7 @@ export class GTableWithDeletableRows<KE, KV, T, U extends T & Array<any>> extend
 
         return (
             <div className={this.props.className} key='top'>
-                {this.props.columns.map((col, n) => {
-                    const key = `col-${n}`;
-                    return (<div key={key} className='column-header'>{col.caption}</div>);
-                })}
-                <div className='column-header' key='entries'></div>
+                {this.renderHeader()}
                 {values.map((v, index) => {
                     return (
                         <React.Fragment key={`row-item-${index}`}>
@@ -78,6 +89,7 @@ export namespace GTableWithDeletableRows {
         }[];
         valuesKey: KV;
         deleter?: Deleter<U>;
+        hideHeader?: boolean;
     }
 }
 

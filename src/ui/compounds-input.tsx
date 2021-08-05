@@ -177,6 +177,7 @@ export class CompoundsInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM.
                         { caption: 'First residue no.', k: 'firstResidueNo' },
                         { caption: 'Type', k: 'type' },
                         { caption: 'Sequence', k: 'sequence' }]}
+                    hideHeader={true}
                     ctxData={this.props.ctxData} />
             </div>
         );

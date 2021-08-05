@@ -286,6 +286,7 @@ export class DoubleHelicesInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, 
                         {caption: 'Chain', k: 'chainTwo'},
                         {caption: 'First residue', k: 'firstResidueNoTwo'},
                         {caption: 'Last residue', k: 'lastResidueNoTwo'}]}
+                    hideHeader={true}
                     ctxData={this.props.ctxData} />
             </div>
         );
