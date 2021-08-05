@@ -167,7 +167,7 @@ function isJobCommands(v: unknown): v is Api.JobCommands {
         checkType(tObj, 'is_empty', isBool);
 
         if (!tObj.is_empty) {
-            if (!isDensityFitCommands(tObj.commands) || !isStandardCommands(tObj.commands))
+            if (!(isDensityFitCommands(tObj.commands) || isStandardCommands(tObj.commands)))
                 return false;
         } else {
             if (tObj.commands !== null) {
