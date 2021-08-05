@@ -313,6 +313,16 @@ export namespace JsonCommandsSerializer {
     export function serialize<K extends (string extends K ? never : string)>(params: CommandsSerializer.DensityFitParameters|CommandsSerializer.StandardParameters<K>) {
         let cmds = Object.assign({}, CommonCommands);
 
+        // Do concrete data first
+        switch (params.jobType) {
+        case 'density-fit':
+            cmds = Object.assign(cmds, serializeDensityFit(params));
+            break;
+        case 'standard':
+            cmds = Object.assign(cmds, serializeStandard(params));
+            break;
+        }
+
         // Stages
         cmds.first_stage = params.stages.first;
         cmds.last_stage = params.stages.last;
@@ -321,11 +331,6 @@ export namespace JsonCommandsSerializer {
         cmds.reporting_interval = params.reporting.interval;
         cmds.num_reporting_intervals = params.reporting.count;
 
-        switch (params.jobType) {
-        case 'density-fit':
-            return Object.assign(cmds, serializeDensityFit(params));
-        case 'standard':
-            return Object.assign(cmds, serializeStandard(params));
-        }
+        return cmds as Api.DensityFitCommands|Api.StandardCommands;
     }
 }
