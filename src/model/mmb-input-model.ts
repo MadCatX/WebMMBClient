@@ -150,10 +150,17 @@ export namespace MmbInputModel {
         return options;
     }
 
-    export function jsonCommandsToValues(name: string, stages: number[], commands: DensityFitCommands|StandardCommands, files: AdditionalFile[]) {
+    export function jsonCommandsToValues(name: string, stages: number[], currentStage: number|null, commands: DensityFitCommands|StandardCommands, files: AdditionalFile[]) {
         const map = commands.job_type === 'DensityFit' ? densityFitCommandsToValues(commands) : standardCommandsToValues(commands, files);
 
-        const stage = stages.length > 0 ? stages[stages.length - 1] : 1;
+        let stage = commands.job_type === 'DensityFit' ? 2 : 1;
+        if (stages.length > 0) {
+            if (currentStage) {
+                if (!stages.includes(currentStage))
+                    throw new Error('Invalid value of currentStage');
+                stage = currentStage;
+            }
+        }
         const rep = JsonCommandsDeserializer.toReporting(commands);
 
         map.set('mol-in-gp-stage', stage);
@@ -164,10 +171,17 @@ export namespace MmbInputModel {
         return map;
     }
 
-    export function rawCommandsToValues(name: string, stages: number[], raw_commands: string, files: AdditionalFile[]) {
+    export function rawCommandsToValues(name: string, stages: number[], currentStage: number|null, raw_commands: string, files: AdditionalFile[]) {
         const map = defaultSetupValues();
 
-        const stage = stages[stages.length - 1];
+        let stage = 1;
+        if (stages.length > 0) {
+            if (currentStage) {
+                if (!stages.includes(currentStage))
+                    throw new Error('Invalid value of currentStage');
+                stage = currentStage;
+            }
+        }
 
         map.set('mol-in-gp-stage', stage);
         map.set('mol-in-job-name', name);

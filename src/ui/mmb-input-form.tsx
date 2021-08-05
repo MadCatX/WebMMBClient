@@ -177,15 +177,19 @@ export class MmbInputForm extends Form<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTy
             return;
         }
 
-        const v = this.emptyValues();
-        if (this.props.availableStages.length !== prevProps.availableStages.length) {
-            v.set('mol-in-gp-stage', this.props.availableStages.length);
-        }
-        if (this.props.currentStage !== null && this.props.currentStage !== prevProps.currentStage)
-            v.set('mol-in-gp-stage', this.props.currentStage);
-
-        if (v.size > 0)
+        // Ridiculous flip-flop to make sure we have the initial stage set right
+        const currentStage = this.getScalar(this.state, 'mol-in-gp-stage', 1);
+        if (prevProps.mode !== this.props.mode && this.props.mode === 'density-fit') {
+            if (currentStage < 2) {
+                const v = this.emptyValues();
+                v.set('mol-in-gp-stage', 2);
+                this.setValues(new Map([...this.state.values, ...v]));
+            }
+        } else if (!this.props.availableStages.includes(currentStage)) {
+            const v = this.emptyValues();
+                v.set('mol-in-gp-stage', this.props.availableStages[this.props.availableStages.length - 1]);
             this.setValues(new Map([...this.state.values, ...v]));
+        }
     }
 
     private makeCommonParams(): CommandsSerializer.CommonParameters {
@@ -328,7 +332,6 @@ export class MmbInputForm extends Form<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTy
 export namespace MmbInputForm {
     export interface Props extends MIM.Props {
         availableStages: number[];
-        currentStage: number|null;
         mode: MIM.UiMode;
     }
 }

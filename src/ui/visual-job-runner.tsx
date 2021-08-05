@@ -126,8 +126,12 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
         try {
             const stages = (() => {
                 const sorted = [...this.state.jobAvailableStages].sort((a, b) => a - b);
-                if (sorted.length === 0)
-                    sorted.push(1);
+                if (sorted.length === 0) {
+                    if (this.state.uiMode === 'density-fit')
+                        sorted.push(2);
+                    else
+                        sorted.push(1);
+                }
                 else {
                     const last = sorted[sorted.length - 1];
                     sorted.push(last + 1);
@@ -159,7 +163,6 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
                         jobId={this.props.jobId}
                         jobName={this.state.jobName}
                         availableStages={stages}
-                        currentStage={this.state.jobCurrentStage}
                         mode={this.state.uiMode}
                         initialValues={this.state.setup} />
                 </>
@@ -231,8 +234,8 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
                 }
 
                 if (jobInfo.commands_mode === 'Raw')
-                    return MIM.rawCommandsToValues(jobInfo.name, jobInfo.available_stages, (commands as Api.JobCommandsRaw).commands!, files);
-                return MIM.jsonCommandsToValues(jobInfo.name, jobInfo.available_stages, (commands as Api.JobCommands).commands!, files);
+                    return MIM.rawCommandsToValues(jobInfo.name, jobInfo.available_stages, jobInfo.current_stage, (commands as Api.JobCommandsRaw).commands!, files);
+                return MIM.jsonCommandsToValues(jobInfo.name, jobInfo.available_stages, jobInfo.current_stage, (commands as Api.JobCommands).commands!, files);
             })();
 
             let newState: Partial<State> = { ...this.jobInfoOkBlock(jobInfo) };
