@@ -52,6 +52,7 @@ interface State {
     mmbOutput: Viewer.MmbOutput;
     uiMode: MIM.UiMode;
     setup: Map<MIM.ValueKeys, MIM.V<MIM.ValueTypes>>;
+    startJobError: string[];
 }
 
 export class VisualJobRunner extends React.Component<VisualJobRunner.Props, State> {
@@ -80,6 +81,7 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
             mmbOutput: { text: undefined, errors: undefined },
             uiMode: 'simple',
             setup: MIM.defaultSetupValues(),
+            startJobError: []
         };
 
 
@@ -318,10 +320,14 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
 
         Net.abortFetch(this.startJobAborter);
 
-        const commands = await this.mmbInputFormRef.current.commandsToJob();
-        const task = JobQuery.start(this.props.jobId, commands);
+        try {
+            const commands = this.mmbInputFormRef.current.commandsToJob();
+            const task = JobQuery.start(this.props.jobId, commands);
 
-        this.startJobCommon(task);
+            this.startJobCommon(task);
+        } catch (e) {
+            this.setState({ ...this.state, startJobError: e });
+        }
     }
 
     private async startJobCommon(task: Query.Query<Api.Empty>) {
@@ -342,11 +348,13 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
             this.setState({
                 ...this.state,
                 ...this.jobInfoOkBlock(jobInfo),
+                startJobError: [],
             });
         } catch (e) {
             this.setState({
                 ...this.state,
                 ...this.jobInfoErrorBlock(e.toString(), 'none', 'none'),
+                startJobError: [],
             });
         }
     }
@@ -359,6 +367,7 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
             this.setState({
                 ...this.state,
                 jobError: 'Job is already running',
+                startJobError: [],
             });
             return;
         }
@@ -473,6 +482,7 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
                         totalSteps={this.state.jobTotalSteps}
                         error={this.state.jobError} />
                     {this.makeMmbInputForm()}
+                    <ErrorBox errors={this.state.startJobError} />
                     <JobControls
                         handleStart={() => {
                             switch (this.state.uiMode) {
