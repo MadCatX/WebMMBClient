@@ -17,8 +17,8 @@ export class DensityFitFile extends AdditionalFileImpl {
         return new DensityFitFile(type, file);
     }
 
-    static fromInfo(type: DensityFitFile.ContentType, name: string, size: number) {
-        return new DensityFitFile(type, null, name, size);
+    static fromInfo(type: DensityFitFile.ContentType, name: string, size: number|null) {
+        return new DensityFitFile(type, null, name, size ?? undefined);
     }
 }
 

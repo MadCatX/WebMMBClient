@@ -72,8 +72,8 @@ export namespace MmbInputModel {
 
         const densityFitFiles = JsonCommandsDeserializer.toDensityFitFiles(commands);
         const files: DensityFitFile[] = [];
-        files.push(DensityFitFile.fromInfo('structure', densityFitFiles.structureFileName, 0));
-        files.push(DensityFitFile.fromInfo('density-map', densityFitFiles.densityMapFileName, 0));
+        files.push(DensityFitFile.fromInfo('structure', densityFitFiles.structureFileName, null));
+        files.push(DensityFitFile.fromInfo('density-map', densityFitFiles.densityMapFileName, null));
 
         map.set('mol-in-density-fit-files-added', files);
 

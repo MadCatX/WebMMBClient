@@ -38,8 +38,8 @@ export class AdditionalFile extends AdditionalFileImpl {
         return new AdditionalFileImpl(file);
     }
 
-    static fromInfo(name: string, size: number) {
-        return new AdditionalFileImpl(null, name, size);
+    static fromInfo(name: string, size: number|null) {
+        return new AdditionalFileImpl(null, name, size ?? undefined);
     }
 }
 
