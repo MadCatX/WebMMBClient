@@ -49,6 +49,10 @@ export class Viewer extends React.Component<Viewer.Props, State> {
         WebMmbViewer.clear();
     }
 
+    private clearDensity() {
+        WebMmbViewer.clearDensityMap();
+    }
+
     private async initAndLoad() {
         await WebMmbViewer.init(document.getElementById('viewer'));
         this.load();
@@ -59,7 +63,15 @@ export class Viewer extends React.Component<Viewer.Props, State> {
         if (surl !== undefined)
             await WebMmbViewer.loadStructure(surl, 'pdb');
         if (this.props.densityMap)
-            await WebMmbViewer.loadDensityMap(this.props.densityMap.url, this.props.densityMap.format);
+            await this.loadDensity();
+    }
+
+    private async loadDensity() {
+        try {
+            await WebMmbViewer.loadDensityMapIfNeeded(this.props.densityMap!.url, this.props.densityMap!.format);
+        } catch (e) {
+            console.error(e);
+        }
     }
 
     private renderMmbOutput() {
@@ -97,12 +109,15 @@ export class Viewer extends React.Component<Viewer.Props, State> {
     }
 
     componentDidUpdate(prevProps: Viewer.Props, prevState: State) {
+        let didFullLoad = false;
         if (this.props.step === 0 && prevProps.step !== 0)
             this.clear();
         else if (this.props.availableStages.length !== prevProps.availableStages.length ||
                  this.props.step !== prevProps.step ||
-                 this.state.selectedStage !== prevState.selectedStage)
+                 this.state.selectedStage !== prevState.selectedStage) {
             this.load();
+            didFullLoad = true;
+        }
 
         if (this.state.autoRefreshInterval !== prevState.autoRefreshInterval ||
             this.state.autoRefreshEnabled !== prevState.autoRefreshEnabled)
@@ -113,6 +128,13 @@ export class Viewer extends React.Component<Viewer.Props, State> {
             mmbOutput.scrollTo(0, mmbOutput.scrollHeight);
 
         forceResize();
+
+        if (!didFullLoad) {
+            if (this.props.densityMap)
+                this.loadDensity();
+            else
+                this.clearDensity();
+        }
     }
 
     render() {
