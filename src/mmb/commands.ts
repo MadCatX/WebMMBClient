@@ -60,7 +60,6 @@ export function isCommonCommands(v: unknown): v is Api.CommonCommands {
 
         return true;
     } catch (e) {
-        console.error(e);
         return false;
     }
 
@@ -83,7 +82,6 @@ export function isDensityFitCommands(v: unknown): v is Api.DensityFitCommands {
 
         return true;
     } catch (e) {
-        console.error(e);
         return false;
     }
 }
@@ -110,7 +108,6 @@ export function isStandardCommands(v: unknown): v is Api.StandardCommands {
 
         return true;
     } catch (e) {
-        console.error(e);
         return false;
     }
 }
