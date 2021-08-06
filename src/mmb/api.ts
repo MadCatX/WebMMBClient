@@ -57,12 +57,12 @@ export type CommonCommands = {
     num_reporting_intervals: number,
     first_stage: number,
     last_stage: number,
+    base_interaction_scale_factor: number,
+    temperature: number,
 }
 
 export type StandardCommands = CommonCommands & {
     job_type: 'Standard',
-    base_interaction_scale_factor: number,
-    temperature: number,
     sequences: string[],
     double_helices: string[],
     base_interactions: string[],

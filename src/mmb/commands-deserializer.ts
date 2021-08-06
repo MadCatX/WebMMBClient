@@ -209,7 +209,7 @@ export namespace JsonCommandsDeserializer {
         return compounds;
     }
 
-    export function toGlobal(commands: Api.StandardCommands) {
+    export function toGlobal(commands: Api.CommonCommands) {
         const bisf = commands.base_interaction_scale_factor;
         const temp = commands.temperature;
 

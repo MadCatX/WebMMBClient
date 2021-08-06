@@ -162,10 +162,13 @@ export namespace MmbInputModel {
             }
         }
         const rep = JsonCommandsDeserializer.toReporting(commands);
+        const global = JsonCommandsDeserializer.toGlobal(commands);
 
         map.set('mol-in-gp-stage', stage);
         map.set('mol-in-gp-reporting-interval', rep.interval);
         map.set('mol-in-gp-num-reports', rep.count);
+        map.set('mol-in-gp-bisf', global.baseInteractionScaleFactor);
+        map.set('mol-in-gp-temperature', global.temperature);
         map.set('mol-in-job-name', name);
 
         return map;
@@ -195,7 +198,6 @@ export namespace MmbInputModel {
     export function standardCommandsToValues(commands: StandardCommands, files: AdditionalFile[]) {
         const map = new Map<ValueKeys, V<ValueTypes>>();
 
-        const global = JsonCommandsDeserializer.toGlobal(commands);
         const md = JsonCommandsDeserializer.toMdParams(commands);
         const compounds = JsonCommandsDeserializer.toCompounds(commands);
         const doubleHelices = JsonCommandsDeserializer.toDoubleHelices(commands);
@@ -212,10 +214,6 @@ export namespace MmbInputModel {
             return map;
         })();
 
-        // Global
-
-        map.set('mol-in-gp-bisf', global.baseInteractionScaleFactor);
-        map.set('mol-in-gp-temperature', global.temperature);
         map.set('mol-in-gp-def-md-params', md.useDefaults);
         map.set('mol-in-cp-added', compounds);
         map.set('mol-in-bi-added', baseInteractions);

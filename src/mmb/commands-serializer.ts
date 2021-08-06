@@ -30,6 +30,7 @@ export namespace CommandsSerializer {
     export type CommonParameters = {
         reporting: Reporting,
         stages: StagesSpan,
+        global: GlobalConfig,
     }
 
     export type DensityFitParameters = CommonParameters & {
@@ -40,7 +41,6 @@ export namespace CommandsSerializer {
     export type StandardParameters<K extends (string extends K ? never : string)> = CommonParameters & {
         jobType: 'standard';
         baseInteractions: BaseInteraction[],
-        global: GlobalConfig,
         compounds: Compound[],
         doubleHelices: DoubleHelix[],
         mdParameters: MdParameters,
@@ -112,12 +112,6 @@ export namespace TextCommandsSerializer {
         // Write general config
         commands = commands.concat(global(params.global));
 
-        // Write stages
-        commands = commands.concat(stages(params.stages));
-
-        // Write reporting
-        commands = commands.concat(reporting(params.reporting));
-
         // Write MD parameters
         commands = commands.concat(mdParams(params.mdParameters));
 
@@ -169,11 +163,9 @@ export namespace TextCommandsSerializer {
 
     export function serialize<K extends (string extends K ? never : string)>(params: CommandsSerializer.DensityFitParameters|CommandsSerializer.StandardParameters<K>) {
         let commands: string[] = [];
-        // Write stages
         commands = commands.concat(stages(params.stages));
-
-        // Write reporting
         commands = commands.concat(reporting(params.reporting));
+        commands = commands.concat(global(params.global));
 
         switch (params.jobType) {
         case 'density-fit':
@@ -331,6 +323,10 @@ export namespace JsonCommandsSerializer {
         // Reporting
         cmds.reporting_interval = params.reporting.interval;
         cmds.num_reporting_intervals = params.reporting.count;
+
+        // Global params
+        cmds.base_interaction_scale_factor = params.global.baseInteractionScaleFactor;
+        cmds.temperature = params.global.temperature;
 
         return cmds as Api.DensityFitCommands|Api.StandardCommands;
     }

@@ -55,6 +55,8 @@ export function isCommonCommands(v: unknown): v is Api.CommonCommands {
         checkType(tObj, 'num_reporting_intervals', isInt);
         checkType(tObj, 'first_stage', isInt);
         checkType(tObj, 'last_stage', isInt);
+        checkType(tObj, 'num_reporting_intervals', isInt);
+        checkType(tObj, 'temperature', isNum);
 
         return true;
     } catch (e) {
@@ -98,8 +100,6 @@ export function isStandardCommands(v: unknown): v is Api.StandardCommands {
         if (tObj.job_type !== 'Standard')
             return false;
 
-        checkType(tObj, 'base_interaction_scale_factor', isNum);
-        checkType(tObj, 'temperature', isNum);
         checkType(tObj, 'sequences', isStrArr);
         checkType(tObj, 'double_helices', isStrArr);
         checkType(tObj, 'base_interactions', isStrArr);

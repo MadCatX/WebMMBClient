@@ -198,6 +198,8 @@ export class MmbInputForm extends Form<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTy
         const repInt = Num.parseFloatStrict(this.getScalar(this.state, 'mol-in-gp-reporting-interval', ''));
         const numReps = Num.parseIntStrict(this.getScalar(this.state, 'mol-in-gp-num-reports', ''));
         const stage = this.getScalar(this.state, 'mol-in-gp-stage', NaN);
+        const bisf = Num.parseIntStrict(this.getScalar(this.state, 'mol-in-gp-bisf', ''));
+        const temp = Num.parseFloatStrict(this.getScalar(this.state, 'mol-in-gp-temperature', ''));
 
         if (isNaN(repInt))
             errors.push('Report interval must be a number');
@@ -205,13 +207,17 @@ export class MmbInputForm extends Form<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTy
             errors.push('Number of reports must be a number');
         if (isNaN(stage))
             errors.push('Stage is not a valid number');
-
+        if (isNaN(bisf))
+            errors.push('Base interaction scale factor must be a number');
+        if (isNaN(temp))
+            errors.push('Temperature must be a number');
         if (errors.length > 0)
             throw errors;
 
         return {
             reporting: new Reporting(repInt, numReps),
             stages: { first: stage, last: stage },
+            global: new GlobalConfig(bisf, temp),
         };
     }
 
@@ -251,14 +257,7 @@ export class MmbInputForm extends Form<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTy
     private makeStandardParams(): CommandsSerializer.StandardParameters<ParameterNames> {
         let errors: string[] = [];
 
-        const bisf = Num.parseIntStrict(this.getScalar(this.state, 'mol-in-gp-bisf', ''));
-        const temp = Num.parseFloatStrict(this.getScalar(this.state, 'mol-in-gp-temperature', ''));
         const useDefMd = this.getScalar(this.state, 'mol-in-gp-def-md-params', false);
-
-        if (isNaN(bisf))
-            errors.push('Base interaction scale factor must be a number');
-        if (isNaN(temp))
-            errors.push('Temperature must be a number');
 
         errors = errors.concat(this.getErrors(this.state, 'mol-adv-params'));
 
@@ -266,7 +265,6 @@ export class MmbInputForm extends Form<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTy
             const common = this.makeCommonParams();
 
             if (errors.length === 0) {
-                const global = new GlobalConfig(bisf, temp);
                 const mdParameters = new MdParameters(useDefMd);
 
                 const compounds = this.getArray<Compound[]>(this.state, 'mol-in-cp-added');
@@ -279,7 +277,6 @@ export class MmbInputForm extends Form<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTy
                 return {
                     jobType: 'standard',
                     ...common,
-                    global,
                     compounds,
                     doubleHelices,
                     baseInteractions,

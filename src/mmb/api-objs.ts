@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020 WebMMB contributors, licensed under MIT, See LICENSE file for details.
+ * Copyright (c) 2020-2021 WebMMB contributors, licensed under MIT, See LICENSE file for details.
  *
  * @author Michal Malý (michal.maly@ibt.cas.cz)
  * @author Samuel C. Flores (samuelfloresc@gmail.com)
@@ -13,13 +13,13 @@ export const CommonCommands: Api.CommonCommands = {
     num_reporting_intervals: 0,
     first_stage: 0,
     last_stage: 0,
+    base_interaction_scale_factor: 0,
+    temperature: 0,
 };
 
 export const StandardCommands: Api.StandardCommands = {
     ...CommonCommands,
     job_type: 'Standard',
-    base_interaction_scale_factor: 0,
-    temperature: 0,
     sequences: [],
     double_helices: [],
     base_interactions: [],
