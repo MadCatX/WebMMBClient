@@ -137,6 +137,10 @@ export class Viewer extends React.Component<Viewer.Props, State> {
         }
     }
 
+    componentWillUnmount() {
+        WebMmbViewer.nuke();
+    }
+
     render() {
         const stageOptions = this.props.availableStages.map(n => { return { caption: n.toString(), value: n }} );
         const stageValue = (() => {
