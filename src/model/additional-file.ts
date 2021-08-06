@@ -10,7 +10,7 @@ export class AdditionalFileImpl {
     public isUploaded: boolean;
     public readonly file: File|null;
     public readonly name: string;
-    public readonly size: number;
+    public readonly size: number|null;
 
     protected constructor(file: File|null, name?: string, size?: number) {
         this.file = file;
@@ -20,10 +20,10 @@ export class AdditionalFileImpl {
             this.size = this.file.size;
             this.isUploaded = false;
         } else {
-            if (!name || !size)
-                throw new Error('Invalid initialization of AdditionalFileImpl');
+            if (!name)
+                throw new Error('File name must be provided when File object is null');
             this.name = name;
-            this.size = size;
+            this.size = size ?? null;
             this.isUploaded = true;
         }
     }

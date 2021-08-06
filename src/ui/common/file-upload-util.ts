@@ -124,7 +124,10 @@ export namespace FileUploadUtil {
         };
     }
 
-    export function sizeToHuman(size: number) {
+    export function sizeToHuman(size: number|null) {
+        if (size === null)
+            return 'N/A';
+
         const units = [ 'bytes', 'KiB', 'MiB', 'GiB' ];
 
         let idx = 0;
