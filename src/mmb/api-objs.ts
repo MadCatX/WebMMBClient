@@ -34,4 +34,5 @@ export const DensityFitCommands: Api.DensityFitCommands = {
     job_type: 'DensityFit',
     structure_file_name: '',
     density_map_file_name: '',
+    mobilizers: [],
 };

@@ -17,6 +17,7 @@ const AtomSites = {
     group_PDB: [],
     label_asym_id: [],
     label_seq_id: [],
+    label_comp_id: [],
     auth_asym_id: [],
     auth_seq_id: []
 };
@@ -197,12 +198,12 @@ function toMmCif(data: string) {
     return cif;
 }
 
-function extractStructuralDivision(cif: mmCif): Structural.Division {
+function extractDivision(cif: mmCif) {
     if (!cif['atom_site'])
         throw new Error('atom_site catogory not found. Unable to extract structural division data');
 
-    const chains = new Map<string, number[]>();
-    const authChains = new Map<string, number[]>();
+    const chains = new Map<string, Structural.Residue[]>();
+    const authChains = new Map<string, Structural.Residue[]>();
 
     const atomSites = cif['atom_site'];
     if (!isAtomSites(atomSites))
@@ -211,6 +212,7 @@ function extractStructuralDivision(cif: mmCif): Structural.Division {
     for (let idx = 0; idx < len; idx++) {
         const chain = atomSites.label_asym_id[idx];
         const residue = atomSites.label_seq_id[idx];
+        const compound = atomSites.label_comp_id[idx];
         const authChain = atomSites.auth_asym_id[idx];
         const authResidue = atomSites.auth_seq_id[idx];
 
@@ -218,24 +220,24 @@ function extractStructuralDivision(cif: mmCif): Structural.Division {
             continue;
 
         if (!chains.has(chain))
-            chains.set(chain, new Array<number>())
+            chains.set(chain, new Array<Structural.Residue>())
 
         let resNo = parseInt(residue);
         if (isNaN(resNo))
             throw new Error(`Non-numeric value of residue number ${residue}`);
-        if (!chains.get(chain)!.includes(resNo))
-            chains.get(chain)!.push(resNo);
+        if (!chains.get(chain)!.find(e => e.no === resNo))
+            chains.get(chain)!.push({ compound, no: resNo });
 
         if (authChain !== null) {
             if (!authChains.has(authChain))
-                authChains.set(authChain, new Array<number>());
+                authChains.set(authChain, new Array<Structural.Residue>());
         }
         if (authResidue !== null) {
             resNo = parseInt(authResidue);
             if (isNaN(resNo))
                 throw new Error(`Non-numeric author residue number value ${authResidue}`);
-            if (!authChains.get(authChain)!.includes(resNo))
-                authChains.get(authChain)!.push(resNo);
+            if (!authChains.get(authChain)!.find(e => e.no === resNo))
+                authChains.get(authChain)!.push({ compound, no: resNo });
         }
     }
 
@@ -244,5 +246,5 @@ function extractStructuralDivision(cif: mmCif): Structural.Division {
 
 export function parseCif(data: string): Structural.Division {
     const cif = toMmCif(data);
-    return extractStructuralDivision(cif);
+    return extractDivision(cif);
 }

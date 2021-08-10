@@ -28,10 +28,12 @@ const SeqLField = LabeledField.TextArea<string>();
 
 function isSequenceValid(type: Compound.Type, input: string) {
     try {
-        const seq = Compound.stringToSequence(input);
+        const seq = Compound.stringToSequence(input, type);
         switch (type) {
         case 'DNA':
             return Compound.isDna(seq);
+        case 'protein':
+            return Compound.isProtein(seq);
         case 'RNA':
             return Compound.isRna(seq);
         }
@@ -88,7 +90,7 @@ export class CompoundsInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM.
             }
         }
 
-        compounds.push(new Compound(this.state.chain, resNo, this.state.compoundType, Compound.stringToSequence(this.state.sequence)));
+        compounds.push(new Compound(this.state.chain, resNo, this.state.compoundType, Compound.stringToSequence(this.state.sequence, this.state.compoundType)));
         this.setState({ ...this.state, errors: [] });
         FU.updateValues(data, [{ key: 'mol-in-cp-added', value: compounds }]);
     }
@@ -147,6 +149,7 @@ export class CompoundsInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM.
                         options={[
                                 { value: 'RNA', caption: 'RNA' },
                                 { value: 'DNA', caption: 'DNA' },
+                                { value: 'protein', caption: 'Protein' },
                         ]} />
                     <SeqLField
                         label='Sequence'

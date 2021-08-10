@@ -140,6 +140,7 @@ export class MmbInputForm extends Form<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTy
                         ctxData={ctxData}
                         jobId={this.props.jobId}
                     />
+                    <MobilizersInput ctxData={ctxData} />
                     <GlobalParametersInput
                         ctxData={ctxData}
                         availableStages={this.props.availableStages}
@@ -227,6 +228,7 @@ export class MmbInputForm extends Form<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTy
         const denFitFiles = this.getArray<DensityFitFile[]>(this.state, 'mol-in-density-fit-files-added');
         const structFile = denFitFiles.find(f => f.type === 'structure');
         const denMapFile = denFitFiles.find(f => f.type === 'density-map');
+        const mobilizers = this.getArray<Mobilizer[]>(this.state, 'mol-in-mobilizers-added');
 
         if (!structFile)
             errors.push('No structure file');
@@ -245,6 +247,7 @@ export class MmbInputForm extends Form<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTy
                     jobType: 'density-fit',
                     ...common,
                     densityFitFiles: new DensityFitFiles(structFile!.name, denMapFile!.name),
+                    mobilizers,
                 };
             }
         } catch (e) {

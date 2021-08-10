@@ -76,6 +76,7 @@ export type DensityFitCommands = CommonCommands & {
     job_type: 'DensityFit',
     structure_file_name: string,
     density_map_file_name: string,
+    mobilizers: MobilizerParameter[],
 }
 
 /* Requests */

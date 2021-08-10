@@ -6,13 +6,15 @@
  * @author Jiří Černý (jiri.cerny@ibt.cas.cz)
  */
 
-const ResidueIdentifiers = [ 'A', 'T', 'U', 'G', 'C' ];
+const DNAIdentifiers = [ 'A', 'T', 'G', 'C' ];
+const ProteinIdentifiers = ['G', 'P', 'A', 'V', 'L', 'I', 'M', 'C', 'F', 'Y', 'W', 'H', 'K', 'R', 'Q', 'N', 'E', 'D', 'S', 'T' ];
+const RNAIdentifiers = [ 'A', 'U', 'G', 'C' ];
 
 export class Compound {
     readonly residueCount: number;
     readonly lastResidueNo: number;
 
-    constructor(readonly chain: string, readonly firstResidueNo: number, readonly type: Compound.Type, readonly sequence: Compound.Residue[]) {
+    constructor(readonly chain: string, readonly firstResidueNo: number, readonly type: Compound.Type, readonly sequence: Compound.AnyResidue[]) {
         this.residueCount = sequence.length;
         this.lastResidueNo = this.firstResidueNo + this.residueCount - 1;
 
@@ -21,9 +23,14 @@ export class Compound {
             if (!Compound.isDna(sequence))
                 throw new Error('Sequence is not DNA');
             break;
+        case 'protein':
+            if (!Compound.isProtein(sequence))
+                throw new Error('Sequence is not DNA');
+            break;
         case 'RNA':
             if (!Compound.isRna(sequence))
                 throw new Error('Sequence is not RNA');
+            break;
         }
     }
 
@@ -36,39 +43,97 @@ export class Compound {
 }
 
 export namespace Compound {
-    export type Residue = typeof ResidueIdentifiers[number];
-    export type Type = 'DNA' | 'RNA';
+    export type DNAResidue = typeof DNAIdentifiers[number];
+    export type ProteinResidue = typeof ProteinIdentifiers[number];
+    export type RNAResidue = typeof RNAIdentifiers[number];
+    export type AnyResidue = DNAResidue | ProteinResidue | RNAResidue;
+    export type Type = 'DNA' | 'RNA' | 'protein';
+    export type PossibleTypes = { dna: boolean, protein: boolean, rna: boolean };
 
-    export function isDna(sequence: Residue[]) {
-        return sequence.find((e) => e === 'U') === undefined;
-    }
+    export function guessCompoundType(input: string): PossibleTypes {
+        let maybeDNA = true;
+        let maybeRNA = true;
+        let maybeProtein = true;
 
-    export function isResidue(id: string): id is Residue {
-        return ResidueIdentifiers.includes(id as Residue);
-    }
-
-    export function isResidues(input: string) {
         for (const c of input) {
-            if (!isResidue(c))
+            maybeDNA = maybeDNA && isDnaResidue(c);
+            maybeRNA = maybeRNA && isRnaResidue(c);
+            maybeProtein = maybeProtein && isProteinResidue(c);
+        }
+
+        return {
+            dna: maybeDNA,
+            protein: maybeProtein,
+            rna: maybeRNA,
+        };
+    }
+
+    export function isDna(sequence: AnyResidue[]) {
+        for (const c of sequence) {
+            if (!isDnaResidue(c))
                 return false;
         }
         return true;
     }
 
-    export function isRna(sequence: Residue[]) {
-        return sequence.find((e) => e === 'T') === undefined;
+    export function isDnaResidue(id: string): id is DNAResidue {
+        return DNAIdentifiers.includes(id);
     }
 
-    export function sequenceAsString(residues: Residue[]) {
+    export function isProteinResidue(id: string): id is ProteinResidue {
+        return ProteinIdentifiers.includes(id);
+    }
+
+    export function isRnaResidue(id: string): id is DNAResidue {
+        return RNAIdentifiers.includes(id);
+    }
+
+    export function isResidue(id: string, type: Type): id is AnyResidue {
+        switch (type) {
+        case 'DNA':
+            return isDnaResidue(id);
+        case 'protein':
+            return isProteinResidue(id);
+        case 'RNA':
+            return isRnaResidue(id);
+        }
+    }
+
+    export function isProtein(sequence: AnyResidue[]) {
+        for (const c of sequence) {
+            if (!ProteinIdentifiers.includes(c))
+                return false;
+        }
+        return true;
+    }
+
+    export function isRna(sequence: AnyResidue[]) {
+        for (const c of sequence) {
+            if (!RNAIdentifiers.includes(c))
+                return false;
+        }
+        return true;
+    }
+
+    export function sequenceAsString(residues: AnyResidue[]) {
         return residues.reduce((r, s) => r + s, '');
     }
 
-    export function stringToSequence(input: string) {
-        const residues: Residue[] = [];
+    export function stringIsSequence(input: string) {
+        for (const c of input) {
+            const isRes = isDnaResidue(c) || isProteinResidue(c) || isRnaResidue(c);
+            if (!isRes)
+                return false;
+        }
+        return true;
+    }
+
+    export function stringToSequence(input: string, type: Type) {
+        const residues: AnyResidue[] = [];
 
         for (const c of input) {
-            if (!isResidue(c))
-                throw new Error(`Symbol ${c} does not indentify a valid residue`);
+            if (!isResidue(c, type))
+                throw new Error(`Symbol ${c} does not indentify a valid residue for ${type} sequence`);
             residues.push(c);
         }
 

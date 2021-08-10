@@ -14,6 +14,7 @@ import { FormBlock } from './common/form/form-block';
 import { PushButton } from './common/push-button';
 import { FileQuery } from '../mmb/file-query';
 import { FormUtil } from '../model/common/form';
+//import { Compound } from '../model/compound';
 import { DensityFitFile } from '../model/density-fit-file';
 import { MmbInputModel as MIM } from '../model/mmb-input-model';
 import { Structural } from '../structural/index';
@@ -26,11 +27,38 @@ interface State {
     errors: string[];
 }
 
+type FileType = 'cif' | 'pdb';
+async function getStructureDivision(f: File, type: FileType) {
+    switch (type) {
+    case 'cif':
+        return Structural.cifToDivision(f);
+    case 'pdb':
+        return Structural.pdbToDivision(f);
+    }
+}
+
+function getStructureFileType(name: string) : FileType {
+    const dotIdx = name.lastIndexOf('.');
+    if (dotIdx < 0)
+        throw new Error('Unable to determine file type');
+    const suffix = name.slice(dotIdx + 1).toLowerCase();
+
+    switch (suffix) {
+    case 'cif':
+        return 'cif';
+    case 'pdb':
+        return 'pdb';
+    default:
+        throw new Error(`Unknown file type ${suffix}`);
+    }
+}
+
 export class DensityFitInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes, DensityFitInput.Props, State> {
     private Uploader = FileUploadUtil.Uploader(
         'mol-in-density-fit-files-added',
         (xfrs: FileUploadUtil.TransferMap) => this.uploadProgressHandler(xfrs),
         (xfrs: FileUploadUtil.TransferMap, errors: string[]) => this.uploadErrorHandler(xfrs, errors),
+        (xfrs: FileUploadUtil.TransferMap, completed: string) => this.uploadCompletionHandler(xfrs, completed),
     );
 
     constructor(props: DensityFitInput.Props) {
@@ -48,23 +76,13 @@ export class DensityFitInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM
     }
 
     private async fillMobilizers(name: string, file: File) {
-        const dotIdx = name.lastIndexOf('.');
-        if (dotIdx < 0)
-            return;
-        const suffix = name.slice(dotIdx + 1).toLowerCase();
+        const type = getStructureFileType(name);
+        const division = await getStructureDivision(file, type);
+        const compounds = Structural.divisionToCompounds(division);
 
-        const division = await (() => {
-            switch (suffix) {
-            case 'cif':
-                return Structural.cifToDivision(file);
-            case 'pdb':
-                return Structural.pdbToDivision(file);
-            default:
-                throw new Error('Unknown structure file type');
-            }
-        })();
-
+        FU.updateValues(this.props.ctxData, [{ key: 'mol-in-cp-added', value: compounds }]);
         console.log(division);
+        console.log(compounds);
     }
 
     private removeFile(file: DensityFitFile) {
@@ -94,26 +112,21 @@ export class DensityFitInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM
         this.Uploader.upload(this.props.ctxData, this.props.jobId);
     }
 
+    private uploadCompletionHandler(xfrs: FileUploadUtil.TransferMap, completed: string) {
+        let files = FU.getArray<DensityFitFile[]>(this.props.ctxData, 'mol-in-density-fit-files-added');
+        const f = files.find(f => f.name === completed);
+        if (!f || !f.file)
+            throw new Error('No file');
+
+        if (f.type === 'structure')
+            this.fillMobilizers(f.name, f.file);
+    }
+
     private uploadErrorHandler(xfrs: FileUploadUtil.TransferMap, errors: string[]) {
         this.setState({ ...this.state, transfers: xfrs, errors });
     }
 
     private uploadProgressHandler(xfrs: FileUploadUtil.TransferMap) {
-        const getFile = (name: string) => {
-            let files = FU.getArray<DensityFitFile[]>(this.props.ctxData, 'mol-in-density-fit-files-added');
-            return files.find(f => f.name === name);
-        }
-
-        for (const [k, v] of xfrs.entries()) {
-            if (v.state !== 'done')
-                continue;
-
-            const f = getFile(k);
-            if (!f || !f.file)
-                throw new Error('No file');
-            if (f.type === 'structure')
-                this.fillMobilizers(f.name, f.file);
-        }
         this.setState({ ...this.state, transfers: xfrs });
     }
 

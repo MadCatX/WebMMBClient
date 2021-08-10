@@ -36,6 +36,7 @@ export namespace CommandsSerializer {
     export type DensityFitParameters = CommonParameters & {
         jobType: 'density-fit',
         densityFitFiles: DensityFitFiles,
+        mobilizers: Mobilizer[],
     }
 
     export type StandardParameters<K extends (string extends K ? never : string)> = CommonParameters & {
@@ -278,6 +279,7 @@ export namespace JsonCommandsSerializer {
 
         cmds.structure_file_name = params.densityFitFiles.structureFileName;
         cmds.density_map_file_name = params.densityFitFiles.densityMapFileName;
+        cmds.mobilizers = mobilizers(params.mobilizers);
 
         return cmds;
     }

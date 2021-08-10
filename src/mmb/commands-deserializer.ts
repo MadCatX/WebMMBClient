@@ -201,7 +201,7 @@ export namespace JsonCommandsDeserializer {
 
             const chain = getChain(def[1]);
             const firstResNo = getResNo(def[2]);
-            const seq = Compound.stringToSequence(def[3]);
+            const seq = Compound.stringToSequence(def[3], type);
 
             compounds.push(new Compound(chain, firstResNo, type, seq));
         }

@@ -35,6 +35,10 @@ export namespace FileUploadUtil {
 
     export type TransferMap = Map<string, Transfer>;
 
+    export interface CompletionHandler {
+        (xfrs: TransferMap, completed: string): void;
+    }
+
     export interface ErrorHandler {
         (xfrs: TransferMap, errors: string[]): void;
     }
@@ -51,7 +55,7 @@ export namespace FileUploadUtil {
         (data: MIM.ContextData, jobId: string): void;
     }
 
-    export function Uploader(key: MIM.ValueKeys, progressHandler: ProgressHandler, errorHandler: ErrorHandler) {
+    export function Uploader(key: MIM.ValueKeys, progressHandler: ProgressHandler, errorHandler: ErrorHandler, completionHandler?: CompletionHandler) {
         const xfrs = new Map<string, Transfer>();
         return {
             cancel: (xfrId: string) => {
@@ -103,6 +107,8 @@ export namespace FileUploadUtil {
 
                                     xfr.state = 'done';
                                     progressHandler(cpyXfrs(xfrs));
+                                    if (completionHandler)
+                                        completionHandler(cpyXfrs(xfrs), f.name);
                                     return;
                                 }
                             }
