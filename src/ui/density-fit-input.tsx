@@ -16,6 +16,7 @@ import { FileQuery } from '../mmb/file-query';
 import { FormUtil } from '../model/common/form';
 import { DensityFitFile } from '../model/density-fit-file';
 import { MmbInputModel as MIM } from '../model/mmb-input-model';
+import { Structural } from '../structural/index';
 
 const FU = new FormUtil<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes>();
 const AddedTable = MIM.TWDR<DensityFitFile[]>();
@@ -44,6 +45,26 @@ export class DensityFitInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM
     private cancelUpload() {
         for (const k of this.state.transfers.keys())
             this.Uploader.cancel(k);
+    }
+
+    private async fillMobilizers(name: string, file: File) {
+        const dotIdx = name.lastIndexOf('.');
+        if (dotIdx < 0)
+            return;
+        const suffix = name.slice(dotIdx + 1).toLowerCase();
+
+        const division = await (() => {
+            switch (suffix) {
+            case 'cif':
+                return Structural.cifToDivision(file);
+            case 'pdb':
+                return Structural.pdbToDivision(file);
+            default:
+                throw new Error('Unknown structure file type');
+            }
+        })();
+
+        console.log(division);
     }
 
     private removeFile(file: DensityFitFile) {
@@ -78,6 +99,21 @@ export class DensityFitInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM
     }
 
     private uploadProgressHandler(xfrs: FileUploadUtil.TransferMap) {
+        const getFile = (name: string) => {
+            let files = FU.getArray<DensityFitFile[]>(this.props.ctxData, 'mol-in-density-fit-files-added');
+            return files.find(f => f.name === name);
+        }
+
+        for (const [k, v] of xfrs.entries()) {
+            if (v.state !== 'done')
+                continue;
+
+            const f = getFile(k);
+            if (!f || !f.file)
+                throw new Error('No file');
+            if (f.type === 'structure')
+                this.fillMobilizers(f.name, f.file);
+        }
         this.setState({ ...this.state, transfers: xfrs });
     }
 

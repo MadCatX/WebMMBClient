@@ -15,9 +15,7 @@
         "build-webpack-dev": "webpack --mode development --config ./webpack.config.js",
         "lint": "eslint ./**/*.{ts,tsx}",
         "lint-fix": "eslint ./**/*.{ts,tsx} --fix",
-        "test": "npm run lint",
-        "watch": "npm watch-tsc",
-        "watch-tsc": "tsc --watch --incremental"
+        "test": "npm run lint"
     },
     "author": "",
     "license": "ISC",
