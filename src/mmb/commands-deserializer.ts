@@ -256,8 +256,8 @@ export namespace JsonCommandsDeserializer {
             else {
                 const chain = getChain(m.chain);
 
-                if (m.first_residue !== undefined && m.last_residue !== undefined)
-                    mobilizers.push(new Mobilizer(bondMobility, chain, new ResidueSpan(m.first_residue, m.last_residue)));
+                if (m.first_residue !== null && m.last_residue !== null)
+                    mobilizers.push(new Mobilizer(bondMobility, chain, new ResidueSpan(m.first_residue!, m.last_residue!)));
                 else
                     mobilizers.push(new Mobilizer(bondMobility, chain));
             }
