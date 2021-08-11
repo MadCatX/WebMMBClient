@@ -36,12 +36,13 @@ export type JobCommandsMode = 'None' | 'Synthetic' | 'Raw';
 export type FileOperationRequestType = 'InitUpload' | 'FinishUpload' | 'CancelUpload' | 'Delete';
 
 /* JSON commands */
-/*
-export type ExtraFile = {
-    key: string;
-    name: string;
-    data: string;
-};*/
+
+export type CompoundParameter = {
+    chain: string;
+    ctype: 'DNA' | 'RNA' | 'Protein';
+    sequence: string;
+    first_residue_no: number;  // TODO: Extend to allow for arbitrary residue numbers
+}
 
 export type MobilizerParameter = {
     bond_mobility: string;
@@ -76,6 +77,7 @@ export type DensityFitCommands = CommonCommands & {
     job_type: 'DensityFit',
     structure_file_name: string,
     density_map_file_name: string,
+    compounds: CompoundParameter[],
     mobilizers: MobilizerParameter[],
 }
 

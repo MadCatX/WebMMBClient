@@ -211,6 +211,22 @@ export namespace JsonCommandsDeserializer {
         return compounds;
     }
 
+    // FIXME: Unify with toCompounds once we standardize the compounds API representation
+    export function toCompounds2(commands: Api.DensityFitCommands) {
+        const compounds: Compound[] = [];
+
+        for (const c of commands.compounds) {
+            const type = c.ctype === 'Protein' ? 'protein' : c.ctype;
+            if (!Compound.isType(type))
+                throw new Error(`Compound type ${type} is not a valid compound type`);
+
+            const seq = Compound.stringToSequence(c.sequence, type);
+            compounds.push(new Compound(c.chain, c.first_residue_no, type, seq));
+        }
+
+        return compounds;
+    }
+
     export function toGlobal(commands: Api.CommonCommands) {
         const bisf = commands.base_interaction_scale_factor;
         const temp = commands.temperature;
@@ -227,7 +243,7 @@ export namespace JsonCommandsDeserializer {
         return new MdParameters(defMd);
     }
 
-    export function toMobilizers(commands: Api.StandardCommands) {
+    export function toMobilizers(commands: Api.DensityFitCommands|Api.StandardCommands) {
         const mobilizers: Mobilizer[] = [];
 
         for (const m of commands.mobilizers) {

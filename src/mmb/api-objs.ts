@@ -34,5 +34,13 @@ export const DensityFitCommands: Api.DensityFitCommands = {
     job_type: 'DensityFit',
     structure_file_name: '',
     density_map_file_name: '',
+    compounds: [],
     mobilizers: [],
+};
+
+export const CompoundParameter: Api.CompoundParameter = {
+    chain: '',
+    ctype: 'DNA',
+    sequence: '',
+    first_residue_no: 0,
 };

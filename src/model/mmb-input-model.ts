@@ -75,7 +75,12 @@ export namespace MmbInputModel {
         files.push(DensityFitFile.fromInfo('structure', densityFitFiles.structureFileName, null));
         files.push(DensityFitFile.fromInfo('density-map', densityFitFiles.densityMapFileName, null));
 
+        const compounds = JsonCommandsDeserializer.toCompounds2(commands);
+        const mobilizers = JsonCommandsDeserializer.toMobilizers(commands);
+
         map.set('mol-in-density-fit-files-added', files);
+        map.set('mol-in-cp-added', compounds);
+        map.set('mol-in-mobilizers-added', mobilizers);
 
         return map;
     }

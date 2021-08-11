@@ -115,6 +115,10 @@ export namespace Compound {
         return true;
     }
 
+    export function isType(s: string): s is Type {
+        return s === 'DNA' || s === 'RNA' || s === 'protein';
+    }
+
     export function sequenceAsString(residues: AnyResidue[]) {
         return residues.reduce((r, s) => r + s, '');
     }

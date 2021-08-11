@@ -36,6 +36,7 @@ export namespace CommandsSerializer {
     export type DensityFitParameters = CommonParameters & {
         jobType: 'density-fit',
         densityFitFiles: DensityFitFiles,
+        compounds: Compound[],
         mobilizers: Mobilizer[],
     }
 
@@ -219,6 +220,21 @@ export namespace JsonCommandsSerializer {
         return defs;
     }
 
+    function compounds(comps: Compound[]) {
+        const defs: Api.CompoundParameter[] = [];
+
+        for (const c of comps) {
+            defs.push({
+                chain: c.chain,
+                ctype: c.type === 'DNA' ? 'DNA' : c.type === 'RNA' ? 'RNA' : 'Protein',
+                sequence: Compound.sequenceAsString(c.sequence),
+                first_residue_no: c.firstResidueNo
+            });
+        }
+
+        return defs;
+    }
+
     function doubleHelices(dhs: DoubleHelix[]) {
         const defs: string[] = [];
 
@@ -279,6 +295,7 @@ export namespace JsonCommandsSerializer {
 
         cmds.structure_file_name = params.densityFitFiles.structureFileName;
         cmds.density_map_file_name = params.densityFitFiles.densityMapFileName;
+        cmds.compounds = compounds(params.compounds);
         cmds.mobilizers = mobilizers(params.mobilizers);
 
         return cmds;

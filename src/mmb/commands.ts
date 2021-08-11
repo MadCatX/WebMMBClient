@@ -8,10 +8,41 @@
 
 import { assignAll, checkProps, checkType, isArr, isBool, isInt, isNum, isObj, isStr } from '../util/json';
 import * as Api from './api';
-import { CommonCommands, DensityFitCommands, StandardCommands } from './api-objs';
+import { CommonCommands, DensityFitCommands, StandardCommands, CompoundParameter } from './api-objs';
 
 function isAdvancedParams(v: unknown): v is Api.JsonAdvancedParameters {
     return isObj(v);
+}
+
+function isCompoundType(v: unknown): v is 'DNA' | 'RNA' | 'Protein' {
+    if (!isStr(v))
+        return false;
+
+    return v === 'DNA' || v === 'RNA' || v === 'Protein';
+}
+
+function isCompound(v: unknown): v is Api.CompoundParameter {
+    if (!isObj(v))
+        return false;
+
+    try {
+        checkProps(v, CompoundParameter);
+
+        const tObj = v as Api.CompoundParameter;
+
+        checkType(tObj, 'chain', isStr);
+        checkType(tObj, 'ctype', isCompoundType);
+        checkType(tObj, 'sequence', isStr);
+        checkType(tObj, 'first_residue_no', isInt);
+
+        return true;
+    } catch (e) {
+        return false;
+    }
+}
+
+function isCompoundArr(v: unknown): v is Api.CompoundParameter[] {
+    return isArr<Api.CompoundParameter>(v, isCompound);
 }
 
 function isMobilizer(v: unknown): v is Api.MobilizerParameter {
@@ -79,6 +110,8 @@ export function isDensityFitCommands(v: unknown): v is Api.DensityFitCommands {
 
         checkType(tObj, 'structure_file_name', isStr);
         checkType(tObj, 'density_map_file_name', isStr);
+        checkType(tObj, 'compounds', isCompoundArr);
+        checkType(tObj, 'mobilizers', isMobilizerArr);
 
         return true;
     } catch (e) {
