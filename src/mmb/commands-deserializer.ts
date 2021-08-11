@@ -196,6 +196,8 @@ export namespace JsonCommandsDeserializer {
                     return 'DNA';
                 if (def[0] === 'RNA')
                     return 'RNA';
+                if (def[0] === 'protein')
+                    return 'protein';
                 throw new Error(`Invalid compound type ${def[0]}`);
             })();
 
