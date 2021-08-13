@@ -131,14 +131,9 @@ export namespace MmbInputModel {
             throw new Error(`Invalid stop residue number ${num}`);
 
         const options = new Array<ComboBox.Option<number>>();
-        // Find first residue
-        let idx = 0;
-        const len = c.residues.length;
-        while (idx < len && c.residues[idx].number < num)
-            idx++;
-        while (idx < len && c.residues[idx].number <= numTo) {
-            options.push({ value: c.residues[idx].number, caption: Util.resNumToString(c.residues[idx]) });
-            idx++;
+        for (;num <= numTo; num++) {
+            const res = c.residueByNumber(num);
+            options.push({ value: res.number, caption: Util.resNumToString(res) });
         }
         return options;
     }
@@ -158,13 +153,9 @@ export namespace MmbInputModel {
             throw new Error(`Invalid stop residue number ${c}`);
 
         const options = new Array<ComboBox.Option<number>>();
-        // Find last residue
-        let idx = c.residues.length - 1;
-        while (idx > 0 && c.residues[idx].number > num)
-            idx--;
-        while (idx > 0 && c.residues[idx].number >= numTo) {
-            options.push({ value: c.residues[idx].number, caption: Util.resNumToString(c.residues[idx]) });
-            idx--;
+        for (;num >= numTo; num--) {
+            const res = c.residueByNumber(num);
+            options.push({ value: res.number, caption: Util.resNumToString(res) });
         }
         return options;
     }
