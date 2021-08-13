@@ -295,10 +295,10 @@ export class DoubleHelicesInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, 
                     className='mol-in-dh-added spaced-grid'
                     valuesKey='mol-in-dh-added'
                     columns={[
-                        {caption: 'Chain', k: 'chainNameOne'},
+                        {caption: 'Chain', k: 'chainNameOne', stringify: name => { const c = compounds.find(c => c.chain.name === name); return c ? Util.chainToString(c.chain) : 'N/A' }},
                         {caption: 'First residue', k: 'firstResidueNoOne'},
                         {caption: 'Last residue', k: 'lastResidueNoOne'},
-                        {caption: 'Chain', k: 'chainNameTwo'},
+                        {caption: 'Chain', k: 'chainNameTwo', stringify: name => { const c = compounds.find(c => c.chain.name === name); return c ? Util.chainToString(c.chain) : 'N/A' }},
                         {caption: 'First residue', k: 'firstResidueNoTwo'},
                         {caption: 'Last residue', k: 'lastResidueNoTwo'}]}
                     hideHeader={true}

@@ -244,10 +244,10 @@ export class BaseInteractionsInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKey
                     className='mol-in-bi-added spaced-grid'
                     valuesKey='mol-in-bi-added'
                     columns={[
-                        {caption: 'Chain', k: 'chainNameOne'},
+                        {caption: 'Chain', k: 'chainNameOne', stringify: name => { const c = compounds.find(c => c.chain.name === name); return c ? Util.chainToString(c.chain) : 'N/A' }},
                         {caption: 'Residue', k: 'residueNoOne'},
                         {caption: 'Edge', k: 'edgeOne', stringify: v => EdgeInteraction.toString(v)},
-                        {caption: 'Chain', k: 'chainNameTwo'},
+                        {caption: 'Chain', k: 'chainNameTwo', stringify: name => { const c = compounds.find(c => c.chain.name === name); return c ? Util.chainToString(c.chain) : 'N/A' }},
                         {caption: 'Residue', k: 'residueNoTwo'},
                         {caption: 'Edge', k: 'edgeTwo', stringify: v => EdgeInteraction.toString(v)},
                         {caption: 'Orientation', k: 'orientation'}]}

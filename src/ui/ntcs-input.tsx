@@ -211,7 +211,7 @@ export class NtCsInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM.Value
                     className='mol-in-ntcs-added spaced-grid'
                     valuesKey='mol-in-ntcs-added'
                     columns={[
-                        {caption: 'Chain', k: 'chainName'},
+                        {caption: 'Chain', k: 'chainName', stringify: name => { const c = compounds.find(c => c.chain.name === name); return c ? Util.chainToString(c.chain) : 'N/A' }},
                         {caption: 'First residue', k: 'firstResidueNo'},
                         {caption: 'Last residue', k: 'lastResidueNo'},
                         {caption: 'NtC', k: 'ntc'}]}

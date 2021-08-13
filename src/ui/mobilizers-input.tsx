@@ -289,7 +289,7 @@ export class MobilizersInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM
                     deleter={this.mobilizerRemoved}
                     columns={[
                         { caption: 'Bond mobility', k: 'bondMobility' },
-                        { caption: 'Chain', k: 'chainName' },
+                        { caption: 'Chain', k: 'chainName', stringify: name => { const c = compounds.find(c => c.chain.name === name); return c ? Util.chainToString(c.chain) : 'N/A' } },
                         { caption: 'Residue span', k: 'residueSpan', stringify: (v: ResidueSpan|undefined) => v ? `${v.first} -> ${v.last}` : 'All residues' },
                     ]}
                     hideHeader={true}
