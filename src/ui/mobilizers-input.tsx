@@ -217,24 +217,20 @@ export class MobilizersInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM
     render() {
         const compounds = FU.getArray<Compound[]>(this.props.ctxData, 'mol-in-cp-added');
 
-        const firstResNoOpts: ComboBoxModel.Option<number | AllItems>[] = [ { value: 'all-items', caption: 'All residues' } ];
-        const lastResNoOpts: ComboBoxModel.Option<number>[] = [];
+        let firstResNoOpts: ComboBoxModel.Option<number | AllItems>[] = [ { value: 'all-items', caption: 'All residues' } ];
+        let lastResNoOpts: ComboBoxModel.Option<number>[] = [];
 
-        let selectedChain = this.state.chainName;
+        let selectedChain = compounds.find(c => c.chain.name === this.state.chainName) ? this.state.chainName : 'all-items';
 
         if (this.state.chainName !== 'all-items') {
-            const c = compounds.find(c => c.chain.name === selectedChain);
-            if (c !== undefined) {
-                for (let i = c.firstResidue().number; i <= c.lastResidue().number; i++)
-                    firstResNoOpts.push({ value: i, caption: i.toString() } );
+            const fro = MIM.residueOptions(compounds, selectedChain);
+            firstResNoOpts = firstResNoOpts.concat(fro);
 
-                if (this.state.firstResNo !== 'all-items') {
-                    const lastFrom = this.state.firstResNo;
-                    for (let i = lastFrom; i <= c.lastResidue().number; i++)
-                        lastResNoOpts.push({ value: i, caption: i.toString() });
-                }
-            } else
-                selectedChain = 'all-items';
+            if (this.state.firstResNo !== 'all-items') {
+                const lastFrom = this.state.firstResNo;
+                const lro = MIM.residueOptions(compounds, selectedChain, lastFrom);
+                lastResNoOpts = lastResNoOpts.concat(lro);
+            }
         }
 
         return (
