@@ -246,10 +246,10 @@ export class BaseInteractionsInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKey
                     columns={[
                         {caption: 'Chain', k: 'chainNameOne'},
                         {caption: 'Residue', k: 'residueNoOne'},
-                        {caption: 'Edge', k: 'edgeOne'},
+                        {caption: 'Edge', k: 'edgeOne', stringify: v => EdgeInteraction.toString(v)},
                         {caption: 'Chain', k: 'chainNameTwo'},
                         {caption: 'Residue', k: 'residueNoTwo'},
-                        {caption: 'Edge', k: 'edgeTwo'},
+                        {caption: 'Edge', k: 'edgeTwo', stringify: v => EdgeInteraction.toString(v)},
                         {caption: 'Orientation', k: 'orientation'}]}
                     hideHeader={true}
                     ctxData={this.props.ctxData} />
