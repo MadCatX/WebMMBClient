@@ -14,7 +14,6 @@ import { FormBlock } from './common/form/form-block';
 import { PushButton } from './common/push-button';
 import { FileQuery } from '../mmb/file-query';
 import { FormUtil } from '../model/common/form';
-//import { Compound } from '../model/compound';
 import { DensityFitFile } from '../model/density-fit-file';
 import { MmbInputModel as MIM } from '../model/mmb-input-model';
 import { Structural } from '../structural/index';
@@ -28,12 +27,12 @@ interface State {
 }
 
 type FileType = 'cif' | 'pdb';
-async function getStructureDivision(f: File, type: FileType) {
+async function getStructureChains(f: File, type: FileType) {
     switch (type) {
     case 'cif':
-        return Structural.cifToDivision(f);
+        return Structural.cifToChains(f);
     case 'pdb':
-        return Structural.pdbToDivision(f);
+        return Structural.pdbToChains(f);
     }
 }
 
@@ -77,11 +76,11 @@ export class DensityFitInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM
 
     private async fillMobilizers(name: string, file: File) {
         const type = getStructureFileType(name);
-        const division = await getStructureDivision(file, type);
-        const compounds = Structural.divisionToCompounds(division);
+        const chains = await getStructureChains(file, type);
+        const compounds = Structural.chainsToCompounds(chains);
 
         FU.updateValues(this.props.ctxData, [{ key: 'mol-in-cp-added', value: compounds }]);
-        console.log(division);
+        console.log(chains);
         console.log(compounds);
     }
 

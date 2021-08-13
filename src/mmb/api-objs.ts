@@ -20,7 +20,7 @@ export const CommonCommands: Api.CommonCommands = {
 export const StandardCommands: Api.StandardCommands = {
     ...CommonCommands,
     job_type: 'Standard',
-    sequences: [],
+    compounds: [],
     double_helices: [],
     base_interactions: [],
     ntcs: [],
@@ -38,9 +38,46 @@ export const DensityFitCommands: Api.DensityFitCommands = {
     mobilizers: [],
 };
 
-export const CompoundParameter: Api.CompoundParameter = {
-    chain: '',
+export const Chain: Api.Chain = {
+    name: '',
+    auth_name: '',
+};
+
+export const ResidueNumber: Api.ResidueNumber = {
+    number: 0,
+    auth_number: 0,
+};
+
+export const BaseInteractionParametrer: Api.BaseInteraction = {
+    chain_name_1: '',
+    res_no_1: 0,
+    edge_1: 'WatsonCrick',
+    chain_name_2: '',
+    res_no_2: 0,
+    edge_2: 'WatsonCrick',
+    orientation: 'Cis',
+};
+
+export const CompoundParameter: Api.Compound = {
+    chain: { name: '', auth_name: '' },
     ctype: 'DNA',
+    residues: [],
     sequence: '',
-    first_residue_no: 0,
+};
+
+export const DoubleHelixParameter: Api.DoubleHelix = {
+    chain_name_1: '',
+    first_res_no_1: 0,
+    last_res_no_1: 0,
+    chain_name_2: '',
+    first_res_no_2: 0,
+    last_res_no_2: 0,
+};
+
+export const NtCParameter: Api.NtC = {
+    chain_name: '',
+    first_res_no: 0,
+    last_res_no: 0,
+    ntc: '',
+    weight: 0,
 };

@@ -28,30 +28,69 @@ type AuthRequestType =
     'LogIn' |
     'LogOut';
 
+export type EdgeInteraction = 'WatsonCrick' | 'SugarEdge';
 export type JobState = 'NotStarted' | 'Running' | 'Finished' | 'Failed';
 export type JobStep = number | 'preparing' | 'none';
 export type JobTotalSteps = number | 'none';
 export type JobType = 'Standard' | 'DensityFit';
 export type JobCommandsMode = 'None' | 'Synthetic' | 'Raw';
 export type FileOperationRequestType = 'InitUpload' | 'FinishUpload' | 'CancelUpload' | 'Delete';
+export type Orientation = 'Cis' | 'Trans';
 
 /* JSON commands */
 
-export type CompoundParameter = {
-    chain: string;
-    ctype: 'DNA' | 'RNA' | 'Protein';
-    sequence: string;
-    first_residue_no: number;  // TODO: Extend to allow for arbitrary residue numbers
+export type Chain = {
+    name: string;
+    auth_name: string;
 }
 
-export type MobilizerParameter = {
+export type ResidueNumber = {
+    number: number;
+    auth_number: number;
+}
+
+export type BaseInteraction = {
+    chain_name_1: string;
+    res_no_1: number;
+    edge_1: EdgeInteraction;
+    chain_name_2: string;
+    res_no_2: number;
+    edge_2: EdgeInteraction;
+    orientation: Orientation;
+}
+
+export type Compound = {
+    chain: Chain;
+    ctype: 'DNA' | 'RNA' | 'Protein';
+    sequence: string;
+    residues: ResidueNumber[];
+}
+
+export type DoubleHelix = {
+    chain_name_1: string;
+    first_res_no_1: number;
+    last_res_no_1: number;
+    chain_name_2: string;
+    first_res_no_2: number;
+    last_res_no_2: number;
+}
+
+export type JsonAdvancedParameters = Record<string, string | boolean | number | null>;
+
+export type Mobilizer = {
     bond_mobility: string;
     chain?: string;
     first_residue?: number;
     last_residue?: number;
-};
+}
 
-export type JsonAdvancedParameters = Record<string, string | boolean | number | null>;
+export type NtC = {
+    chain_name: string;
+    first_res_no: number;
+    last_res_no: number;
+    ntc: string;
+    weight: number;
+}
 
 export type CommonCommands = {
     reporting_interval: number,
@@ -64,11 +103,11 @@ export type CommonCommands = {
 
 export type StandardCommands = CommonCommands & {
     job_type: 'Standard',
-    sequences: string[],
-    double_helices: string[],
-    base_interactions: string[],
-    ntcs: string[],
-    mobilizers: MobilizerParameter[],
+    compounds: Compound[],
+    double_helices: DoubleHelix[],
+    base_interactions: BaseInteraction[],
+    ntcs: NtC[],
+    mobilizers: Mobilizer[],
     adv_params: JsonAdvancedParameters,
     set_default_MD_parameters: boolean,
 }
@@ -77,8 +116,8 @@ export type DensityFitCommands = CommonCommands & {
     job_type: 'DensityFit',
     structure_file_name: string,
     density_map_file_name: string,
-    compounds: CompoundParameter[],
-    mobilizers: MobilizerParameter[],
+    compounds: Compound[],
+    mobilizers: Mobilizer[],
 }
 
 /* Requests */

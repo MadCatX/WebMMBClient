@@ -6,7 +6,6 @@
  * @author Jiří Černý (jiri.cerny@ibt.cas.cz)
  */
 
-
 export class ResidueSpan {
     constructor(public readonly first: number, public readonly last: number) {
         if (this.last < this.first)
@@ -28,13 +27,13 @@ export class ResidueSpan {
 
 export class Mobilizer {
     constructor(public readonly bondMobility: Mobilizer.BondMobility,
-                public readonly chain?: string,
+                public readonly chainName?: string,
                 public readonly residueSpan?: ResidueSpan) {
     }
 
     equals(other: Mobilizer) {
         return this.bondMobility === other.bondMobility &&
-               this.chain === other.chain &&
+               this.chainName === other.chainName &&
                this.residueSpan === other.residueSpan;
     }
 }

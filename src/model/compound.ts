@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020 WebMMB contributors, licensed under MIT, See LICENSE file for details.
+ * Copyright (c) 2020-2021 WebMMB contributors, licensed under MIT, See LICENSE file for details.
  *
  * @author Michal Malý (michal.maly@ibt.cas.cz)
  * @author Samuel C. Flores (samuelfloresc@gmail.com)
@@ -7,17 +7,44 @@
  */
 
 const DNAIdentifiers = [ 'A', 'T', 'G', 'C' ];
-const ProteinIdentifiers = ['G', 'P', 'A', 'V', 'L', 'I', 'M', 'C', 'F', 'Y', 'W', 'H', 'K', 'R', 'Q', 'N', 'E', 'D', 'S', 'T' ];
+const ProteinIdentifiers = [ 'G', 'P', 'A', 'V', 'L', 'I', 'M', 'C', 'F', 'Y', 'W', 'H', 'K', 'R', 'Q', 'N', 'E', 'D', 'S', 'T' ];
 const RNAIdentifiers = [ 'A', 'U', 'G', 'C' ];
 
+export interface ResidueNumber {
+    number: number;
+    authNumber: number;
+}
+
+export interface Chain {
+    name: string;
+    authName: string;
+}
+
+interface Comparator<T> {
+    (first: T, second: T): boolean;
+}
+
+function cmpArr<T>(first: T[], second: T[], comparator?: Comparator<T>) {
+    if (first.length !== second.length)
+        return false;
+
+    const cmpFunc = comparator ? comparator : (first: T, second: T) => first === second;
+    for (let idx = 0; idx < first.length; idx++) {
+        if (!cmpFunc(first[idx], second[idx]))
+            return false;
+    }
+    return true;
+}
+
+export function cmpChain(first: Chain, second: Chain) {
+    return first.name === second.name &&
+           first.authName === second.authName;
+}
+
 export class Compound {
-    readonly residueCount: number;
-    readonly lastResidueNo: number;
+    readonly residues: ResidueNumber[];
 
-    constructor(readonly chain: string, readonly firstResidueNo: number, readonly type: Compound.Type, readonly sequence: Compound.AnyResidue[]) {
-        this.residueCount = sequence.length;
-        this.lastResidueNo = this.firstResidueNo + this.residueCount - 1;
-
+    constructor(readonly type: Compound.Type, readonly chain: Chain, readonly sequence: Compound.AnyResidue[], residues: ResidueNumber[]|number) {
         switch (type) {
         case 'DNA':
             if (!Compound.isDna(sequence))
@@ -25,20 +52,44 @@ export class Compound {
             break;
         case 'protein':
             if (!Compound.isProtein(sequence))
-                throw new Error('Sequence is not DNA');
+                throw new Error('Sequence is not protein');
             break;
         case 'RNA':
             if (!Compound.isRna(sequence))
                 throw new Error('Sequence is not RNA');
             break;
         }
+
+        if (typeof residues === 'object') {
+            if (residues.length !== sequence.length)
+                throw new Error('Length of residue numbering array does not match the length of sequence');
+            this.residues = residues;
+        } else if (typeof residues === 'number') {
+            this.residues = [];
+            for (let idx = 0; idx < sequence.length; idx++) {
+                this.residues.push({ number: idx + 1, authNumber: idx + residues });
+            }
+        } else
+            throw new Error('Bad residues type');
     }
 
     equals(other: Compound) {
-        return this.chain === other.chain &&
-               this.firstResidueNo === other.firstResidueNo &&
+        return this.chain.name === other.chain.name && this.chain.authName === this.chain.authName &&
+               cmpArr(this.residues, other.residues, (a: ResidueNumber, b: ResidueNumber) => a.number === b.number && a.authNumber === b.authNumber) &&
                this.type === other.type &&
-               this.sequence === other.sequence;
+               cmpArr(this.sequence, other.sequence);
+    }
+
+    firstResidue() {
+        return this.residues[0];
+    }
+
+    lastResidue() {
+        return this.residues[this.residues.length - 1];
+    }
+
+    residueByNumber(num: number) {
+        return this.residues.find(res => res.number === num);
     }
 }
 

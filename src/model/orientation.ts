@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020 WebMMB contributors, licensed under MIT, See LICENSE file for details.
+ * Copyright (c) 2020-2021 WebMMB contributors, licensed under MIT, See LICENSE file for details.
  *
  * @author Michal Malý (michal.maly@ibt.cas.cz)
  * @author Samuel C. Flores (samuelfloresc@gmail.com)
@@ -7,8 +7,8 @@
  */
 
 export namespace Orientation {
-    export const Orientations = [ 'Cis', 'Trans' ];
-    export type Orientation = typeof Orientations[number];
+    export type Orientation = 'Cis' | 'Trans';
+    export const Orientations: Orientation[] = [ 'Cis', 'Trans' ];
 
     export function isOrientation(o: string): o is Orientation {
         return Orientations.includes(o as Orientation);

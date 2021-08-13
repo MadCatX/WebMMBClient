@@ -64,7 +64,7 @@ export function isInt(obj: unknown): obj is number {
 
 export function isNum(obj: unknown): obj is number {
     if (typeof obj === 'number')
-        return Number.isInteger(obj);
+        return Number.isFinite(obj);
     if (typeof obj === 'string')
         return !isNaN(Num.parseFloatStrict(obj));
     return false;

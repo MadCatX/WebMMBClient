@@ -122,29 +122,34 @@ export namespace TextCommandsSerializer {
 
         // Write sequences
         commands.push('', '# Sequences');
-        params.compounds.forEach((c) => {
-            const entry = `${c.type.toLocaleUpperCase()} ${c.chain} ${c.firstResidueNo} ${Compound.sequenceAsString(c.sequence)}`;
+        params.compounds.forEach(c => {
+            const entry = `${c.type.toLocaleUpperCase()} ${c.chain.name} ${c.firstResidue().authNumber} ${Compound.sequenceAsString(c.sequence)}`;
             commands.push(entry);
         });
 
         // Double helices
         commands.push('', '# Double helices');
-        params.doubleHelices.forEach((dh) => {
-            const entry = `nucleicAcidDuplex ${dh.chainOne} ${dh.firstResidueNoOne} ${dh.lastResidueNoOne} ${dh.chainTwo} ${dh.firstResidueNoTwo} ${dh.lastResidueNoTwo}`;
+        params.doubleHelices.forEach(dh => {
+            const cOne = params.compounds.find(c => c.chain.name === dh.chainNameOne)!;
+            const cTwo = params.compounds.find(c => c.chain.name === dh.chainNameTwo)!;
+            const entry = `nucleicAcidDuplex ${cOne.chain.authName} ${cOne.residueByNumber(dh.firstResidueNoOne)!.authNumber} ${cOne.residueByNumber(dh.lastResidueNoOne)} ${cTwo.chain.authName} ${cTwo.residueByNumber(dh.firstResidueNoTwo)!.authNumber} ${cTwo.residueByNumber(dh.lastResidueNoTwo)!.authNumber}`;
             commands.push(entry);
         });
 
         // Base interactions
         commands.push('', '# Base interactions');
-        params.baseInteractions.forEach((bi) => {
-            const entry = `baseInteraction ${bi.chainOne} ${bi.residueOne} ${bi.edgeOne} ${bi.chainTwo} ${bi.residueTwo} ${bi.edgeTwo} ${bi.orientation}`;
+        params.baseInteractions.forEach(bi => {
+            const cOne = params.compounds.find(c => c.chain.name === bi.chainNameOne)!;
+            const cTwo = params.compounds.find(c => c.chain.name === bi.chainNameTwo)!;
+            const entry = `baseInteraction ${cOne.chain.authName} ${cOne.residueByNumber(bi.residueNoTwo)!.authNumber} ${bi.edgeOne} ${cTwo.chain.authName} ${cTwo.residueByNumber(bi.residueNoTwo)} ${bi.edgeTwo} ${bi.orientation}`;
             commands.push(entry);
         });
 
         // NtCs
         commands.push('', '# NtCs');
         params.ntcs.forEach((ntc) => {
-            const entry  = `NtC ${ntc.chain} ${ntc.firstResidueNo} ${ntc.lastResidueNo} ${ntc.ntc} 1.5`;
+            const c = params.compounds.find(c => c.chain.name === ntc.chainName)!;
+            const entry  = `NtC ${c.chain.authName} ${c.residueByNumber(ntc.firstResidueNo)!.authNumber} ${c.residueByNumber(ntc.lastResidueNo)!.authNumber} ${ntc.ntc} 1.5`;
             commands.push(entry);
         });
 
@@ -152,10 +157,12 @@ export namespace TextCommandsSerializer {
         commands.push('', '# Mobilizers');
         params.mobilizers.forEach(m => {
             let entry = `mobilizer ${m.bondMobility}`;
-            if (m.chain !== undefined)
-                entry += ` ${m.chain}`;
-            if (m.residueSpan !== undefined)
-                entry += ` ${m.residueSpan.first} ${m.residueSpan.last}`;
+            if (m.chainName !== undefined) {
+                const c = params.compounds.find(c => c.chain.name === m.chainName)!;
+                entry += ` ${c.chain.authName}`;
+                if (m.residueSpan !== undefined)
+                    entry += ` ${c.residueByNumber(m.residueSpan.first)!.authNumber} ${c.residueByNumber(m.residueSpan.last)!.authNumber}`;
+            }
             commands.push(entry);
         });
 
@@ -210,36 +217,53 @@ export namespace JsonCommandsSerializer {
         return defs;
     }
 
-    function baseInteractions(bis: BaseInteraction[]) {
-        const defs: string[] = [];
+    function baseInteractions(bis: BaseInteraction[], compounds: Compound[]) {
+        const defs: Api.BaseInteraction[] = [];
 
-        bis.forEach((bi) => {
-            defs.push(`baseInteraction ${bi.chainOne} ${bi.residueOne} ${bi.edgeOne} ${bi.chainTwo} ${bi.residueTwo} ${bi.edgeTwo} ${bi.orientation}`);
+        bis.forEach(bi => {
+            const cOne = compounds.find(c => c.chain.name === bi.chainNameOne)!;
+            const cTwo = compounds.find(c => c.chain.name === bi.chainNameTwo)!;
+            const def: Api.BaseInteraction = {
+                chain_name_1: cOne.chain.name,
+                res_no_1: bi.residueNoOne,
+                edge_1: bi.edgeTwo,
+                chain_name_2: cTwo.chain.name,
+                res_no_2: bi.residueNoTwo,
+                edge_2: bi.edgeTwo,
+                orientation: bi.orientation,
+            }
+            defs.push(def);
         });
 
         return defs;
     }
 
     function compounds(comps: Compound[]) {
-        const defs: Api.CompoundParameter[] = [];
+        const defs: Api.Compound[] = [];
 
         for (const c of comps) {
             defs.push({
-                chain: c.chain,
+                chain: { name: c.chain.name, auth_name: c.chain.authName },
                 ctype: c.type === 'DNA' ? 'DNA' : c.type === 'RNA' ? 'RNA' : 'Protein',
                 sequence: Compound.sequenceAsString(c.sequence),
-                first_residue_no: c.firstResidueNo
+                residues: c.residues.map(res => { return { number: res.number, auth_number: res.authNumber } }),
             });
         }
 
         return defs;
     }
 
-    function doubleHelices(dhs: DoubleHelix[]) {
-        const defs: string[] = [];
+    function doubleHelices(dhs: DoubleHelix[], compounds: Compound[]) {
+        const defs: Api.DoubleHelix[] = [];
 
-        dhs.forEach((dh) => {
-            defs.push(`nucleicAcidDuplex ${dh.chainOne} ${dh.firstResidueNoOne} ${dh.lastResidueNoOne} ${dh.chainTwo} ${dh.firstResidueNoTwo} ${dh.lastResidueNoTwo}`);
+        dhs.forEach(dh => {
+            const cOne = compounds.find(c => c.chain.name === dh.chainNameOne)!;
+            const cTwo = compounds.find(c => c.chain.name === dh.chainNameTwo)!;
+            const def = {
+                chain_name_1: cOne.chain.name, first_res_no_1: dh.firstResidueNoOne, last_res_no_1: dh.lastResidueNoOne,
+                chain_name_2: cTwo.chain.name, first_res_no_2: dh.firstResidueNoTwo, last_res_no_2: dh.lastResidueNoTwo,
+            };
+            defs.push(def);
         });
 
         return defs;
@@ -250,13 +274,14 @@ export namespace JsonCommandsSerializer {
         return cmds;
     }
 
-    function mobilizers(mobilizers: Mobilizer[]) {
-        const defs = new Array<Api.MobilizerParameter>();
+    function mobilizers(mobilizers: Mobilizer[], compounds: Compound[]) {
+        const defs = new Array<Api.Mobilizer>();
 
         mobilizers.forEach(m => {
-            const def: Api.MobilizerParameter = { bond_mobility: m.bondMobility };
-            if (m.chain !== undefined) {
-                def.chain = m.chain;
+            const def: Api.Mobilizer = { bond_mobility: m.bondMobility };
+            if (m.chainName !== undefined) {
+                const c = compounds.find(c => c.chain.name === m.chainName)!;
+                def.chain = c.chain.name;
 
                 if (m.residueSpan !== undefined) {
                     def.first_residue = m.residueSpan.first;
@@ -270,21 +295,19 @@ export namespace JsonCommandsSerializer {
         return defs;
     }
 
-    function ntcs(ntcs: NtCConformation[]) {
-        const defs: string[] = [];
+    function ntcs(ntcs: NtCConformation[], compounds: Compound[]) {
+        const defs: Api.NtC[] = [];
 
-        ntcs.forEach((ntc) => {
-            defs.push(`NtC ${ntc.chain} ${ntc.firstResidueNo} ${ntc.lastResidueNo} ${ntc.ntc} 1.5`);
-        });
-
-        return defs;
-    }
-
-    function sequences(compounds: Compound[]) {
-        const defs: string[] = [];
-
-        compounds.forEach((c) => {
-            defs.push(`${c.type.toLocaleUpperCase()} ${c.chain} ${c.firstResidueNo} ${Compound.sequenceAsString(c.sequence)}`);
+        ntcs.forEach(ntc => {
+            const c = compounds.find(c => c.chain.name === ntc.chainName)!;
+            const def = {
+                chain_name: c.chain.name,
+                first_res_no: ntc.firstResidueNo,
+                last_res_no: ntc.lastResidueNo,
+                ntc: ntc.ntc,
+                weight: 1.5, // Temporary
+            };
+            defs.push(def);
         });
 
         return defs;
@@ -296,7 +319,7 @@ export namespace JsonCommandsSerializer {
         cmds.structure_file_name = params.densityFitFiles.structureFileName;
         cmds.density_map_file_name = params.densityFitFiles.densityMapFileName;
         cmds.compounds = compounds(params.compounds);
-        cmds.mobilizers = mobilizers(params.mobilizers);
+        cmds.mobilizers = mobilizers(params.mobilizers, params.compounds);
 
         return cmds;
     }
@@ -310,11 +333,11 @@ export namespace JsonCommandsSerializer {
 
         cmds = mdParams(cmds, params.mdParameters);
 
-        cmds.sequences = sequences(params.compounds);
-        cmds.double_helices = doubleHelices(params.doubleHelices);
-        cmds.base_interactions = baseInteractions(params.baseInteractions);
-        cmds.ntcs = ntcs(params.ntcs);
-        cmds.mobilizers = mobilizers(params.mobilizers);
+        cmds.compounds = compounds(params.compounds);
+        cmds.double_helices = doubleHelices(params.doubleHelices, params.compounds);
+        cmds.base_interactions = baseInteractions(params.baseInteractions, params.compounds);
+        cmds.ntcs = ntcs(params.ntcs, params.compounds);
+        cmds.mobilizers = mobilizers(params.mobilizers, params.compounds);
 
         // Advanced
         cmds.adv_params = advancedParameters(params.advParams);

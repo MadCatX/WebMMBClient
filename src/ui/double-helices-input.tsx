@@ -25,10 +25,10 @@ const ChainLField = LabeledField.ComboBox<string>();
 const ResidueLField = LabeledField.ComboBox<number>();
 
 interface State {
-    chainOne?: string;
+    chainNameOne?: string;
     firstResNoOne?: number;
     lastResNoOne?: number;
-    chainTwo?: string;
+    chainNameTwo?: string;
     firstResNoTwo?: number;
     errors: string[];
 }
@@ -41,11 +41,11 @@ export class DoubleHelicesInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, 
 
         this.state = {
             errors: new Array<string>(),
-            chainOne: compounds.length > 0 ? compounds[0].chain : undefined,
-            chainTwo: compounds.length > 0 ? compounds[0].chain : undefined,
-            firstResNoOne: compounds.length > 0 ? compounds[0].firstResidueNo : undefined,
-            lastResNoOne: compounds.length > 0 ? compounds[0].firstResidueNo : undefined,
-            firstResNoTwo: compounds.length > 0 ? compounds[0].lastResidueNo : undefined,
+            chainNameOne: compounds.length > 0 ? compounds[0].chain.name : undefined,
+            chainNameTwo: compounds.length > 0 ? compounds[0].chain.name : undefined,
+            firstResNoOne: compounds.length > 0 ? compounds[0].firstResidue().number : undefined,
+            lastResNoOne: compounds.length > 0 ? compounds[0].firstResidue().number : undefined,
+            firstResNoTwo: compounds.length > 0 ? compounds[0].lastResidue().number : undefined,
         };
     }
 
@@ -57,14 +57,14 @@ export class DoubleHelicesInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, 
         const errors = new Array<string>();
 
         // Sanity checks
-        if (this.state.chainOne === undefined || (cA = compounds.find(c => c.chain === this.state.chainOne)) === undefined)
+        if (this.state.chainNameOne === undefined || (cA = compounds.find(c => c.chain.name === this.state.chainNameOne)) === undefined)
             errors.push('Invalid first chain');
         if (this.state.firstResNoOne === undefined)
             errors.push('First residue on first chain is not set');
         if (this.state.lastResNoOne === undefined)
             errors.push('Last residue on first chain is not set');
 
-        if (this.state.chainTwo === undefined || (cB = compounds.find(c => c.chain === this.state.chainTwo)) === undefined)
+        if (this.state.chainNameTwo === undefined || (cB = compounds.find(c => c.chain.name === this.state.chainNameTwo)) === undefined)
             errors.push('Invalid second chain');
         if (this.state.firstResNoTwo === undefined)
             errors.push('First residue on second chain is not set');
@@ -76,14 +76,14 @@ export class DoubleHelicesInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, 
 
         const firstOne = this.state.firstResNoOne!;
         const lastOne = this.state.lastResNoOne!;
-        if (firstOne > lastOne || firstOne > cA!.lastResidueNo)
+        if (firstOne > lastOne || firstOne > cA!.lastResidue().number)
             errors.push('Invalid residues on first chain')
 
         const firstTwo = this.state.firstResNoTwo!;
         const lastTwo = firstTwo - (lastOne - firstOne);
-        if (firstTwo > cB!.lastResidueNo || lastTwo < cB!.firstResidueNo)
+        if (firstTwo > cB!.lastResidue().number || lastTwo < cB!.firstResidue().number)
             errors.push('Invalid residues on second chain');
-        if (this.state.chainOne! === this.state.chainTwo! && lastOne >= lastTwo)
+        if (this.state.chainNameOne! === this.state.chainNameTwo! && lastOne >= lastTwo)
                 errors.push('Paired residues on the same chain cannot overlap');
 
         if (errors.length > 0) {
@@ -91,7 +91,7 @@ export class DoubleHelicesInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, 
             return;
         }
 
-        const dh = new DoubleHelix(this.state.chainOne!, firstOne, lastOne, this.state.chainTwo!, firstTwo, lastTwo);
+        const dh = new DoubleHelix(this.state.chainNameOne!, firstOne, lastOne, this.state.chainNameTwo!, firstTwo, lastTwo);
         const helices = FU.getArray<DoubleHelix[]>(this.props.ctxData, 'mol-in-dh-added');
         if (helices.find(e => e.equals(dh)) !== undefined) {
             errors.push('Such double helix already exists');
@@ -109,18 +109,18 @@ export class DoubleHelicesInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, 
         return undefined;
     }
 
-    private lastSelectableResidue(compounds: Compound[], firstResNoOne?: number, lastResNoOne?: number, chainTwo?: string) : [number|undefined, boolean] {
-        if (firstResNoOne === undefined || lastResNoOne === undefined || chainTwo === undefined)
+    private lastSelectableResidue(compounds: Compound[], firstResNoOne?: number, lastResNoOne?: number, chainNameTwo?: string) : [number|undefined, boolean] {
+        if (firstResNoOne === undefined || lastResNoOne === undefined || chainNameTwo === undefined)
             return [undefined, true];
 
         if (lastResNoOne < firstResNoOne)
             return [undefined, true];
 
-        const comp = compounds.find((c) => c.chain === chainTwo);
+        const comp = compounds.find(c => c.chain.name, chainNameTwo);
         if (comp === undefined)
             return [undefined, true];
-        const last = comp.firstResidueNo + (lastResNoOne - firstResNoOne);
-        if (last > comp.lastResidueNo)
+        const last = comp.firstResidue().number + (lastResNoOne - firstResNoOne);
+        if (last > comp.lastResidue().number)
             return [undefined, false];
         return [last, true];
     }
@@ -128,20 +128,20 @@ export class DoubleHelicesInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, 
     componentDidUpdate() {
         const compounds = FU.getArray<Compound[]>(this.props.ctxData, 'mol-in-cp-added');
 
-        if (compounds.length < 1 && this.state.chainOne === undefined && this.state.chainTwo === undefined)
+        if (compounds.length < 1 && this.state.chainNameOne === undefined && this.state.chainNameTwo === undefined)
             return; // Do fuck all;
 
         if ((compounds.length < 1 ||
-             compounds.find(c => c.chain === this.state.chainOne) === undefined ||
-             compounds.find(c => c.chain === this.state.chainTwo) === undefined) &&
-            (this.state.chainOne !== undefined && this.state.chainTwo !== undefined)) {
+             compounds.find(c => c.chain.name === this.state.chainNameOne) === undefined ||
+             compounds.find(c => c.chain.name === this.state.chainNameTwo) === undefined) &&
+            (this.state.chainNameOne !== undefined && this.state.chainNameTwo !== undefined)) {
             // Revert to empty state
             this.setState({
                 ...this.state,
-                chainOne: undefined,
+                chainNameOne: undefined,
                 firstResNoOne: undefined,
                 lastResNoOne: undefined,
-                chainTwo: undefined,
+                chainNameTwo: undefined,
                 firstResNoTwo: undefined,
                 errors: new Array<string>(),
             });
@@ -150,13 +150,13 @@ export class DoubleHelicesInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, 
 
         let update: Partial<State> = {};
 
-        if (this.state.chainOne === undefined)
-            update = { ...update, chainOne: compounds[0].chain };
-        if (this.state.chainTwo === undefined)
-            update = { ...update, chainTwo: compounds[0].chain };
+        if (this.state.chainNameOne === undefined)
+            update = { ...update, chainNameOne: compounds[0].chain.name };
+        if (this.state.chainNameTwo === undefined)
+            update = { ...update, chainNameTwo: compounds[0].chain.name };
 
-        if (this.state.chainOne !== undefined && (this.state.firstResNoOne === undefined || this.state.lastResNoOne === undefined)) {
-            const def = MIM.defaultFirstResNo(compounds, this.state.chainOne);
+        if (this.state.chainNameOne !== undefined && (this.state.firstResNoOne === undefined || this.state.lastResNoOne === undefined)) {
+            const def = MIM.defaultFirstResNo(compounds, this.state.chainNameOne);
             update = {
                 ...update,
                 firstResNoOne: def,
@@ -164,15 +164,15 @@ export class DoubleHelicesInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, 
             };
         }
 
-        if (this.state.chainTwo !== undefined && this.state.firstResNoTwo === undefined) {
-            const def = MIM.defaultFirstResNoRev(compounds, this.state.chainTwo);
+        if (this.state.chainNameTwo !== undefined && this.state.firstResNoTwo === undefined) {
+            const def = MIM.defaultFirstResNoRev(compounds, this.state.chainNameTwo);
             update = {
                 ...update,
                 firstResNoTwo: def,
             };
         }
 
-        if ((this.state.chainOne === this.state.chainTwo) && (this.state.chainOne !== undefined) &&
+        if ((this.state.chainNameOne === this.state.chainNameTwo) && (this.state.chainNameOne !== undefined) &&
             (this.state.firstResNoOne !== undefined && this.state.lastResNoOne) &&
             (this.state.firstResNoOne > this.state.lastResNoOne)) {
             update = {
@@ -188,13 +188,13 @@ export class DoubleHelicesInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, 
     render() {
         const chains = MIM.chainOptions(this.props.ctxData);
         const compounds = FU.getArray<Compound[]>(this.props.ctxData, 'mol-in-cp-added');
-        const [lastSel, lastAvail] = this.lastSelectableResidue(compounds, this.state.firstResNoOne, this.state.lastResNoOne, this.state.chainTwo);
-        const secondOpts = (this.state.chainTwo !== undefined) ? (lastAvail ? MIM.residueOptionsRev(compounds, this.state.chainTwo, undefined, lastSel) : []) : [];
+        const [lastSel, lastAvail] = this.lastSelectableResidue(compounds, this.state.firstResNoOne, this.state.lastResNoOne, this.state.chainNameTwo);
+        const secondOpts = (this.state.chainNameTwo !== undefined) ? (lastAvail ? MIM.residueOptionsRev(compounds, this.state.chainNameTwo, undefined, lastSel) : []) : [];
         let lastResNoTwo = this.lastResNoTwo(this.state.firstResNoOne, this.state.lastResNoOne, this.state.firstResNoTwo);
 
         let cTwo: Compound | undefined;
-        if (this.state.chainTwo !== undefined && lastResNoTwo !== undefined && (cTwo = compounds.find(c => c.chain === this.state.chainTwo)) !== undefined) {
-            if (lastResNoTwo < cTwo.firstResidueNo)
+        if (this.state.chainNameTwo !== undefined && lastResNoTwo !== undefined && (cTwo = compounds.find(c => c.chain.name === this.state.chainNameTwo)) !== undefined) {
+            if (lastResNoTwo < cTwo.firstResidue().number)
                 lastResNoTwo = undefined;
         }
 
@@ -206,17 +206,18 @@ export class DoubleHelicesInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, 
                         id='first-res-one'
                         label='Chain'
                         style='above'
-                        value={this.state.chainOne}
+                        value={this.state.chainNameOne}
                         updateNotifier={v => {
-                            let update: Partial<State> = { chainOne: v };
-                            const c = compounds.find(c => c.chain === v);
+                            let update: Partial<State> = {};
+                            const c = compounds.find(c => c.chain.name === v);
                             if (c === undefined)
-                                update = { ...update, firstResNoOne: undefined, lastResNoOne: undefined };
+                                update = { ...update, chainNameOne: undefined, firstResNoOne: undefined, lastResNoOne: undefined };
                             else {
-                                if (this.state.firstResNoOne !== undefined && !Num.within(c.firstResidueNo, c.lastResidueNo, this.state.firstResNoOne))
-                                    update = { ...update, firstResNoOne: c.firstResidueNo };
-                                if (this.state.lastResNoOne !== undefined && !Num.within(c.firstResidueNo, c.lastResidueNo, this.state.lastResNoOne))
-                                    update = { ...update, lastResNoOne: c.firstResidueNo };
+                                update = { ...update, chainNameOne: c.chain.name };
+                                if (this.state.firstResNoOne !== undefined && !Num.within(c.firstResidue().number, c.lastResidue().number, this.state.firstResNoOne))
+                                    update = { ...update, firstResNoOne: c.firstResidue().number };
+                                if (this.state.lastResNoOne !== undefined && !Num.within(c.firstResidue().number, c.lastResidue().number, this.state.lastResNoOne))
+                                    update = { ...update, lastResNoOne: c.firstResidue().number };
                             }
                             this.setState({ ...this.state, ...update });
                         }}
@@ -228,7 +229,7 @@ export class DoubleHelicesInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, 
                         value={this.state.firstResNoOne}
                         stringifier={Util.nToS}
                         updateNotifier={v => this.setState({ ...this.state, firstResNoOne: v })}
-                        options={MIM.residueOptions(compounds, this.state.chainOne)} />
+                        options={MIM.residueOptions(compounds, this.state.chainNameOne)} />
                     <ResidueLField
                         id='last-res-one'
                         label='Last residue'
@@ -236,20 +237,21 @@ export class DoubleHelicesInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, 
                         value={this.state.lastResNoOne}
                         updateNotifier={v => this.setState({ ...this.state, lastResNoOne: v })}
                         stringifier={Util.nToS}
-                        options={MIM.residueOptions(compounds, this.state.chainOne, this.state.firstResNoOne)} />
+                        options={MIM.residueOptions(compounds, this.state.chainNameOne, this.state.firstResNoOne)} />
                     <ChainLField
                         id='chain-two'
                         label='Chain'
                         style='above'
-                        value={this.state.chainTwo}
+                        value={this.state.chainNameTwo}
                         updateNotifier={v => {
-                            let update: Partial<State> = { chainTwo: v };
-                            const c = compounds.find(c => c.chain === v);
+                            let update: Partial<State> = {};
+                            const c = compounds.find(c => c.chain.name === v);
                             if (c === undefined)
-                                update = { ...update, firstResNoTwo: undefined };
+                                update = { ...update, chainNameTwo: undefined, firstResNoTwo: undefined };
                             else {
-                                if (this.state.firstResNoTwo !== undefined && !Num.within(c.firstResidueNo, c.lastResidueNo, this.state.firstResNoTwo))
-                                    update = { ...update, firstResNoTwo: c.lastResidueNo };
+                                update = { ...update, chainNameTwo: c.chain.name };
+                                if (this.state.firstResNoTwo !== undefined && !Num.within(c.firstResidue().number, c.lastResidue().number, this.state.firstResNoTwo))
+                                    update = { ...update, firstResNoTwo: c.lastResidue().number };
                             }
                             this.setState({ ...this.state, ...update });
                         }}
@@ -280,10 +282,10 @@ export class DoubleHelicesInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, 
                     className='mol-in-dh-added spaced-grid'
                     valuesKey='mol-in-dh-added'
                     columns={[
-                        {caption: 'Chain', k: 'chainOne'},
+                        {caption: 'Chain', k: 'chainNameOne'},
                         {caption: 'First residue', k: 'firstResidueNoOne'},
                         {caption: 'Last residue', k: 'lastResidueNoOne'},
-                        {caption: 'Chain', k: 'chainTwo'},
+                        {caption: 'Chain', k: 'chainNameTwo'},
                         {caption: 'First residue', k: 'firstResidueNoTwo'},
                         {caption: 'Last residue', k: 'lastResidueNoTwo'}]}
                     hideHeader={true}

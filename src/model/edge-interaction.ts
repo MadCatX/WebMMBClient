@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020 WebMMB contributors, licensed under MIT, See LICENSE file for details.
+ * Copyright (c) 2020-2021 WebMMB contributors, licensed under MIT, See LICENSE file for details.
  *
  * @author Michal Malý (michal.maly@ibt.cas.cz)
  * @author Samuel C. Flores (samuelfloresc@gmail.com)
@@ -7,8 +7,8 @@
  */
 
 export namespace EdgeInteraction {
-    export const Edges = [ 'WatsonCrick', 'SugarEdge' ];
-    export type Edge = typeof Edges[number];
+    export type Edge = 'WatsonCrick' | 'SugarEdge';
+    export const Edges: Edge[] = [ 'WatsonCrick', 'SugarEdge' ];
 
     export function isEdge(e: string): e is Edge {
         return Edges.includes(e as Edge);
@@ -21,7 +21,5 @@ export namespace EdgeInteraction {
         case 'SugarEdge':
             return 'Sugar edge';
         }
-
-        throw new Error('Unreachable');
     }
 }

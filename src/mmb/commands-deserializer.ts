@@ -9,16 +9,13 @@
 import { Parameters, ParameterNames } from '../mmb/available-parameters';
 import { AdditionalFile } from '../model/additional-file';
 import { BaseInteraction } from '../model/base-interaction';
-import { Compound } from '../model/compound';
+import { Compound, ResidueNumber } from '../model/compound';
 import { DensityFitFiles } from '../model/density-fit-files';
 import { DoubleHelix } from '../model/double-helix';
-import { EdgeInteraction } from '../model/edge-interaction';
 import { GlobalConfig } from '../model/global-config';
 import { MdParameters } from '../model/md-parameters';
 import { Mobilizer, ResidueSpan } from '../model/mobilizer';
-import { NtC } from '../model/ntc';
 import { NtCConformation } from '../model/ntc-conformation';
-import { Orientation } from '../model/orientation';
 import { Parameter as P } from '../model/parameter';
 import { Reporting } from '../model/reporting';
 import { StagesSpan } from '../model/stages-span';
@@ -30,31 +27,6 @@ export namespace JsonCommandsDeserializer {
         if (tok.length !== 1)
             throw new Error('Invalid chain ID');
         return tok;
-    }
-
-    function getEdge(tok: string): EdgeInteraction.Edge {
-        if (EdgeInteraction.isEdge(tok))
-            return tok;
-        throw new Error(`Invalid edge interaction ${tok}`);
-    }
-
-    function getNtC(tok: string) {
-        if (NtC.isConformer(tok))
-            return tok;
-        throw new Error(`Invalid NtC ${tok}`);
-    }
-
-    function getOrientation(tok: string): Orientation.Orientation {
-        if (Orientation.isOrientation(tok))
-            return tok;
-        throw new Error(`Invalid orientation ${tok}`);
-    }
-
-    function getResNo(tok: string) {
-        const n = Num.parseIntStrict(tok);
-        if (isNaN(n))
-            throw new Error('Invalid residue no');
-        return n;
     }
 
     export function toAdvancedParameters(commands: Api.StandardCommands, files: AdditionalFile[]): Api.JsonAdvancedParameters {
@@ -116,28 +88,12 @@ export namespace JsonCommandsDeserializer {
     export function toBaseInteractions(commands: Api.StandardCommands) {
         const baseInteractions: BaseInteraction[] = [];
 
-        for (const line of commands.base_interactions) {
-            const def = line.split(' ');
-
-            if (def.length !== 8)
-                throw new Error('Invalid number of tokens');
-
-            if (def[0] !== 'baseInteraction')
-                throw new Error(`Invalid prefix ${def[0]}`);
-
-            const chainOne = getChain(def[1]);
-            const resOne = getResNo(def[2]);
-            const edgeOne = getEdge(def[3]);
-            const chainTwo = getChain(def[4]);
-            const resTwo = getResNo(def[5]);
-            const edgeTwo = getEdge(def[6]);
-            const orientation = getOrientation(def[7]);
-
+        for (const bi of commands.base_interactions) {
             baseInteractions.push(
                 new BaseInteraction(
-                    chainOne, resOne, edgeOne,
-                    chainTwo, resTwo, edgeTwo,
-                    orientation
+                    bi.chain_name_1, bi.res_no_1, bi.edge_1,
+                    bi.chain_name_2, bi.res_no_2, bi.edge_2,
+                    bi.orientation
                 )
             );
         }
@@ -155,27 +111,12 @@ export namespace JsonCommandsDeserializer {
     export function toDoubleHelices(commands: Api.StandardCommands) {
         const doubleHelices: DoubleHelix[] = [];
 
-        for (const line of commands.double_helices) {
-            const def = line.split(' ');
-
-            if (def.length !== 7)
-                throw new Error('Invalid number of tokens');
-
-            if (def[0] !== 'nucleicAcidDuplex')
-                throw new Error(`Invalid prefix ${def[0]}`);
-
-            const chainOne = getChain(def[1]);
-            const firstResNoOne = getResNo(def[2]);
-            const lastResNoOne = getResNo(def[3]);
-
-            const chainTwo = getChain(def[4]);
-            const firstResNoTwo = getResNo(def[5]);
-            const lastResNoTwo = getResNo(def[6]);
+        for (const dh of commands.double_helices) {
 
             doubleHelices.push(
                 new DoubleHelix(
-                    chainOne, firstResNoOne, lastResNoOne,
-                    chainTwo, firstResNoTwo, lastResNoTwo
+                    dh.chain_name_1, dh.first_res_no_1, dh.last_res_no_1,
+                    dh.chain_name_2, dh.first_res_no_2, dh.last_res_no_2
                 )
             );
         }
@@ -183,36 +124,7 @@ export namespace JsonCommandsDeserializer {
         return doubleHelices;
     }
 
-    export function toCompounds(commands: Api.StandardCommands) {
-        const compounds: Compound[] = [];
-
-        for (const line of commands.sequences) {
-            const def = line.split(' ');
-            if (def.length !== 4)
-                throw new Error('Invalid number of tokens');
-
-            const type = ((): Compound.Type => {
-                if (def[0] === 'DNA')
-                    return 'DNA';
-                if (def[0] === 'RNA')
-                    return 'RNA';
-                if (def[0] === 'protein')
-                    return 'protein';
-                throw new Error(`Invalid compound type ${def[0]}`);
-            })();
-
-            const chain = getChain(def[1]);
-            const firstResNo = getResNo(def[2]);
-            const seq = Compound.stringToSequence(def[3], type);
-
-            compounds.push(new Compound(chain, firstResNo, type, seq));
-        }
-
-        return compounds;
-    }
-
-    // FIXME: Unify with toCompounds once we standardize the compounds API representation
-    export function toCompounds2(commands: Api.DensityFitCommands) {
+    export function toCompounds(commands: Api.DensityFitCommands|Api.StandardCommands) {
         const compounds: Compound[] = [];
 
         for (const c of commands.compounds) {
@@ -220,8 +132,12 @@ export namespace JsonCommandsDeserializer {
             if (!Compound.isType(type))
                 throw new Error(`Compound type ${type} is not a valid compound type`);
 
+            const chain = { name: c.chain.name, authName: c.chain.auth_name };
+            const residues: ResidueNumber[] = [];
+            for (const res of c.residues)
+                residues.push({ number: res.number, authNumber: res.auth_number });
             const seq = Compound.stringToSequence(c.sequence, type);
-            compounds.push(new Compound(c.chain, c.first_residue_no, type, seq));
+            compounds.push(new Compound(type, chain, seq, residues));
         }
 
         return compounds;
@@ -269,22 +185,10 @@ export namespace JsonCommandsDeserializer {
     export function toNtCs(commands: Api.StandardCommands) {
         const ntcs: NtCConformation[] = [];
 
-        for (const line of commands.ntcs) {
-            const def = line.split(' ');
-            if (def.length !== 6)
-                throw new Error('Invalid number of tokens');
-
-            if (def[0] !== 'NtC')
-                throw new Error(`Invalid prefix ${def[0]}`);
-
-            const chain = getChain(def[1]);
-            const firstResNo = getResNo(def[2]);
-            const lastResNo = getResNo(def[3]);
-            const ntc = getNtC(def[4]);
-
+        for (const ntc of commands.ntcs) {
             ntcs.push(
                 new NtCConformation(
-                    chain, firstResNo, lastResNo, ntc
+                    ntc.chain_name, ntc.first_res_no, ntc.last_res_no, ntc.ntc
                 )
             );
         }

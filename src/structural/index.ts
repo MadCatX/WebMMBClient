@@ -6,7 +6,7 @@
  * @author Jiří Černý (jiri.cerny@ibt.cas.cz)
  */
 
-import { Compound } from '../model/compound';
+import { Compound, ResidueNumber } from '../model/compound';
 import { parseCif } from './cif';
 
 const CompoundIdsToSingle = new Map([
@@ -28,13 +28,9 @@ const CompoundIdsToSingle = new Map([
 ]);
 
 export namespace Structural {
-    export type Residue = { compound: string, no: number };
-    export type Chains = Map<string, Residue[]>;
-
-    export interface Division {
-        chains: Chains;
-        authChains: Chains;
-    }
+    export type Chain = { authName: string, residues: Residue[] };
+    export type Residue = { compound: string, no: number, authNo: number, seqNo: number };
+    export type Chains = Map<string, Chain>;
 
     function decideType(possible: Compound.PossibleTypes, considerNA: boolean) {
         if (possible.protein) {
@@ -53,7 +49,7 @@ export namespace Structural {
         throw new Error('Cannot decide compound type');
     }
 
-    export async function cifToDivision(cif: string | File): Promise<Division> {
+    export async function cifToChains(cif: string | File): Promise<Chains> {
         let data = '';
         if (typeof cif !== 'string')
             data = await cif.text();
@@ -61,14 +57,14 @@ export namespace Structural {
         return parseCif(data);
     }
 
-    export function divisionToCompounds(div: Division) {
+    export function chainsToCompounds(chains: Chains) {
         const compounds: Compound[] = [];
         // TODO: Account for author identifiers
-        for (const [k, v] of div.chains.entries()) {
+        for (const [k, v] of chains.entries()) {
             let seq = '';
-            const resNos: number[] = [];
+            const residues: ResidueNumber[] = [];
             let considerNA = true;
-            for (const res of v) {
+            for (const res of v.residues) {
                 considerNA = res.compound.length === 1;
                 const single = CompoundIdsToSingle.get(res.compound);
                 if (!single) {
@@ -77,7 +73,7 @@ export namespace Structural {
                 }
 
                 seq += single;
-                resNos.push(res.no);
+                residues.push({ number: res.no, authNumber: res.authNo });
             }
             if (seq.length === 0) {
                 console.warn(`Chain ${k} contains empty sequence. Skipping.`);
@@ -89,13 +85,15 @@ export namespace Structural {
                 continue;
             }
             const type = decideType(possible, considerNA);
-            compounds.push(new Compound(k, resNos[0], type, Compound.stringToSequence(seq, type)));
+
+            const ch = { name: k, authName: v.authName };
+            compounds.push(new Compound(type, ch, Compound.stringToSequence(seq, type), residues));
         }
 
         return compounds;
     }
 
-    export async function pdbToDivision(pdb: string | File): Promise<Division> {
+    export async function pdbToChains(pdb: string | File): Promise<Chains> {
         throw new Error('Unimplemented');
     }
 }

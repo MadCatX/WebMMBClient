@@ -6,17 +6,27 @@
  * @author Jiří Černý (jiri.cerny@ibt.cas.cz)
  */
 
+import { Chain, ResidueNumber } from '../../model/compound';
+
 function HasOwnProperty<X extends {}, Y extends PropertyKey>(obj: X, prop: Y): obj is X & Record<Y, unknown> {
     return obj.hasOwnProperty(prop);
 }
 
 export namespace Util {
+    export function chainToString(chain: Chain) {
+        return `${chain.name} (${chain.authName})`;
+    }
+
     export function formatError(status: number|undefined, prefix: string, text: string) {
         if (status === 403)
             return `${prefix} - ${status}: You session may have expired. Try logging in again.`;
 
         const st = status ? `${status}: ${prefix} - ` : `${prefix} - `;
         return `${st} ${text}`;
+    }
+
+    export function resNumToString(resNum: ResidueNumber) {
+        return `${resNum.number} (${resNum.authNumber})`;
     }
 
     export function toString(value: any) {

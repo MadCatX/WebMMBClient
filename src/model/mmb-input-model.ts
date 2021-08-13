@@ -13,6 +13,7 @@ import * as AVP from '../mmb/available-parameters';
 import { DensityFitCommands, StandardCommands } from '../mmb/api';
 import { JsonCommandsDeserializer } from '../mmb/commands-deserializer';
 import { ParameterNames } from '../mmb/available-parameters';
+import { Util } from '../ui/common/util';
 import { BaseInteraction } from './base-interaction';
 import { Compound } from './compound';
 import { DoubleHelix } from './double-helix';
@@ -63,7 +64,7 @@ export namespace MmbInputModel {
     export function chainOptions(data: ContextData) {
         const compounds = (data.values.get('mol-in-cp-added') ?? new Array<Compound>()) as Compound[];
         const chains = new Array<ComboBox.Option<string>>();
-        compounds.forEach((comp) => chains.push({value: comp.chain, caption: comp.chain}));
+        compounds.forEach(c => chains.push({value: c.chain.name, caption: Util.chainToString(c.chain)}));
         return chains;
     }
 
@@ -75,7 +76,7 @@ export namespace MmbInputModel {
         files.push(DensityFitFile.fromInfo('structure', densityFitFiles.structureFileName, null));
         files.push(DensityFitFile.fromInfo('density-map', densityFitFiles.densityMapFileName, null));
 
-        const compounds = JsonCommandsDeserializer.toCompounds2(commands);
+        const compounds = JsonCommandsDeserializer.toCompounds(commands);
         const mobilizers = JsonCommandsDeserializer.toMobilizers(commands);
 
         map.set('mol-in-density-fit-files-added', files);
@@ -85,18 +86,18 @@ export namespace MmbInputModel {
         return map;
     }
 
-    export function defaultFirstResNo(compounds: Compound[], chain: string): number|undefined {
-        const seq = compounds.find(i => i.chain === chain);
-        if (seq === undefined)
+    export function defaultFirstResNo(compounds: Compound[], chainName: string): number|undefined {
+        const c = compounds.find(i => i.chain.name, chainName);
+        if (c === undefined)
             return undefined;
-        return seq.firstResidueNo;
+        return c.firstResidue().number;
     }
 
-    export function defaultFirstResNoRev(compounds: Compound[], chain: string): number|undefined {
-        const seq = compounds.find(i => i.chain === chain);
-        if (seq === undefined)
+    export function defaultFirstResNoRev(compounds: Compound[], chainName: string): number|undefined {
+        const c = compounds.find(i => i.chain.name, chainName);
+        if (c === undefined)
             return undefined;
-        return seq.lastResidueNo;
+        return c.firstResidue().number;
     }
 
     export function defaultSetupValues() {
@@ -111,47 +112,60 @@ export namespace MmbInputModel {
         return map;
     }
 
-    export function getCompound(compounds: Compound[], chain: string) {
-        return compounds.find(i => i.chain === chain);
+    export function getCompound(compounds: Compound[], chainName: string) {
+        return compounds.find(i => i.chain.name === chainName);
     }
 
-    export function residueOptions(compounds: Compound[], chain?: string, start?: number, stop?: number) {
-        if (chain === undefined)
+    export function residueOptions(compounds: Compound[], chainName?: string, start?: number, stop?: number) {
+        if (chainName === undefined)
             return [];
-        const seq = compounds.find(i => i.chain === chain);
-        if (seq === undefined)
+        const c = compounds.find(i => i.chain.name === chainName);
+        if (c === undefined)
             return [];
 
-        let num = start !== undefined ? start : seq.firstResidueNo;
-        if (num < seq.firstResidueNo || num > seq.lastResidueNo)
+        let num = start !== undefined ? start : c.firstResidue().number;
+        if (num < c.firstResidue().number || num > c.lastResidue().number)
             throw new Error(`Invalid start residue number ${num}`);
-        const numTo = stop !== undefined ? stop : seq.lastResidueNo;
-        if (numTo > seq.lastResidueNo || numTo < num)
+        const numTo = stop !== undefined ? stop : c.lastResidue().number;
+        if (numTo > c.lastResidue().number || numTo < num)
             throw new Error(`Invalid stop residue number ${num}`);
 
         const options = new Array<ComboBox.Option<number>>();
-        for (; num <= numTo; num++)
-            options.push({ value: num, caption: num.toString() });
+        // Find first residue
+        let idx = 0;
+        const len = c.residues.length;
+        while (idx < len && c.residues[idx].number < num)
+            idx++;
+        while (idx < len && c.residues[idx].number <= numTo) {
+            options.push({ value: c.residues[idx].number, caption: Util.resNumToString(c.residues[idx]) });
+            idx++;
+        }
         return options;
     }
 
-    export function residueOptionsRev(compounds: Compound[], chain?: string, start?: number, stop?: number) {
-        if (chain === undefined)
+    export function residueOptionsRev(compounds: Compound[], chainName?: string, start?: number, stop?: number) {
+        if (chainName === undefined)
             return [];
-        const seq = compounds.find(i => i.chain === chain);
-        if (seq === undefined)
+        const c = compounds.find(i => i.chain.name === chainName);
+        if (c === undefined)
             return [];
 
-        let num = start !== undefined ? start : seq.lastResidueNo;
-        if (num > seq.lastResidueNo || num < seq.firstResidueNo)
-            throw new Error(`Invalid start residue number ${seq}`);
-        const numTo = stop !== undefined ? stop : seq.firstResidueNo;
-        if (numTo < seq.firstResidueNo || numTo > num)
-            throw new Error(`Invalid stop residue number ${seq}`);
+        let num = start !== undefined ? start : c.lastResidue().number;
+        if (num > c.lastResidue().number || num < c.firstResidue().number)
+            throw new Error(`Invalid start residue number ${c}`);
+        const numTo = stop !== undefined ? stop : c.firstResidue().number;
+        if (numTo < c.firstResidue().number || numTo > num)
+            throw new Error(`Invalid stop residue number ${c}`);
 
         const options = new Array<ComboBox.Option<number>>();
-        for (; num >= numTo; num--)
-            options.push({ value: num, caption: num.toString() });
+        // Find last residue
+        let idx = c.residues.length - 1;
+        while (idx > 0 && c.residues[idx].number > num)
+            idx--;
+        while (idx > 0 && c.residues[idx].number >= numTo) {
+            options.push({ value: c.residues[idx].number, caption: Util.resNumToString(c.residues[idx]) });
+            idx--;
+        }
         return options;
     }
 

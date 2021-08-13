@@ -38,11 +38,11 @@ const EdgeLField = LabeledField.ComboBox<EdgeInteraction.Edge>();
 const OrientLField = LabeledField.ComboBox<Orientation.Orientation>();
 
 interface State {
-    chainOne?: string;
-    residueOne?: number;
+    chainNameOne?: string;
+    residueNoOne?: number;
     edgeOne?: EdgeInteraction.Edge;
-    chainTwo?: string;
-    residueTwo?: number;
+    chainNameTwo?: string;
+    residueNoTwo?: number;
     edgeTwo?: EdgeInteraction.Edge;
     orientation?: Orientation.Orientation;
     errors: string[];
@@ -54,44 +54,45 @@ export class BaseInteractionsInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKey
 
         const compounds = FU.getArray<Compound[]>(this.props.ctxData, 'mol-in-cp-added');
 
+        // FIXME: Account for author residue numbering too! (This need to be done in more places)
         this.state = {
-            chainOne: compounds.length > 0 ? compounds[0].chain : undefined,
-            chainTwo: compounds.length > 0 ? compounds[0].chain : undefined,
-            residueOne: compounds.length > 0 ? compounds[0].firstResidueNo : undefined,
-            residueTwo: compounds.length > 0 ? compounds[0].firstResidueNo : undefined,
-            edgeOne: 'Watson-Crick',
-            edgeTwo: 'Watson-Crick',
+            chainNameOne: compounds.length > 0 ? compounds[0].chain.name : undefined,
+            chainNameTwo: compounds.length > 0 ? compounds[0].chain.name : undefined,
+            residueNoOne: compounds.length > 0 ? compounds[0].residues[0].number : undefined,
+            residueNoTwo: compounds.length > 0 ? compounds[0].residues[0].number : undefined,
+            edgeOne: 'WatsonCrick',
+            edgeTwo: 'WatsonCrick',
             orientation: 'Cis',
             errors: new Array<string>(),
         };
     }
 
     private addBaseInteraction() {
-        if (this.state.chainOne === undefined || this.state.residueOne === undefined || this.state.edgeOne === undefined ||
-            this.state.chainTwo === undefined || this.state.residueTwo === undefined || this.state.edgeTwo === undefined ||
+        if (this.state.chainNameOne === undefined || this.state.residueNoOne === undefined || this.state.edgeOne === undefined ||
+            this.state.chainNameTwo === undefined || this.state.residueNoTwo === undefined || this.state.edgeTwo === undefined ||
             this.state.orientation === undefined) {
             this.setState({ ...this.state, errors: [ 'Incomplete base interaction definition' ] });
             return;
         }
 
         const compounds = FU.getArray<Compound[]>(this.props.ctxData, 'mol-in-cp-added');
-        if (compounds.find(c => c.chain === this.state.chainOne) === undefined || compounds.find(c => c.chain === this.state.chainTwo) === undefined) {
+        if (compounds.find(c => c.chain.name === this.state.chainNameOne) === undefined || compounds.find(c => c.chain.name === this.state.chainNameTwo) === undefined) {
             this.setState({ ...this.state, errors: [ 'Invalid chains' ] });
             return;
         }
 
-        if (this.state.residueOne === this.state.residueTwo && this.state.chainOne === this.state.chainTwo) {
+        if (this.state.residueNoOne === this.state.residueNoTwo && this.state.chainNameOne === this.state.chainNameTwo) {
             this.setState({ ...this.state, errors: [ 'Residue cannot interact with itself' ] });
             return;
         }
 
         const interactions = FU.getArray<BaseInteraction[]>(this.props.ctxData, 'mol-in-bi-added');
         const bi = new BaseInteraction(
-            this.state.chainOne,
-            this.state.residueOne,
+            this.state.chainNameOne,
+            this.state.residueNoOne,
             this.state.edgeOne,
-            this.state.chainTwo,
-            this.state.residueTwo,
+            this.state.chainNameTwo,
+            this.state.residueNoTwo,
             this.state.edgeTwo,
             this.state.orientation
         );
@@ -109,21 +110,21 @@ export class BaseInteractionsInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKey
     componentDidUpdate() {
         const compounds = FU.getArray<Compound[]>(this.props.ctxData, 'mol-in-cp-added');
 
-        if (compounds.length < 1 && this.state.chainOne === undefined && this.state.chainTwo === undefined)
+        if (compounds.length < 1 && this.state.chainNameOne === undefined && this.state.chainNameTwo === undefined)
             return; // Do fuck all;
 
         if (compounds.length < 1 ||
-            (compounds.find(c => c.chain === this.state.chainOne) === undefined ||
-             compounds.find(c => c.chain === this.state.chainTwo) === undefined) &&
-             (this.state.chainOne !== undefined || this.state.chainTwo !== undefined)
+            (compounds.find(c => c.chain.name === this.state.chainNameOne) === undefined ||
+             compounds.find(c => c.chain.name === this.state.chainNameTwo) === undefined) &&
+             (this.state.chainNameOne !== undefined || this.state.chainNameTwo !== undefined)
            ) {
             // Revert to empty statae
             this.setState({
                 ...this.state,
-                chainOne: undefined,
-                residueOne: undefined,
-                chainTwo: undefined,
-                residueTwo: undefined,
+                chainNameOne: undefined,
+                residueNoOne: undefined,
+                chainNameTwo: undefined,
+                residueNoTwo: undefined,
                 errors: new Array<string>(),
             });
             return;
@@ -131,18 +132,18 @@ export class BaseInteractionsInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKey
 
         let update: Partial<State> =  {};
 
-        if (this.state.chainOne === undefined)
-            update = { ...update, chainOne: compounds[0].chain };
-        if (this.state.chainTwo === undefined)
-            update = { ...update, chainTwo: compounds[0].chain };
+        if (this.state.chainNameOne === undefined)
+            update = { ...update, chainNameOne: compounds[0].chain.name };
+        if (this.state.chainNameTwo === undefined)
+            update = { ...update, chainNameTwo: compounds[0].chain.name };
 
-        if (this.state.chainOne !== undefined && this.state.residueOne === undefined) {
-            const def = MIM.defaultFirstResNo(compounds, this.state.chainOne);
-            update = { ...update, residueOne: def };
+        if (this.state.chainNameOne !== undefined && this.state.residueNoOne === undefined) {
+            const def = MIM.defaultFirstResNo(compounds, this.state.chainNameOne);
+            update = { ...update, residueNoOne: def };
         }
-        if (this.state.chainTwo !== undefined && this.state.residueTwo === undefined) {
-            const def = MIM.defaultFirstResNo(compounds, this.state.chainTwo);
-            update = { ...update, residueTwo: def };
+        if (this.state.chainNameTwo !== undefined && this.state.residueNoTwo === undefined) {
+            const def = MIM.defaultFirstResNo(compounds, this.state.chainNameTwo);
+            update = { ...update, residueNoTwo: def };
         }
 
         if (Manip.hasDefined(update))
@@ -160,17 +161,17 @@ export class BaseInteractionsInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKey
                         id='mol-in-bi-chain-one'
                         label='Chain'
                         style='above'
-                        value={this.state.chainOne}
+                        value={this.state.chainNameOne}
                         updateNotifier={v => {
-                            let update: Partial<State> = { chainOne: v };
-                            const c = compounds.find(c => c.chain === v);
+                            let update: Partial<State> = {};
+                            const c = compounds.find(c => c.chain.name === v);
                             if (c === undefined)
-                                update = { ...update, residueOne: undefined }
+                                update = { ...update, chainNameOne : undefined, residueNoOne: undefined }
                             else {
-                                if (this.state.residueOne === undefined || !Num.within(c.firstResidueNo, c.lastResidueNo, this.state.residueOne))
-                                    update = { ...update, residueOne: c.firstResidueNo, };
+                                update = { ...update, chainNameOne: c.chain.name };
+                                if (this.state.residueNoOne === undefined || !Num.within(c.firstResidue().number, c.lastResidue().number, this.state.residueNoOne))
+                                    update = { ...update, residueNoOne: c.firstResidue().number };
                             }
-
                             this.setState({ ...this.state, ...update });
                         }}
                         options={MIM.chainOptions(this.props.ctxData)} />
@@ -178,10 +179,10 @@ export class BaseInteractionsInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKey
                         id='mol-in-bi-res-no-one'
                         label='Residue'
                         style='above'
-                        value={this.state.residueOne}
-                        updateNotifier={v => this.setState({ ...this.state, residueOne: v })}
+                        value={this.state.residueNoOne}
+                        updateNotifier={v => this.setState({ ...this.state, residueNoOne: v })}
                         stringifier={Util.nToS}
-                        options={MIM.residueOptions(compounds, this.state.chainOne)} />
+                        options={MIM.residueOptions(compounds, this.state.chainNameOne)} />
                     <EdgeLField
                         id='mol-in-bi-edge-one'
                         label='Edge'
@@ -193,17 +194,17 @@ export class BaseInteractionsInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKey
                         id='mol-in-bi-chain-two'
                         label='Chain'
                         style='above'
-                        value={this.state.chainTwo}
+                        value={this.state.chainNameTwo}
                         updateNotifier={v => {
-                            let update: Partial<State> = { chainTwo: v };
-                            const c = compounds.find(c => c.chain === v);
+                            let update: Partial<State> = {};
+                            const c = compounds.find(c => c.chain.name === v);
                             if (c === undefined)
-                                update = { ...update, residueTwo: undefined }
+                                update = { ...update, chainNameTwo: undefined, residueNoTwo: undefined }
                             else {
-                                if (this.state.residueTwo === undefined || !Num.within(c.firstResidueNo, c.lastResidueNo, this.state.residueTwo))
-                                    update = { ...update, residueTwo: c.firstResidueNo, };
+                                update = { ...update, chainNameTwo: c.chain.name };
+                                if (this.state.residueNoTwo === undefined || !Num.within(c.firstResidue().number, c.lastResidue().number, this.state.residueNoTwo))
+                                    update = { ...update, residueNoTwo: c.firstResidue().number };
                             }
-
                             this.setState({ ...this.state, ...update });
                         }}
                         options={MIM.chainOptions(this.props.ctxData)} />
@@ -211,10 +212,10 @@ export class BaseInteractionsInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKey
                         id='mol-in-bi-res-no-two'
                         label='Residue'
                         style='above'
-                        value={this.state.residueTwo}
-                        updateNotifier={v => this.setState({ ...this.state, residueTwo: v })}
+                        value={this.state.residueNoTwo}
+                        updateNotifier={v => this.setState({ ...this.state, residueNoTwo: v })}
                         stringifier={Util.nToS}
-                        options={MIM.residueOptions(compounds, this.state.chainTwo)} />
+                        options={MIM.residueOptions(compounds, this.state.chainNameTwo)} />
                     <EdgeLField
                         id='mol-in-bi-edge-two'
                         label='Edge'
@@ -243,11 +244,11 @@ export class BaseInteractionsInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKey
                     className='mol-in-bi-added spaced-grid'
                     valuesKey='mol-in-bi-added'
                     columns={[
-                        {caption: 'Chain', k: 'chainOne'},
-                        {caption: 'Residue', k: 'residueOne'},
+                        {caption: 'Chain', k: 'chainNameOne'},
+                        {caption: 'Residue', k: 'residueNoOne'},
                         {caption: 'Edge', k: 'edgeOne'},
-                        {caption: 'Chain', k: 'chainTwo'},
-                        {caption: 'Residue', k: 'residueTwo'},
+                        {caption: 'Chain', k: 'chainNameTwo'},
+                        {caption: 'Residue', k: 'residueNoTwo'},
                         {caption: 'Edge', k: 'edgeTwo'},
                         {caption: 'Orientation', k: 'orientation'}]}
                     hideHeader={true}

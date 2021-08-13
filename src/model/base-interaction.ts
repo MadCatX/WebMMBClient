@@ -10,19 +10,20 @@ import { EdgeInteraction } from './edge-interaction';
 import { Orientation } from './orientation';
 
 export class BaseInteraction {
-    constructor(readonly chainOne: string, readonly residueOne: number, readonly edgeOne: EdgeInteraction.Edge,
-                readonly chainTwo: string, readonly residueTwo: number, readonly edgeTwo: EdgeInteraction.Edge,
+    constructor(readonly chainNameOne: string, readonly residueNoOne: number, readonly edgeOne: EdgeInteraction.Edge,
+                readonly chainNameTwo: string, readonly residueNoTwo: number, readonly edgeTwo: EdgeInteraction.Edge,
                 readonly orientation: Orientation.Orientation) {
-        if (chainOne === chainTwo && residueOne === residueTwo)
+        if (chainNameOne === chainNameTwo && residueNoOne === residueNoTwo)
             throw new Error('Residue cannot interact with itself');
     }
 
     equals(other: BaseInteraction) {
-        return this.chainOne === other.chainOne &&
-               this.residueOne === other.residueOne &&
+        return this.chainNameOne === other.chainNameOne &&
+               this.residueNoOne === other.residueNoOne &&
                this.edgeOne === other.edgeOne &&
-               this.chainTwo === other.chainTwo &&
-               this.residueTwo === other.residueTwo &&
+               this.chainNameTwo === other.chainNameTwo &&
+               this.residueNoTwo === other.residueNoTwo &&
+               this.edgeTwo === other.edgeTwo &&
                this.orientation === other.orientation;
     }
 }

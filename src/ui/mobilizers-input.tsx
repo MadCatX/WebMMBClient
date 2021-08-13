@@ -44,7 +44,7 @@ function rToS(v: number | AllItems | undefined) {
 
 interface State {
     bondMobility: Mobilizer.BondMobility;
-    chain: string | AllItems;
+    chainName: string | AllItems;
     firstResNo: number | AllItems;
     lastResNo?: number;
     errors: string[];
@@ -56,7 +56,7 @@ export class MobilizersInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM
 
         this.state = {
             bondMobility: 'Rigid',
-            chain: 'all-items',
+            chainName: 'all-items',
             firstResNo: 'all-items',
             lastResNo: undefined,
             errors: new Array<string>(),
@@ -69,11 +69,11 @@ export class MobilizersInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM
 
         try {
             const m = (() => {
-                if (this.state.chain === 'all-items')
+                if (this.state.chainName === 'all-items')
                     return new Mobilizer(this.state.bondMobility);
                 else {
                     if (this.state.firstResNo === 'all-items')
-                        return new Mobilizer(this.state.bondMobility, this.state.chain);
+                        return new Mobilizer(this.state.bondMobility, this.state.chainName);
                     else {
                         const first = this.state.firstResNo;
                         const last = this.state.lastResNo;
@@ -84,14 +84,14 @@ export class MobilizersInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM
                         if (last < first)
                             throw new Error('Last residue number is lower than first residue number');
 
-                        return new Mobilizer(this.state.bondMobility, this.state.chain, new ResidueSpan(first, last));
+                        return new Mobilizer(this.state.bondMobility, this.state.chainName, new ResidueSpan(first, last));
                     }
                 }
             })();
 
-            if (this.state.chain !== 'all-items') {
-                if (compounds.find(c => c.chain === this.state.chain) === undefined)
-                    throw new Error(`Chain ${this.state.chain} was selected but there is no compound with such chain ID`);
+            if (this.state.chainName !== 'all-items') {
+                if (compounds.find(c => c.chain.name === this.state.chainName) === undefined)
+                    throw new Error(`Chain ${this.state.chainName} was selected but there is no compound with such chain ID`);
             }
             this.checkAllowed(m, mobilizers);
             mobilizers.push(m);
@@ -110,21 +110,21 @@ export class MobilizersInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM
     }
 
     private checkAllowed(m: Mobilizer, mobilizers: Mobilizer[]) {
-        if (m.chain === undefined && mobilizers.length > 0)
+        if (m.chainName === undefined && mobilizers.length > 0)
             throw new Error('Cannot add mobilizer for the entire structure when there are some other mobilizers already set');
 
         for (const om of mobilizers) {
             if (m === om)
                 throw new Error('Such mobilizer already exists');
 
-            if (om.chain === undefined)
+            if (om.chainName === undefined)
                 throw new Error('Cannnot add mobilizer when there is a mobilizer already set for the entire structure');
 
-            if (m.chain === om.chain) {
+            if (m.chainName === om.chainName) {
                 if (m.residueSpan === undefined)
-                    throw new Error(`Cannot add mobilizer for the entire chain when there are some other mobilizers already set for chain ${om.chain}`);
+                    throw new Error(`Cannot add mobilizer for the entire chain when there are some other mobilizers already set for chain ${om.chainName}`);
                 if (om.residueSpan === undefined)
-                    throw new Error(`Cannot add mobilizer for chain ${om.chain} when there is a mobilizer for the entire chain already set for that chain`);
+                    throw new Error(`Cannot add mobilizer for chain ${om.chainName} when there is a mobilizer for the entire chain already set for that chain`);
 
                 if (m.residueSpan.overlap(om.residueSpan))
                     throw new Error('Mobilizers residue spans cannot overlap');
@@ -137,7 +137,7 @@ export class MobilizersInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM
             return [];
 
         const opts: ComboBoxModel.Option<string | AllItems>[] = [ { value: 'all-items', caption: 'All chains'} ];
-        compounds.forEach(c => opts.push({ value: c.chain, caption: c.chain }));
+        compounds.forEach(c => opts.push({ value: c.chain.name, caption: Util.chainToString(c.chain) }));
 
         return opts;
     }
@@ -152,17 +152,17 @@ export class MobilizersInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM
     componentDidUpdate() {
         const compounds = FU.getArray<Compound[]>(this.props.ctxData, 'mol-in-cp-added');
 
-        if (compounds.length < 1 && (this.state.chain !== 'all-items' || this.state.firstResNo !== 'all-items' || this.state.lastResNo !== undefined)) {
+        if (compounds.length < 1 && (this.state.chainName !== 'all-items' || this.state.firstResNo !== 'all-items' || this.state.lastResNo !== undefined)) {
             this.setState({
                 ...this.state,
-                chain: 'all-items',
+                chainName: 'all-items',
                 firstResNo: 'all-items',
                 lastResNo: undefined,
             });
             return;
         }
 
-        if (this.state.chain === 'all-items') {
+        if (this.state.chainName === 'all-items') {
             if (this.state.firstResNo !== 'all-items' || this.state.lastResNo !== undefined) {
                 this.setState({
                     ...this.state,
@@ -173,18 +173,18 @@ export class MobilizersInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM
             return;
         }
 
-        const c = compounds.find(c => c.chain === this.state.chain);
+        const c = compounds.find(c => c.chain.name === this.state.chainName);
         if (c === undefined) {
             this.setState({
                 ...this.state,
-                chain: 'all-items',
+                chainName: 'all-items',
                 firstResNo: 'all-items',
                 lastResNo: undefined,
             });
             return;
         }
 
-        if (this.state.firstResNo !== 'all-items' && !within(c.firstResidueNo, c.lastResidueNo, this.state.firstResNo)) {
+        if (this.state.firstResNo !== 'all-items' && !within(c.firstResidue().number, c.lastResidue().number, this.state.firstResNo)) {
             this.setState({
                 ...this.state,
                 firstResNo: 'all-items',
@@ -205,7 +205,7 @@ export class MobilizersInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM
                     ...this.state,
                     lastResNo: undefined,
                 })
-            } else if (!within(c.firstResidueNo, c.lastResidueNo, this.state.lastResNo)) {
+            } else if (!within(c.firstResidue().number, c.lastResidue().number, this.state.lastResNo)) {
                 this.setState({
                     ...this.state,
                     lastResNo: this.state.firstResNo,
@@ -220,17 +220,17 @@ export class MobilizersInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM
         const firstResNoOpts: ComboBoxModel.Option<number | AllItems>[] = [ { value: 'all-items', caption: 'All residues' } ];
         const lastResNoOpts: ComboBoxModel.Option<number>[] = [];
 
-        let selectedChain = this.state.chain;
+        let selectedChain = this.state.chainName;
 
-        if (this.state.chain !== 'all-items') {
-            const c = compounds.find(c => c.chain === selectedChain);
+        if (this.state.chainName !== 'all-items') {
+            const c = compounds.find(c => c.chain.name === selectedChain);
             if (c !== undefined) {
-                for (let i = c.firstResidueNo; i <= c.lastResidueNo; i++)
+                for (let i = c.firstResidue().number; i <= c.lastResidue().number; i++)
                     firstResNoOpts.push({ value: i, caption: i.toString() } );
 
                 if (this.state.firstResNo !== 'all-items') {
                     const lastFrom = this.state.firstResNo;
-                    for (let i = lastFrom; i <= c.lastResidueNo; i++)
+                    for (let i = lastFrom; i <= c.lastResidue().number; i++)
                         lastResNoOpts.push({ value: i, caption: i.toString() });
                 }
             } else
@@ -257,8 +257,8 @@ export class MobilizersInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM
                         label='Chain'
                         style='above'
                         options={this.makeChainOptions(compounds)}
-                        value={selectedChain}
-                        updateNotifier={v => this.setState({ ...this.state, chain: v })} />
+                        value={selectedChain === 'all-items' ? 'all-items' : selectedChain}
+                        updateNotifier={v => this.setState({ ...this.state, chainName: v })} />
                     <FResNoLField
                         id='mobilizers-first-res-no'
                         label='First residue'
@@ -293,7 +293,7 @@ export class MobilizersInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM
                     deleter={this.mobilizerRemoved}
                     columns={[
                         { caption: 'Bond mobility', k: 'bondMobility' },
-                        { caption: 'Chain', k: 'chain' },
+                        { caption: 'Chain', k: 'chainName' },
                         { caption: 'Residue span', k: 'residueSpan', stringify: (v: ResidueSpan|undefined) => v ? `${v.first} -> ${v.last}` : 'All residues' },
                     ]}
                     hideHeader={true}

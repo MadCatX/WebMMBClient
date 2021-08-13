@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020 WebMMB contributors, licensed under MIT, See LICENSE file for details.
+ * Copyright (c) 2020-2021 WebMMB contributors, licensed under MIT, See LICENSE file for details.
  *
  * @author Michal Malý (michal.maly@ibt.cas.cz)
  * @author Samuel C. Flores (samuelfloresc@gmail.com)
@@ -8,10 +8,111 @@
 
 import { assignAll, checkProps, checkType, isArr, isBool, isInt, isNum, isObj, isStr } from '../util/json';
 import * as Api from './api';
-import { CommonCommands, DensityFitCommands, StandardCommands, CompoundParameter } from './api-objs';
+import * as AO from './api-objs';
+import { NtC } from '../model/ntc';
 
 function isAdvancedParams(v: unknown): v is Api.JsonAdvancedParameters {
     return isObj(v);
+}
+
+function isChain(v: unknown): v is Api.Chain {
+    if (!isObj(v))
+        return false;
+
+    try {
+        checkProps(v, AO.Chain);
+
+        const tObj = v as Api.Chain;
+
+        checkType(tObj, 'name', isStr);
+        checkType(tObj, 'auth_name', isStr);
+
+        return true;
+    } catch (e) {
+        return false;
+    }
+}
+
+function isEdge(v: unknown): v is Api.EdgeInteraction {
+    if (!isStr(v))
+        return false;
+    return v === 'WatsonCrick' || v === 'SugarEdge';
+}
+
+function isOrientation(v: unknown): v is Api.Orientation {
+    if (!isStr(v))
+        return false;
+    return v === 'Cis' || v === 'Trans';
+}
+
+function isResidueNumber(v: unknown): v is Api.ResidueNumber {
+    if (!isObj(v))
+        return false;
+
+    try {
+        checkProps(v, AO.ResidueNumber);
+
+        const tObj = v as Api.ResidueNumber;
+
+        checkType(tObj, 'number', isInt);
+        checkType(tObj, 'auth_number', isInt);
+
+        return true;
+    } catch (e) {
+        return false;
+    }
+}
+function isResidueNumberArr(v: unknown): v is Api.ResidueNumber[] {
+    return isArr<Api.ResidueNumber>(v, isResidueNumber);
+}
+
+function isBaseInteraction(v: unknown): v is Api.BaseInteraction {
+    if (!isObj(v))
+        return false;
+
+    try {
+        checkProps(v, AO.BaseInteractionParametrer);
+
+        const tObj = v as Api.BaseInteraction;
+
+        checkType(tObj, 'chain_name_1', isStr);
+        checkType(tObj, 'res_no_1', isInt);
+        checkType(tObj, 'edge_1', isEdge);
+        checkType(tObj, 'chain_name_2', isStr);
+        checkType(tObj, 'res_no_2', isInt);
+        checkType(tObj, 'edge_2', isEdge);
+        checkType(tObj, 'orientation', isOrientation);
+
+        return true;
+    } catch (e) {
+        return false;
+    }
+}
+function isBaseInteractionArr(v: unknown): v is Api.BaseInteraction[] {
+    return isArr(v, isBaseInteraction);
+}
+
+function isCompound(v: unknown): v is Api.Compound {
+    if (!isObj(v))
+        return false;
+
+    try {
+        checkProps(v, AO.CompoundParameter);
+
+        const tObj = v as Api.Compound;
+
+        checkType(tObj, 'chain', isChain);
+        checkType(tObj, 'ctype', isCompoundType);
+        checkType(tObj, 'residues', isResidueNumberArr);
+        checkType(tObj, 'sequence', isStr);
+
+        return true;
+    } catch (e) {
+        return false;
+    }
+}
+function isCompoundArr(v: unknown): v is Api.Compound[] {
+    return isArr<Api.Compound>(v, isCompound);
 }
 
 function isCompoundType(v: unknown): v is 'DNA' | 'RNA' | 'Protein' {
@@ -21,37 +122,38 @@ function isCompoundType(v: unknown): v is 'DNA' | 'RNA' | 'Protein' {
     return v === 'DNA' || v === 'RNA' || v === 'Protein';
 }
 
-function isCompound(v: unknown): v is Api.CompoundParameter {
+function isDoubleHelix(v: unknown): v is Api.DoubleHelix {
     if (!isObj(v))
         return false;
 
     try {
-        checkProps(v, CompoundParameter);
+        checkProps(v, AO.DoubleHelixParameter);
 
-        const tObj = v as Api.CompoundParameter;
+        const tObj = v as Api.DoubleHelix;
 
-        checkType(tObj, 'chain', isStr);
-        checkType(tObj, 'ctype', isCompoundType);
-        checkType(tObj, 'sequence', isStr);
-        checkType(tObj, 'first_residue_no', isInt);
+        checkType(tObj, 'chain_name_1', isStr);
+        checkType(tObj, 'first_res_no_1', isInt);
+        checkType(tObj, 'last_res_no_1', isInt);
+        checkType(tObj, 'chain_name_1', isStr);
+        checkType(tObj, 'first_res_no_2', isInt);
+        checkType(tObj, 'last_res_no_2', isInt);
 
         return true;
     } catch (e) {
         return false;
     }
 }
-
-function isCompoundArr(v: unknown): v is Api.CompoundParameter[] {
-    return isArr<Api.CompoundParameter>(v, isCompound);
+function isDoubleHelixArr(v: unknown): v is Api.DoubleHelix[] {
+    return isArr(v, isDoubleHelix);
 }
 
-function isMobilizer(v: unknown): v is Api.MobilizerParameter {
+function isMobilizer(v: unknown): v is Api.Mobilizer {
     if (!isObj(v))
         return false;
 
     if (!v.hasOwnProperty('bond_mobility'))
         return false;
-    const mp = v as Api.MobilizerParameter;
+    const mp = v as Api.Mobilizer;
 
     if (!isStr(mp.bond_mobility))
         return false;
@@ -64,13 +166,38 @@ function isMobilizer(v: unknown): v is Api.MobilizerParameter {
 
     return true;
 }
-
-function isMobilizerArr(v: unknown): v is Api.MobilizerParameter[] {
-    return isArr<Api.MobilizerParameter>(v, isMobilizer);
+function isMobilizerArr(v: unknown): v is Api.Mobilizer[] {
+    return isArr<Api.Mobilizer>(v, isMobilizer);
 }
 
-function isStrArr(v: unknown): v is string[] {
-    return isArr<string>(v, isStr);
+function isNtCConformer(v: unknown): v is string {
+    if (!isStr(v))
+        return false;
+    return NtC.isConformer(v);
+}
+
+function isNtC(v: unknown): v is Api.NtC {
+    if (!isObj(v))
+        return false;
+
+    try {
+        checkProps(v, AO.NtCParameter);
+
+        const tObj = v as Api.NtC;
+
+        checkType(tObj, 'chain_name', isStr);
+        checkType(tObj, 'first_res_no', isInt);
+        checkType(tObj, 'last_res_no', isInt);
+        checkType(tObj, 'ntc', isNtCConformer);
+        checkType(tObj, 'weight', isNum);
+
+        return true;
+    } catch (e) {
+        return false;
+    }
+}
+function isNtCArr(v: unknown): v is Api.NtC[] {
+    return isArr(v, isNtC);
 }
 
 export function isCommonCommands(v: unknown): v is Api.CommonCommands {
@@ -78,7 +205,7 @@ export function isCommonCommands(v: unknown): v is Api.CommonCommands {
         return false;
 
     try {
-        checkProps(v, CommonCommands);
+        checkProps(v, AO.CommonCommands);
 
         const tObj = v as Api.CommonCommands;
 
@@ -101,7 +228,7 @@ export function isDensityFitCommands(v: unknown): v is Api.DensityFitCommands {
         return false;
 
     try {
-        checkProps(v, DensityFitCommands);
+        checkProps(v, AO.DensityFitCommands);
 
         const tObj = v as Api.DensityFitCommands;
 
@@ -124,17 +251,17 @@ export function isStandardCommands(v: unknown): v is Api.StandardCommands {
         return false;
 
     try {
-        checkProps(v, StandardCommands);
+        checkProps(v, AO.StandardCommands);
 
         const tObj = v as unknown as Api.StandardCommands;
 
         if (tObj.job_type !== 'Standard')
             return false;
 
-        checkType(tObj, 'sequences', isStrArr);
-        checkType(tObj, 'double_helices', isStrArr);
-        checkType(tObj, 'base_interactions', isStrArr);
-        checkType(tObj, 'ntcs', isStrArr);
+        checkType(tObj, 'compounds', isCompoundArr);
+        checkType(tObj, 'double_helices', isDoubleHelixArr);
+        checkType(tObj, 'base_interactions', isBaseInteractionArr);
+        checkType(tObj, 'ntcs', isNtCArr);
         checkType(tObj, 'mobilizers', isMobilizerArr);
         checkType(tObj, 'adv_params', isAdvancedParams);
         checkType(tObj, 'set_default_MD_parameters', isBool);
@@ -150,9 +277,9 @@ export function commandsFromJson(v: unknown): Api.StandardCommands | Api.Density
         throw new Error('Object is not Commands object');
 
     if (isStandardCommands(v))
-        return assignAll({}, v, StandardCommands);
+        return assignAll({}, v, AO.StandardCommands);
     else if (isDensityFitCommands(v))
-        return assignAll({}, v, DensityFitCommands);
+        return assignAll({}, v, AO.DensityFitCommands);
 
     throw new Error('Object appears to be a Commands object of unknown job type');
 }
