@@ -89,7 +89,7 @@ export class Compound {
     }
 
     residueByNumber(num: number) {
-        return this.residues.find(res => res.number === num);
+        return this.residues[num - 1];
     }
 }
 
