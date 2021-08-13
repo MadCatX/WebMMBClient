@@ -211,9 +211,20 @@ export class NtCsInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM.Value
                     className='mol-in-ntcs-added spaced-grid'
                     valuesKey='mol-in-ntcs-added'
                     columns={[
-                        {caption: 'Chain', k: 'chainName', stringify: name => { const c = compounds.find(c => c.chain.name === name); return c ? Util.chainToString(c.chain) : 'N/A' }},
-                        {caption: 'First residue', k: 'firstResidueNo'},
-                        {caption: 'Last residue', k: 'lastResidueNo'},
+                        {caption: 'Chain', k: 'chainName', stringify: (v, _i) => { const c = compounds.find(c => c.chain.name === v); return c ? Util.chainToString(c.chain) : 'N/A' }},
+                        {caption: 'First residue', k: 'firstResidueNo', stringify: (v, i) => {
+                            const c = compounds.find(c => c.chain.name === i.chainName);
+                            if (!c) return 'N/A';
+                            const res = c.residueByNumber(v);
+                            return res ? Util.resNumToString(res) : 'N/A';
+                        }},
+
+                        {caption: 'Last residue', k: 'lastResidueNo', stringify: (v, i) => {
+                            const c = compounds.find(c => c.chain.name === i.chainName);
+                            if (!c) return 'N/A';
+                            const res = c.residueByNumber(v);
+                            return res ? Util.resNumToString(res) : 'N/A';
+                        }},
                         {caption: 'NtC', k: 'ntc'}]}
                     hideHeader={true}
                     ctxData={this.props.ctxData} />

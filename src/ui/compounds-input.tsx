@@ -13,7 +13,7 @@ import { PushButton } from './common/push-button';
 import { LabeledField } from './common/controlled/labeled-field';
 import { FormUtil } from '../model/common/form';
 import { BaseInteraction } from '../model/base-interaction';
-import { Chain, Compound, cmpChain, ResidueNumber } from '../model/compound';
+import { Chain, Compound, cmpChain } from '../model/compound';
 import { DoubleHelix } from '../model/double-helix';
 import { MmbInputModel as MIM } from '../model/mmb-input-model';
 import { Mobilizer } from '../model/mobilizer';
@@ -183,8 +183,8 @@ export class CompoundsInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM.
                     valuesKey='mol-in-cp-added'
                     deleter={this.compoundRemoved}
                     columns={[
-                        { caption: 'Chain', k: 'chain', stringify: Util.chainToString },
-                        { caption: 'First residue no.', k: 'residues', stringify: (res: ResidueNumber[]) => `${res[0].number} (${res[0].authNumber})` },
+                        { caption: 'Chain', k: 'chain', stringify: (v, _i) => Util.chainToString(v) },
+                        { caption: 'First residue no.', k: 'residues', stringify: (v, _i) => Util.resNumToString(v) },
                         { caption: 'Type', k: 'type' },
                         { caption: 'Sequence', k: 'sequence' }]}
                     hideHeader={true}

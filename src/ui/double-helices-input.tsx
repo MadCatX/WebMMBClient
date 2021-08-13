@@ -295,12 +295,33 @@ export class DoubleHelicesInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, 
                     className='mol-in-dh-added spaced-grid'
                     valuesKey='mol-in-dh-added'
                     columns={[
-                        {caption: 'Chain', k: 'chainNameOne', stringify: name => { const c = compounds.find(c => c.chain.name === name); return c ? Util.chainToString(c.chain) : 'N/A' }},
-                        {caption: 'First residue', k: 'firstResidueNoOne'},
-                        {caption: 'Last residue', k: 'lastResidueNoOne'},
-                        {caption: 'Chain', k: 'chainNameTwo', stringify: name => { const c = compounds.find(c => c.chain.name === name); return c ? Util.chainToString(c.chain) : 'N/A' }},
-                        {caption: 'First residue', k: 'firstResidueNoTwo'},
-                        {caption: 'Last residue', k: 'lastResidueNoTwo'}]}
+                        {caption: 'Chain', k: 'chainNameOne', stringify: (v, _i) => { const c = compounds.find(c => c.chain.name === v); return c ? Util.chainToString(c.chain) : 'N/A' }},
+                        {caption: 'First residue', k: 'firstResidueNoOne', stringify: (v, i) => {
+                            const c = compounds.find(c => c.chain.name === i.chainNameOne);
+                            if (!c) return 'N/A';
+                            const res = c.residueByNumber(v);
+                            return res ? Util.resNumToString(res) : 'N/A';
+                        }},
+                        {caption: 'Last residue', k: 'lastResidueNoOne', stringify: (v, i) => {
+                            const c = compounds.find(c => c.chain.name === i.chainNameOne);
+                            if (!c) return 'N/A';
+                            const res = c.residueByNumber(v);
+                            return res ? Util.resNumToString(res) : 'N/A';
+                        }},
+                        {caption: 'Chain', k: 'chainNameTwo', stringify: (v, _i) => { const c = compounds.find(c => c.chain.name === v); return c ? Util.chainToString(c.chain) : 'N/A' }},
+                        {caption: 'First residue', k: 'firstResidueNoTwo', stringify: (v, i) => {
+                            const c = compounds.find(c => c.chain.name === i.chainNameTwo);
+                            if (!c) return 'N/A';
+                            const res = c.residueByNumber(v);
+                            return res ? Util.resNumToString(res) : 'N/A';
+                        }},
+                        {caption: 'Last residue', k: 'lastResidueNoTwo', stringify: (v, i) => {
+                            const c = compounds.find(c => c.chain.name === i.chainNameTwo);
+                            if (!c) return 'N/A';
+                            const res = c.residueByNumber(v);
+                            return res ? Util.resNumToString(res) : 'N/A';
+                        }},
+                    ]}
                     hideHeader={true}
                     ctxData={this.props.ctxData} />
             </div>

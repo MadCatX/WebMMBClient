@@ -290,7 +290,14 @@ export class MobilizersInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM
                     columns={[
                         { caption: 'Bond mobility', k: 'bondMobility' },
                         { caption: 'Chain', k: 'chainName', stringify: name => { const c = compounds.find(c => c.chain.name === name); return c ? Util.chainToString(c.chain) : 'N/A' } },
-                        { caption: 'Residue span', k: 'residueSpan', stringify: (v: ResidueSpan|undefined) => v ? `${v.first} -> ${v.last}` : 'All residues' },
+                        { caption: 'Residue span', k: 'residueSpan', stringify: (v: ResidueSpan|undefined, i) => {
+                            if (!v) return 'All residues';
+                            const c = compounds.find(c => c.chain.name === i.chainName)
+                            if (!c) return 'All residues';
+                            const first = c.residueByNumber(v.first);
+                            const last = c.residueByNumber(v.last);
+                            return (first !== undefined && last !== undefined) ? `${Util.resNumToString(first)} -> ${Util.resNumToString(last)}` : 'N/A';
+                        }}
                     ]}
                     hideHeader={true}
                     ctxData={this.props.ctxData} />

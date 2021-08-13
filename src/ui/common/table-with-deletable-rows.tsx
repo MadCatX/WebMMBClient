@@ -51,7 +51,7 @@ export class GTableWithDeletableRows<KE, KV, T, U extends T & Array<any>> extend
                             {this.props.columns.map((col, n) => {
                                 const key = `col-item-${index}-${n}`
                                 if (col.stringify !== undefined)
-                                    return (<div className='column-item' key={key}>{col.stringify(v[col.k])}</div>);
+                                    return (<div className='column-item' key={key}>{col.stringify(v[col.k], v)}</div>);
                                 else
                                     return (<div className='column-item' key={key}>{v[col.k]}</div>);
                             })}
@@ -85,7 +85,7 @@ export namespace GTableWithDeletableRows {
         columns: {
             caption: string;
             k: keyof ArrayType<U>;
-            stringify?: (v: ValueOf<ArrayType<U>>) => string;
+            stringify?: (v: ValueOf<ArrayType<U>>, item: ArrayType<U>) => string;
         }[];
         valuesKey: KV;
         deleter?: Deleter<U>;

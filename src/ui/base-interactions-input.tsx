@@ -244,11 +244,21 @@ export class BaseInteractionsInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKey
                     className='mol-in-bi-added spaced-grid'
                     valuesKey='mol-in-bi-added'
                     columns={[
-                        {caption: 'Chain', k: 'chainNameOne', stringify: name => { const c = compounds.find(c => c.chain.name === name); return c ? Util.chainToString(c.chain) : 'N/A' }},
-                        {caption: 'Residue', k: 'residueNoOne'},
+                        {caption: 'Chain', k: 'chainNameOne', stringify: (v, _i) => { const c = compounds.find(c => c.chain.name === v); return c ? Util.chainToString(c.chain) : 'N/A' }},
+                        {caption: 'Residue', k: 'residueNoOne', stringify: (v, i) => {
+                            const c = compounds.find(c => c.chain.name === i.chainNameOne);
+                            if (!c) return 'N/A';
+                            const res = c.residueByNumber(v);
+                            return res ? Util.resNumToString(res) : 'N/A';
+                        }},
                         {caption: 'Edge', k: 'edgeOne', stringify: v => EdgeInteraction.toString(v)},
-                        {caption: 'Chain', k: 'chainNameTwo', stringify: name => { const c = compounds.find(c => c.chain.name === name); return c ? Util.chainToString(c.chain) : 'N/A' }},
-                        {caption: 'Residue', k: 'residueNoTwo'},
+                        {caption: 'Chain', k: 'chainNameTwo', stringify: (v, _i) => { const c = compounds.find(c => c.chain.name === v); return c ? Util.chainToString(c.chain) : 'N/A' }},
+                        {caption: 'Residue', k: 'residueNoTwo', stringify: (v, i) => {
+                            const c = compounds.find(c => c.chain.name === i.chainNameTwo);
+                            if (!c) return 'N/A';
+                            const res = c.residueByNumber(v);
+                            return res ? Util.resNumToString(res) : 'N/A';
+                        }},
                         {caption: 'Edge', k: 'edgeTwo', stringify: v => EdgeInteraction.toString(v)},
                         {caption: 'Orientation', k: 'orientation'}]}
                     hideHeader={true}
