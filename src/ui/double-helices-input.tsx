@@ -130,6 +130,19 @@ export class DoubleHelicesInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, 
 
         if (compounds.length < 1 && this.state.chainNameOne === undefined && this.state.chainNameTwo === undefined)
             return; // Do fuck all;
+        if (compounds.length > 0 && this.state.chainNameOne === undefined && this.state.chainNameTwo === undefined) {
+            // Set reasonable initial state
+            const c = compounds[0];
+            this.setState({
+                ...this.state,
+                chainNameOne: c.chain.name,
+                firstResNoOne: c.firstResidue().number,
+                lastResNoOne: c.firstResidue().number,
+                chainNameTwo: c.chain.name,
+                firstResNoTwo: c.lastResidue().number
+            });
+            return;
+        }
 
         if ((compounds.length < 1 ||
              compounds.find(c => c.chain.name === this.state.chainNameOne) === undefined ||
