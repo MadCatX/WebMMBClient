@@ -14,6 +14,8 @@ function HasOwnProperty<X extends {}, Y extends PropertyKey>(obj: X, prop: Y): o
 
 export namespace Util {
     export function chainToString(chain: Chain) {
+        if (chain.name === chain.authName)
+            return chain.name;
         return `${chain.name} (${chain.authName})`;
     }
 
@@ -26,6 +28,8 @@ export namespace Util {
     }
 
     export function resNumToString(resNum: ResidueNumber) {
+        if (resNum.number === resNum.authNumber)
+            return `${resNum.number}`;
         return `${resNum.number} (${resNum.authNumber})`;
     }
 
