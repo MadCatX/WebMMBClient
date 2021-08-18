@@ -8,6 +8,7 @@
 
 import { Compound, ResidueNumber } from '../model/compound';
 import { parseCif } from './cif';
+import { parsePdb } from './pdb';
 
 const CompoundIdsToSingle = new Map([
     ['GLY', 'G'], ['PRO', 'P'], ['ALA', 'A'],
@@ -59,7 +60,6 @@ export namespace Structural {
 
     export function chainsToCompounds(chains: Chains) {
         const compounds: Compound[] = [];
-        // TODO: Account for author identifiers
         for (const [k, v] of chains.entries()) {
             let seq = '';
             const residues: ResidueNumber[] = [];
@@ -94,6 +94,10 @@ export namespace Structural {
     }
 
     export async function pdbToChains(pdb: string | File): Promise<Chains> {
-        throw new Error('Unimplemented');
+        let data = '';
+        if (typeof pdb !== 'string')
+            data = await pdb.text();
+
+        return parsePdb(data);
     }
 }
