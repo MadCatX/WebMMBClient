@@ -36,6 +36,8 @@ export const DensityFitCommands: Api.DensityFitCommands = {
     density_map_file_name: '',
     compounds: [],
     mobilizers: [],
+    ntcs: [],
+    set_default_MD_parameters: false,
 };
 
 export const Chain: Api.Chain = {

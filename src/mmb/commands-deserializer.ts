@@ -153,7 +153,7 @@ export namespace JsonCommandsDeserializer {
         return new GlobalConfig(bisf, temp);
     }
 
-    export function toMdParams(commands: Api.StandardCommands) {
+    export function toMdParams(commands: Api.DensityFitCommands|Api.StandardCommands) {
         const defMd = commands.set_default_MD_parameters;
 
         return new MdParameters(defMd);
@@ -182,7 +182,7 @@ export namespace JsonCommandsDeserializer {
         return mobilizers;
     }
 
-    export function toNtCs(commands: Api.StandardCommands) {
+    export function toNtCs(commands: Api.DensityFitCommands|Api.StandardCommands) {
         const ntcs: NtCConformation[] = [];
 
         for (const ntc of commands.ntcs) {

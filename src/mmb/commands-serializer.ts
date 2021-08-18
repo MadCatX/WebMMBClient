@@ -38,6 +38,8 @@ export namespace CommandsSerializer {
         densityFitFiles: DensityFitFiles,
         compounds: Compound[],
         mobilizers: Mobilizer[],
+        ntcs: NtCConformation[],
+        mdParameters: MdParameters,
     }
 
     export type StandardParameters<K extends (string extends K ? never : string)> = CommonParameters & {
@@ -269,7 +271,7 @@ export namespace JsonCommandsSerializer {
         return defs;
     }
 
-    function mdParams(cmds: Api.StandardCommands, md: MdParameters) {
+    function mdParams<C extends Api.DensityFitCommands|Api.StandardCommands>(cmds: C, md: MdParameters): C {
         cmds.set_default_MD_parameters = md.useDefaults;
         return cmds;
     }
@@ -320,6 +322,9 @@ export namespace JsonCommandsSerializer {
         cmds.density_map_file_name = params.densityFitFiles.densityMapFileName;
         cmds.compounds = compounds(params.compounds);
         cmds.mobilizers = mobilizers(params.mobilizers, params.compounds);
+        cmds.ntcs = ntcs(params.ntcs, params.compounds);
+
+        cmds = mdParams(cmds, params.mdParameters);
 
         return cmds;
     }

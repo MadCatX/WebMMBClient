@@ -140,6 +140,7 @@ export class MmbInputForm extends Form<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTy
                         ctxData={ctxData}
                         jobId={this.props.jobId}
                     />
+                    <NtCsInput ctxData={ctxData} />
                     <MobilizersInput ctxData={ctxData} />
                     <GlobalParametersInput
                         ctxData={ctxData}
@@ -230,6 +231,9 @@ export class MmbInputForm extends Form<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTy
         const denMapFile = denFitFiles.find(f => f.type === 'density-map');
         const compounds = this.getArray<Compound[]>(this.state, 'mol-in-cp-added');
         const mobilizers = this.getArray<Mobilizer[]>(this.state, 'mol-in-mobilizers-added');
+        const ntcs = this.getArray<NtCConformation[]>(this.state, 'mol-in-ntcs-added');
+        const useDefMd = this.getScalar(this.state, 'mol-in-gp-def-md-params', false);
+        const mdParameters = new MdParameters(useDefMd);
 
         if (!structFile)
             errors.push('No structure file');
@@ -250,6 +254,8 @@ export class MmbInputForm extends Form<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTy
                     densityFitFiles: new DensityFitFiles(structFile!.name, denMapFile!.name),
                     compounds,
                     mobilizers,
+                    ntcs,
+                    mdParameters,
                 };
             }
         } catch (e) {

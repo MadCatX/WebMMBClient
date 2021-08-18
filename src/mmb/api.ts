@@ -118,6 +118,8 @@ export type DensityFitCommands = CommonCommands & {
     density_map_file_name: string,
     compounds: Compound[],
     mobilizers: Mobilizer[],
+    ntcs: NtC[],
+    set_default_MD_parameters: boolean,
 }
 
 /* Requests */

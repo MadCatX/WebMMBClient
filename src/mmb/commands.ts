@@ -239,6 +239,8 @@ export function isDensityFitCommands(v: unknown): v is Api.DensityFitCommands {
         checkType(tObj, 'density_map_file_name', isStr);
         checkType(tObj, 'compounds', isCompoundArr);
         checkType(tObj, 'mobilizers', isMobilizerArr);
+        checkType(tObj, 'ntcs', isNtCArr);
+        checkType(tObj, 'set_default_MD_parameters', isBool);
 
         return true;
     } catch (e) {

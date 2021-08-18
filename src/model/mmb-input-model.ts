@@ -78,10 +78,14 @@ export namespace MmbInputModel {
 
         const compounds = JsonCommandsDeserializer.toCompounds(commands);
         const mobilizers = JsonCommandsDeserializer.toMobilizers(commands);
+        const ntcs = JsonCommandsDeserializer.toNtCs(commands);
+        const md = JsonCommandsDeserializer.toMdParams(commands);
 
         map.set('mol-in-density-fit-files-added', files);
         map.set('mol-in-cp-added', compounds);
         map.set('mol-in-mobilizers-added', mobilizers);
+        map.set('mol-in-ntcs-added', ntcs);
+        map.set('mol-in-gp-def-md-params', md.useDefaults);
 
         return map;
     }
