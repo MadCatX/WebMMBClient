@@ -25,7 +25,8 @@ const CompoundIdsToSingle = new Map([
     ['K', 'K'], ['R', 'R'],	['Q', 'Q'],
     ['N', 'N'], ['E', 'E'], ['D', 'D'],
     ['S', 'S'], ['T', 'T'],
-    ['U', 'U']
+    ['U', 'U'],
+    ['DA', 'A'], ['DC', 'C'], ['DG', 'G'], ['DT', 'T'],
 ]);
 
 export namespace Structural {
@@ -65,7 +66,7 @@ export namespace Structural {
             const residues: ResidueNumber[] = [];
             let considerNA = true;
             for (const res of v.residues) {
-                considerNA = res.compound.length === 1;
+                considerNA = res.compound.length < 3;
                 const single = CompoundIdsToSingle.get(res.compound);
                 if (!single) {
                     console.warn(`No known conversion of compoound ${res.compound} to single letter code. Skipping residue ${k}, ${res.no}.`);
