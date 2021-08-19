@@ -26,32 +26,6 @@ interface State {
     errors: string[];
 }
 
-type FileType = 'cif' | 'pdb';
-async function getStructureChains(f: File, type: FileType) {
-    switch (type) {
-    case 'cif':
-        return Structural.cifToChains(f);
-    case 'pdb':
-        return Structural.pdbToChains(f);
-    }
-}
-
-function getStructureFileType(name: string) : FileType {
-    const dotIdx = name.lastIndexOf('.');
-    if (dotIdx < 0)
-        throw new Error('Unable to determine file type');
-    const suffix = name.slice(dotIdx + 1).toLowerCase();
-
-    switch (suffix) {
-    case 'cif':
-        return 'cif';
-    case 'pdb':
-        return 'pdb';
-    default:
-        throw new Error(`Unknown file type ${suffix}`);
-    }
-}
-
 export class DensityFitInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes, DensityFitInput.Props, State> {
     private Uploader = FileUploadUtil.Uploader(
         'mol-in-density-fit-files-added',
@@ -74,9 +48,8 @@ export class DensityFitInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM
             this.Uploader.cancel(k);
     }
 
-    private async fillMobilizers(name: string, file: File) {
-        const type = getStructureFileType(name);
-        const chains = await getStructureChains(file, type);
+    private async fillMobilizers(file: File) {
+        const chains = await Structural.extractChainsFromStructureFile(file);
         const compounds = Structural.chainsToCompounds(chains);
 
         FU.updateValues(this.props.ctxData, [{ key: 'mol-in-cp-added', value: compounds }]);
@@ -118,7 +91,7 @@ export class DensityFitInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM
             throw new Error('No file');
 
         if (f.type === 'structure')
-            this.fillMobilizers(f.name, f.file);
+            this.fillMobilizers(f.file);
     }
 
     private uploadErrorHandler(xfrs: FileUploadUtil.TransferMap, errors: string[]) {

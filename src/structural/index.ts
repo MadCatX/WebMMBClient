@@ -7,6 +7,7 @@
  */
 
 import { Compound, ResidueNumber } from '../model/compound';
+import { ungzip } from '../zip/unzip';
 import { parseCif } from './cif';
 import { parsePdb } from './pdb';
 
@@ -34,6 +35,16 @@ export namespace Structural {
     export type Residue = { compound: string, no: number, authNo: number, seqNo: number };
     export type Chains = Map<string, Chain>;
 
+    async function dataToChains(data: string | File, type: string) {
+        switch (type) {
+        case 'cif':
+            return await cifToChains(data);
+        case 'pdb':
+            return await pdbToChains(data);
+        }
+        throw new Error(`Unknown structure file type ${type}`);
+    }
+
     function decideType(possible: Compound.PossibleTypes, considerNA: boolean) {
         if (possible.protein) {
             if (considerNA) {
@@ -51,12 +62,18 @@ export namespace Structural {
         throw new Error('Cannot decide compound type');
     }
 
-    export async function cifToChains(cif: string | File): Promise<Chains> {
-        let data = '';
-        if (typeof cif !== 'string')
-            data = await cif.text();
+    function getSuffix(fileName: string): { head: string, suffix: string } {
+        const idx = fileName.lastIndexOf('.');
+        if (idx < 0)
+            return { head: fileName, suffix: '' };
+        const suffix = fileName.slice(idx + 1).toLowerCase();
+        return { head: fileName.slice(0, idx), suffix };
+    }
 
-        return parseCif(data);
+    export async function cifToChains(cif: string | File): Promise<Chains> {
+        if (typeof cif !== 'string')
+            return parseCif(await cif.text());
+        return parseCif(cif);
     }
 
     export function chainsToCompounds(chains: Chains) {
@@ -94,11 +111,22 @@ export namespace Structural {
         return compounds;
     }
 
-    export async function pdbToChains(pdb: string | File): Promise<Chains> {
-        let data = '';
-        if (typeof pdb !== 'string')
-            data = await pdb.text();
+    export async function extractChainsFromStructureFile(file: File): Promise<Chains> {
+        let { head, suffix } = getSuffix(file.name);
+        const isGZipped = suffix === 'gz';
+        if (isGZipped) {
+            ({ head, suffix } = getSuffix(head));
+            const compressed = new Uint8Array(await file.arrayBuffer());
+            const decompressed = await ungzip(compressed);
+            const text = new TextDecoder().decode(decompressed);
+            return await dataToChains(text, suffix);
+        }
+        return await dataToChains(file, suffix);
+    }
 
-        return parsePdb(data);
+    export async function pdbToChains(pdb: string | File): Promise<Chains> {
+        if (typeof pdb !== 'string')
+            return parsePdb(await pdb.text());
+        return parsePdb(pdb);
     }
 }
