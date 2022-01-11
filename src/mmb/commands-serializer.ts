@@ -13,13 +13,13 @@ import { DoubleHelix } from '../model/double-helix';
 import { GlobalConfig } from '../model/global-config';
 import { MdParameters } from '../model/md-parameters';
 import { Mobilizer } from '../model/mobilizer';
-import { NtCConformation } from '../model/ntc-conformation';
+import { NtCs } from '../model/ntc-conformation';
 import { Parameter as P } from '../model/parameter';
 import { Reporting } from '../model/reporting';
 import { StagesSpan } from '../model/stages-span';
 import { Num } from '../util/num';
 import * as Api from './api';
-import { CommonCommands, DensityFitCommands, StandardCommands } from './api-objs';
+import * as AO from './api-objs';
 
 export namespace CommandsSerializer {
     export type AdvancedParameters<K extends (string extends K ? never : string)> = {
@@ -38,7 +38,7 @@ export namespace CommandsSerializer {
         densityFitFiles: DensityFitFiles,
         compounds: Compound[],
         mobilizers: Mobilizer[],
-        ntcs: NtCConformation[],
+        ntcs: NtCs,
         mdParameters: MdParameters,
     }
 
@@ -48,7 +48,7 @@ export namespace CommandsSerializer {
         compounds: Compound[],
         doubleHelices: DoubleHelix[],
         mdParameters: MdParameters,
-        ntcs: NtCConformation[],
+        ntcs: NtCs,
         mobilizers: Mobilizer[],
         advParams: AdvancedParameters<K>,
     }
@@ -149,11 +149,12 @@ export namespace TextCommandsSerializer {
 
         // NtCs
         commands.push('', '# NtCs');
-        params.ntcs.forEach((ntc) => {
+        params.ntcs.conformations.forEach((ntc) => {
             const c = params.compounds.find(c => c.chain.name === ntc.chainName)!;
             const entry  = `NtC ${c.chain.authName} ${c.residueByNumber(ntc.firstResidueNo)!.authNumber} ${c.residueByNumber(ntc.lastResidueNo)!.authNumber} ${ntc.ntc} 1.5`;
             commands.push(entry);
         });
+        commands.push(`NtCForceScaleFactor ${params.ntcs.forceScaleFactor}`);
 
         // Mobilizers
         commands.push('', '# Mobilizers');
@@ -193,7 +194,7 @@ export namespace TextCommandsSerializer {
 
 export namespace JsonCommandsSerializer {
     function advancedParameters<K extends (string extends K ? never : string)>(advParams: CommandsSerializer.AdvancedParameters<K>) {
-        let defs: Api.JsonAdvancedParameters = {};
+        const defs: Api.JsonAdvancedParameters = {};
 
         for (const [name, value] of advParams.values.entries()) {
             const param = advParams.parameters.get(name)!;
@@ -248,7 +249,7 @@ export namespace JsonCommandsSerializer {
                 chain: { name: c.chain.name, auth_name: c.chain.authName },
                 ctype: c.type === 'DNA' ? 'DNA' : c.type === 'RNA' ? 'RNA' : 'Protein',
                 sequence: Compound.sequenceAsString(c.sequence),
-                residues: c.residues.map(res => { return { number: res.number, auth_number: res.authNumber } }),
+                residues: c.residues.map(res => { return { number: res.number, auth_number: res.authNumber }; }),
             });
         }
 
@@ -297,10 +298,11 @@ export namespace JsonCommandsSerializer {
         return defs;
     }
 
-    function ntcs(ntcs: NtCConformation[], compounds: Compound[]) {
-        const defs: Api.NtC[] = [];
+    function ntcs(ntcs: NtCs, compounds: Compound[]) {
+        const defs: Api.NtCs = Object.assign({}, AO.NtCs);
+        defs.conformations = new Array<Api.NtCConformation>();
 
-        ntcs.forEach(ntc => {
+        ntcs.conformations.forEach(ntc => {
             const c = compounds.find(c => c.chain.name === ntc.chainName)!;
             const def = {
                 chain_name: c.chain.name,
@@ -309,14 +311,15 @@ export namespace JsonCommandsSerializer {
                 ntc: ntc.ntc,
                 weight: 1.5, // Temporary
             };
-            defs.push(def);
+            defs.conformations.push(def);
         });
+        defs.force_scale_factor = ntcs.forceScaleFactor;
 
         return defs;
     }
 
     function serializeDensityFit(params: CommandsSerializer.DensityFitParameters) {
-        let cmds = Object.assign({}, DensityFitCommands);
+        let cmds = Object.assign({}, AO.DensityFitCommands);
 
         cmds.structure_file_name = params.densityFitFiles.structureFileName;
         cmds.density_map_file_name = params.densityFitFiles.densityMapFileName;
@@ -330,7 +333,7 @@ export namespace JsonCommandsSerializer {
     }
 
     function serializeStandard<K extends (string extends K ? never : string)>(params: CommandsSerializer.StandardParameters<K>) {
-        let cmds = Object.assign({}, StandardCommands);
+        let cmds = Object.assign({}, AO.StandardCommands);
 
         // Global
         cmds.base_interaction_scale_factor = params.global.baseInteractionScaleFactor;
@@ -351,7 +354,7 @@ export namespace JsonCommandsSerializer {
     }
 
     export function serialize<K extends (string extends K ? never : string)>(params: CommandsSerializer.DensityFitParameters|CommandsSerializer.StandardParameters<K>) {
-        let cmds = Object.assign({}, CommonCommands);
+        let cmds = Object.assign({}, AO.CommonCommands);
 
         // Do concrete data first
         switch (params.jobType) {

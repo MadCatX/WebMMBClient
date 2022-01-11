@@ -8,6 +8,8 @@
 
 import { NtC } from './ntc';
 
+export const DefaultNtCForceScaleFactor = 3000;
+
 export class NtCConformation {
     constructor(readonly chainName: string, readonly firstResidueNo: number, readonly lastResidueNo: number, readonly ntc: NtC.Conformer) {
         if (lastResidueNo <= firstResidueNo)
@@ -19,5 +21,16 @@ export class NtCConformation {
                this.firstResidueNo === other.firstResidueNo &&
                this.lastResidueNo === other.lastResidueNo &&
                this.ntc === other.ntc;
+    }
+}
+
+export class NtCs {
+    constructor(readonly conformations: NtCConformation[], readonly forceScaleFactor: number) {
+        if (forceScaleFactor < 0)
+            throw new Error('Force scale factor must be non-negative');
+    }
+
+    static empty() {
+        return new NtCs([], DefaultNtCForceScaleFactor);
     }
 }

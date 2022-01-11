@@ -84,12 +84,17 @@ export type Mobilizer = {
     last_residue?: number;
 }
 
-export type NtC = {
+export type NtCConformation = {
     chain_name: string;
     first_res_no: number;
     last_res_no: number;
     ntc: string;
     weight: number;
+}
+
+export type NtCs = {
+    conformations: NtCConformation[];
+    force_scale_factor: number;
 }
 
 export type CommonCommands = {
@@ -106,7 +111,7 @@ export type StandardCommands = CommonCommands & {
     compounds: Compound[],
     double_helices: DoubleHelix[],
     base_interactions: BaseInteraction[],
-    ntcs: NtC[],
+    ntcs: NtCs,
     mobilizers: Mobilizer[],
     adv_params: JsonAdvancedParameters,
     set_default_MD_parameters: boolean,
@@ -118,7 +123,7 @@ export type DensityFitCommands = CommonCommands & {
     density_map_file_name: string,
     compounds: Compound[],
     mobilizers: Mobilizer[],
-    ntcs: NtC[],
+    ntcs: NtCs,
     set_default_MD_parameters: boolean,
 }
 

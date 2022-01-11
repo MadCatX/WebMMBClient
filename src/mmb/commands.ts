@@ -176,14 +176,14 @@ function isNtCConformer(v: unknown): v is string {
     return NtC.isConformer(v);
 }
 
-function isNtC(v: unknown): v is Api.NtC {
+function isNtCConformation(v: unknown): v is Api.NtCConformation {
     if (!isObj(v))
         return false;
 
     try {
-        checkProps(v, AO.NtCParameter);
+        checkProps(v, AO.NtCConformation);
 
-        const tObj = v as Api.NtC;
+        const tObj = v as Api.NtCConformation;
 
         checkType(tObj, 'chain_name', isStr);
         checkType(tObj, 'first_res_no', isInt);
@@ -196,9 +196,28 @@ function isNtC(v: unknown): v is Api.NtC {
         return false;
     }
 }
-function isNtCArr(v: unknown): v is Api.NtC[] {
-    return isArr(v, isNtC);
+function isNtCConformationArr(v: unknown): v is Api.NtCConformation[] {
+    return isArr(v, isNtCConformation);
 }
+
+function isNtCs(v: unknown): v is Api.NtCs {
+    if (!isObj(v))
+        return false;
+
+    try {
+        checkProps(v, AO.NtCs);
+
+        const tObj = v as Api.NtCs;
+
+        checkType(tObj, 'conformations', isNtCConformationArr);
+        checkType(tObj, 'force_scale_factor', isNum);
+
+        return true;
+    } catch (e) {
+        return false;
+    }
+}
+
 
 export function isCommonCommands(v: unknown): v is Api.CommonCommands {
     if (!isObj(v))
@@ -239,7 +258,7 @@ export function isDensityFitCommands(v: unknown): v is Api.DensityFitCommands {
         checkType(tObj, 'density_map_file_name', isStr);
         checkType(tObj, 'compounds', isCompoundArr);
         checkType(tObj, 'mobilizers', isMobilizerArr);
-        checkType(tObj, 'ntcs', isNtCArr);
+        checkType(tObj, 'ntcs', isNtCs);
         checkType(tObj, 'set_default_MD_parameters', isBool);
 
         return true;
@@ -263,7 +282,7 @@ export function isStandardCommands(v: unknown): v is Api.StandardCommands {
         checkType(tObj, 'compounds', isCompoundArr);
         checkType(tObj, 'double_helices', isDoubleHelixArr);
         checkType(tObj, 'base_interactions', isBaseInteractionArr);
-        checkType(tObj, 'ntcs', isNtCArr);
+        checkType(tObj, 'ntcs', isNtCs);
         checkType(tObj, 'mobilizers', isMobilizerArr);
         checkType(tObj, 'adv_params', isAdvancedParams);
         checkType(tObj, 'set_default_MD_parameters', isBool);

@@ -144,7 +144,7 @@ export class MobilizersInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM
 
     mobilizerRemoved = (m: Mobilizer) => {
         const mobilizers = FU.getArray<Mobilizer[]>(this.props.ctxData, 'mol-in-mobilizers-added');
-        const filtered = mobilizers.filter(om => om !== m)
+        const filtered = mobilizers.filter(om => om !== m);
 
         FU.updateValue(this.props.ctxData, { key: 'mol-in-mobilizers-added', value: filtered } );
     }
@@ -220,7 +220,7 @@ export class MobilizersInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM
         let firstResNoOpts: ComboBoxModel.Option<number | AllItems>[] = [ { value: 'all-items', caption: 'All residues' } ];
         let lastResNoOpts: ComboBoxModel.Option<number>[] = [];
 
-        let selectedChain = compounds.find(c => c.chain.name === this.state.chainName) ? this.state.chainName : 'all-items';
+        const selectedChain = compounds.find(c => c.chain.name === this.state.chainName) ? this.state.chainName : 'all-items';
 
         if (this.state.chainName !== 'all-items') {
             const fro = MIM.residueOptions(compounds, selectedChain);
@@ -286,7 +286,7 @@ export class MobilizersInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM
                 <AddedTable
                     className='mol-in-mobilizers-added spaced-grid'
                     valuesKey='mol-in-mobilizers-added'
-                    deleter={this.mobilizerRemoved}
+                    onRowDeleted={this.mobilizerRemoved}
                     columns={[
                         { caption: 'Bond mobility', k: 'bondMobility' },
                         { caption: 'Chain', k: 'chainName', stringify: name => { const c = compounds.find(c => c.chain.name === name); return c ? Util.chainToString(c.chain) : 'N/A' } },

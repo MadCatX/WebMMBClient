@@ -20,7 +20,7 @@ import { DoubleHelix } from './double-helix';
 import { GlobalConfig } from './global-config';
 import { Mobilizer } from './mobilizer';
 import { NtC } from './ntc';
-import { NtCConformation } from './ntc-conformation';
+import { NtCConformation, NtCs } from './ntc-conformation';
 import { Reporting } from './reporting';
 import { AdditionalFile } from './additional-file';
 import { DensityFitFile } from './density-fit-file';
@@ -31,13 +31,14 @@ export namespace MmbInputModel {
         'mol-in-cp-added' | 'mol-in-dh-added' | 'mol-in-bi-added' |
         'mol-in-ntcs-added' | 'mol-in-mobilizers-added' | 'mol-in-additional-files-added' |
         'mol-in-density-fit-files-added' |
+        'mol-in-ntcs-force-scale-factor' |
         'mol-in-gp-reporting-interval' | 'mol-in-gp-num-reports' | 'mol-in-gp-temperature' | 'mol-in-gp-bisf' | 'mol-in-gp-def-md-params' | 'mol-in-gp-stage' |
         'mol-in-job-name' |
         'mol-in-raw-commands' |
         'mol-adv-params' |
         'mol-in-additional-files';
     export type AdvParams = Map<AVP.ParameterNames, unknown>;
-    export type ValueTypes = BaseInteraction[] | Compound[] | DoubleHelix[] | NtCConformation[] | string[] | AdvParams | Mobilizer[] | AdditionalFile[] | DensityFitFile [];
+    export type ValueTypes = BaseInteraction[] | Compound[] | DoubleHelix[] | NtCs | NtCConformation[] | string[] | AdvParams | Mobilizer[] | AdditionalFile[] | DensityFitFile [];
     export type V<T> = FormModel.V<T>;
     export type Errors = FormModel.Errors<ErrorKeys>;
     export type Values = FormModel.Values<ValueKeys, ValueTypes>;

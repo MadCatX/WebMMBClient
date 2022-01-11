@@ -15,22 +15,25 @@ import { FormBlock } from './common/form/form-block';
 import { Compound } from '../model/compound';
 import { MmbInputModel as MIM } from '../model/mmb-input-model';
 import { NtC } from '../model/ntc';
-import { NtCConformation } from '../model/ntc-conformation';
+import { DefaultNtCForceScaleFactor, NtCConformation, NtCs } from '../model/ntc-conformation';
 import { FormUtil } from '../model/common/form';
 import { ComboBox as ComboBoxModel } from '../model/common/combo-box';
 import { Manip } from '../util/manip';
+import { Num } from '../util/num';
 
 const FU = new FormUtil<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes>();
 const AddedTable = MIM.TWDR<NtCConformation[]>();
 const ChainLField = LabeledField.ComboBox<string>();
 const ResidueLField = LabeledField.ComboBox<number>();
 const NtCLField = LabeledField.ComboBox<NtC.Conformer>();
+const NumLField = LabeledField.LineEdit<string>();
 
 interface State {
     chainName?: string;
     firstResNo?: number;
     lastResNo?: number;
     cfrm?: NtC.Conformer;
+    forceScaleFactor: number|null;
     errors: string[];
 }
 
@@ -45,6 +48,7 @@ export class NtCsInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM.Value
             firstResNo: viable.length > 0 ? viable[0].firstResidue().number : undefined,
             lastResNo: viable.length > 0 ? viable[0].residues[1].number : undefined,
             cfrm: viable.length > 0 ? MIM.AllNtCsOptions[0].value : undefined,
+            forceScaleFactor: DefaultNtCForceScaleFactor,
             errors: new Array<string>(),
         };
     }
@@ -62,18 +66,22 @@ export class NtCsInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM.Value
             throw new Error('Invalid chain');
 
         const ntc = new NtCConformation(this.state.chainName, this.state.firstResNo, this.state.lastResNo, this.state.cfrm);
-        const ntcs = FU.getArray<NtCConformation[]>(this.props.ctxData, 'mol-in-ntcs-added');
+        const ntcs = FU.getScalar(this.props.ctxData, 'mol-in-ntcs-added', NtCs.empty());
+        const conformations = ntcs.conformations;
 
         if (this.state.lastResNo <= this.state.firstResNo)
             throw new Error('Invalid residue numbers');
 
-        if (ntcs.find((e) => e.equals(ntc)) !== undefined) {
+        if (this.state.forceScaleFactor === null || this.state.forceScaleFactor < 0)
+            throw new Error('Force scale factor must be a non-negative number');
+
+        if (conformations.find((e) => e.equals(ntc)) !== undefined) {
             errors.push('Such NtC configuration already exists');
             this.setState({ ...this.state, errors });
         } else {
-            ntcs.push(new NtCConformation(this.state.chainName, this.state.firstResNo, this.state.lastResNo, this.state.cfrm));
+            conformations.push(new NtCConformation(this.state.chainName, this.state.firstResNo, this.state.lastResNo, this.state.cfrm));
             this.setState({ ...this.state, errors: [] });
-            FU.updateValues(this.props.ctxData, [{ key: 'mol-in-ntcs-added', value: ntcs }]);
+            FU.updateValue(this.props.ctxData, { key: 'mol-in-ntcs-added', value: { conformations, forceScaleFactor: this.state.forceScaleFactor } });
         }
     }
 
@@ -119,7 +127,7 @@ export class NtCsInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM.Value
                 if (c.residues.length < 2)
                     continue;
 
-                let update: Partial<State> = {
+                const update: Partial<State> = {
                     chainName: c.chain.name,
                     firstResNo: c.firstResidue().number,
                     lastResNo: c.residues[1].number,
@@ -178,8 +186,8 @@ export class NtCsInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM.Value
                             if (this.state.lastResNo === undefined || this.state.lastResNo <= v)
                                 update = { ...update, lastResNo: v + 1 };
 
-                            this.setState({ ...this.state, ...update })}
-                        }
+                            this.setState({ ...this.state, ...update });
+                        }}
                         stringifier={Util.nToS}
                         options={firstResOpts} />
                     <ResidueLField
@@ -205,20 +213,46 @@ export class NtCsInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM.Value
                             this.addNtC();
                         }} />
                 </div>
+                <NumLField
+                    id='mol-in-ntcs-force-scale-factor'
+                    label='Force scale factor'
+                    style='above'
+                    tooltip='NtCforceScaleFactor'
+                    value={this.state.forceScaleFactor !== null ? this.state.forceScaleFactor.toString() : ''}
+                    updateNotifier={v => {
+                        if (v === '')
+                            this.setState({ ...this.state, forceScaleFactor: null });
+                        else {
+                            const num = Num.parseIntStrict(v);
+                            if (!isNaN(num)) {
+                                this.setState(({ ...this.state, forceScaleFactor: num }));
+
+                                const ntcs = FU.getScalar(this.props.ctxData, 'mol-in-ntcs-added', NtCs.empty());
+                                FU.updateValue(
+                                    this.props.ctxData,
+                                    {
+                                        key: 'mol-in-ntcs-added',
+                                        value: { conformations: ntcs.conformations, forceScaleFactor: num },
+                                    },
+                                );
+                            }
+                        }
+                    }} />
                 <ErrorBox
                     errors={this.state.errors} />
                 <AddedTable
                     className='mol-in-ntcs-added spaced-grid'
                     valuesKey='mol-in-ntcs-added'
                     columns={[
-                        {caption: 'Chain', k: 'chainName', stringify: (v, _i) => { const c = compounds.find(c => c.chain.name === v); return c ? Util.chainToString(c.chain) : 'N/A' }},
+                        {caption: 'Chain', k: 'chainName', stringify: (v,_i) => {
+                            const c = compounds.find(c => c.chain.name === v); return c ? Util.chainToString(c.chain) : 'N/A';
+                        }},
                         {caption: 'First residue', k: 'firstResidueNo', stringify: (v, i) => {
                             const c = compounds.find(c => c.chain.name === i.chainName);
                             if (!c) return 'N/A';
                             const res = c.residueByNumber(v);
                             return res ? Util.resNumToString(res) : 'N/A';
                         }},
-
                         {caption: 'Last residue', k: 'lastResidueNo', stringify: (v, i) => {
                             const c = compounds.find(c => c.chain.name === i.chainName);
                             if (!c) return 'N/A';
@@ -226,7 +260,24 @@ export class NtCsInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM.Value
                             return res ? Util.resNumToString(res) : 'N/A';
                         }},
                         {caption: 'NtC', k: 'ntc'}]}
-                    hideHeader={true}
+                    hideHeader={false}
+                    rowsGetter={ctx => {
+                        const ntcs = FU.getScalar(ctx, 'mol-in-ntcs-added', NtCs.empty());
+                        return ntcs.conformations;
+                    }}
+                    deleter={(idx, ctxData) => {
+                        const ntcs = FU.getScalar(ctxData, 'mol-in-ntcs-added', NtCs.empty());
+                        const conformations = [...ntcs.conformations];
+                        conformations.splice(idx, 1);
+
+                        FU.updateValue(
+                            ctxData,
+                            {
+                                key: 'mol-in-ntcs-added',
+                                value: { conformations, forceScaleFactor: ntcs.forceScaleFactor },
+                            },
+                        );
+                    }}
                     ctxData={this.props.ctxData} />
             </div>
         );

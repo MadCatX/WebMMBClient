@@ -17,7 +17,7 @@ import { Chain, Compound, cmpChain, ResidueNumber } from '../model/compound';
 import { DoubleHelix } from '../model/double-helix';
 import { MmbInputModel as MIM } from '../model/mmb-input-model';
 import { Mobilizer } from '../model/mobilizer';
-import { NtCConformation } from '../model/ntc-conformation';
+import { NtCs } from '../model/ntc-conformation';
 import { Num } from '../util/num';
 import { Util } from './common/util';
 
@@ -111,8 +111,11 @@ export class CompoundsInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM.
         let baseInteractions = FU.getArray<BaseInteraction[]>(this.props.ctxData, 'mol-in-bi-added');
         baseInteractions = baseInteractions.filter(e => e.chainNameOne !== chain.name && e.chainNameTwo !== chain.name);
 
-        let ntcs = FU.getArray<NtCConformation[]>(this.props.ctxData, 'mol-in-ntcs-added');
-        ntcs = ntcs.filter(e => e.chainName !== chain.name);
+        let ntcs = FU.getArray<NtCs>(this.props.ctxData, 'mol-in-ntcs-added');
+        ntcs = new NtCs(
+            ntcs.conformations.filter(e => e.chainName !== chain.name),
+            ntcs.forceScaleFactor
+        );
 
         let mobilizers = FU.getArray<Mobilizer[]>(this.props.ctxData, 'mol-in-mobilizers-added');
         mobilizers = mobilizers.filter(e => e.chainName !== chain.name);
@@ -154,9 +157,9 @@ export class CompoundsInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM.
                         value={this.state.compoundType}
                         updateNotifier={v => this.setState({ ...this.state, compoundType: v })}
                         options={[
-                                { value: 'RNA', caption: 'RNA' },
-                                { value: 'DNA', caption: 'DNA' },
-                                { value: 'protein', caption: 'Protein' },
+                            { value: 'RNA', caption: 'RNA' },
+                            { value: 'DNA', caption: 'DNA' },
+                            { value: 'protein', caption: 'Protein' },
                         ]} />
                     <SeqLField
                         label='Sequence'
@@ -181,7 +184,7 @@ export class CompoundsInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM.
                 <AddedTable
                     className='mol-in-cp-added spaced-grid'
                     valuesKey='mol-in-cp-added'
-                    deleter={this.compoundRemoved}
+                    onRowDeleted={this.compoundRemoved}
                     columns={[
                         { caption: 'Chain', k: 'chain', stringify: (v, _i) => Util.chainToString(v) },
                         { caption: 'First residue no.', k: 'residues', stringify: (v: ResidueNumber[], _i) => Util.resNumToString(v[0]) },

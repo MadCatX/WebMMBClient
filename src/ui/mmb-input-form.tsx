@@ -16,6 +16,8 @@ import { GlobalParametersInput } from './global-parameters-input';
 import { MobilizersInput } from './mobilizers-input';
 import { NtCsInput } from './ntcs-input';
 import { AdditionalFilesInput } from './additional-files-input';
+import { ErrorBox } from './common/error-box';
+import { PushButton } from './common/push-button';
 import { Form } from './common/form/form';
 import { TextArea } from './common/form/text-area';
 import { ParameterNames, Parameters } from '../mmb/available-parameters';
@@ -24,19 +26,17 @@ import { GlobalConfig } from '../model/global-config';
 import { Reporting } from '../model/reporting';
 import { BaseInteraction } from '../model/base-interaction';
 import { Compound } from '../model/compound';
+import { DensityFitFile } from '../model/density-fit-file';
+import { DensityFitFiles } from '../model/density-fit-files';
 import { DoubleHelix } from '../model/double-helix';
 import { MmbInputModel as MIM } from '../model/mmb-input-model';
 import { Mobilizer } from '../model/mobilizer';
-import { NtCConformation } from '../model/ntc-conformation';
 import { MdParameters } from '../model/md-parameters';
+import { NtCs } from '../model/ntc-conformation';
 import { FormContextManager as FCM } from '../model/common/form-context-manager';
 import { JobNameInput } from './job-name-input';
 import { MmbCommands } from './mmb-commands';
 import { Num } from '../util/num';
-import {PushButton} from './common/push-button';
-import {ErrorBox} from './common/error-box';
-import {DensityFitFile} from '../model/density-fit-file';
-import {DensityFitFiles} from '../model/density-fit-files';
 
 const RawCmdsTA = TextArea.Spec<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes>();
 
@@ -114,23 +114,23 @@ export class MmbInputForm extends Form<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTy
         case 'maverick':
             return (
                 <>
-                     <div className='pushbutton-flex-container'>
-                         <PushButton
-                             className='pushbutton-common pushbutton-flex pushbutton-hclr-default'
-                             value='Import from guided mode'
-                             onClick={() => this.importGuidedToRaw()} />
-                     </div>
-                     <div className='raw-commands-container'>
-                         <RawCmdsTA
-                             id='mmb-in-raw-commands'
-                             keyId='mol-in-raw-commands'
-                             spellcheck={false}
-                             resizeMode={'vertical'}
-                             rows={30}
-                             ctxData={ctxData} />
-                         <ErrorBox
-                             errors={this.state.errors.get('mol-raw') ?? []} />
-                     </div>
+                    <div className='pushbutton-flex-container'>
+                        <PushButton
+                            className='pushbutton-common pushbutton-flex pushbutton-hclr-default'
+                            value='Import from guided mode'
+                            onClick={() => this.importGuidedToRaw()} />
+                    </div>
+                    <div className='raw-commands-container'>
+                        <RawCmdsTA
+                            id='mmb-in-raw-commands'
+                            keyId='mol-in-raw-commands'
+                            spellcheck={false}
+                            resizeMode={'vertical'}
+                            rows={30}
+                            ctxData={ctxData} />
+                        <ErrorBox
+                            errors={this.state.errors.get('mol-raw') ?? []} />
+                    </div>
                 </>
             );
         case 'density-fit':
@@ -164,7 +164,7 @@ export class MmbInputForm extends Form<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTy
             return (
                 <MmbCommands
                     commands={new Array<string>()}
-                    errors={e} />
+                    errors={[e.toString()]} />
             );
         }
     }
@@ -189,13 +189,13 @@ export class MmbInputForm extends Form<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTy
             }
         } else if (!this.props.availableStages.includes(currentStage)) {
             const v = this.emptyValues();
-                v.set('mol-in-gp-stage', this.props.availableStages[this.props.availableStages.length - 1]);
+            v.set('mol-in-gp-stage', this.props.availableStages[this.props.availableStages.length - 1]);
             this.setValues(new Map([...this.state.values, ...v]));
         }
     }
 
     private makeCommonParams(): CommandsSerializer.CommonParameters {
-        let errors: string[] = [];
+        const errors: string[] = [];
 
         const repInt = Num.parseFloatStrict(this.getScalar(this.state, 'mol-in-gp-reporting-interval', ''));
         const numReps = Num.parseIntStrict(this.getScalar(this.state, 'mol-in-gp-num-reports', ''));
@@ -231,7 +231,7 @@ export class MmbInputForm extends Form<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTy
         const denMapFile = denFitFiles.find(f => f.type === 'density-map');
         const compounds = this.getArray<Compound[]>(this.state, 'mol-in-cp-added');
         const mobilizers = this.getArray<Mobilizer[]>(this.state, 'mol-in-mobilizers-added');
-        const ntcs = this.getArray<NtCConformation[]>(this.state, 'mol-in-ntcs-added');
+        const ntcs = this.getScalar(this.state, 'mol-in-ntcs-added', NtCs.empty());
         const useDefMd = this.getScalar(this.state, 'mol-in-gp-def-md-params', false);
         const mdParameters = new MdParameters(useDefMd);
 
@@ -281,7 +281,7 @@ export class MmbInputForm extends Form<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTy
                 const compounds = this.getArray<Compound[]>(this.state, 'mol-in-cp-added');
                 const doubleHelices = this.getArray<DoubleHelix[]>(this.state, 'mol-in-dh-added');
                 const baseInteractions = this.getArray<BaseInteraction[]>(this.state, 'mol-in-bi-added');
-                const ntcs = this.getArray<NtCConformation[]>(this.state, 'mol-in-ntcs-added');
+                const ntcs = this.getScalar(this.state, 'mol-in-ntcs-added', NtCs.empty());
                 const mobilizers = this.getArray<Mobilizer[]>(this.state, 'mol-in-mobilizers-added');
                 const advValues = this.getScalar(this.state, 'mol-adv-params', new Map<ParameterNames, unknown>());
 

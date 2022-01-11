@@ -297,8 +297,8 @@ export namespace ResponseDeserializers {
                 return obj;
             return {
                 is_empty: false,
-                commands: commandsFromJson(obj.commands)
-            }
+                commands: commandsFromJson(obj.commands),
+            };
         }
 
         throw new Error('Object is not JobCommands');

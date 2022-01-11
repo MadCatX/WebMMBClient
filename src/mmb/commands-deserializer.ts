@@ -183,17 +183,15 @@ export namespace JsonCommandsDeserializer {
     }
 
     export function toNtCs(commands: Api.DensityFitCommands|Api.StandardCommands) {
-        const ntcs: NtCConformation[] = [];
+        const conformations: NtCConformation[] = [];
 
-        for (const ntc of commands.ntcs) {
-            ntcs.push(
-                new NtCConformation(
-                    ntc.chain_name, ntc.first_res_no, ntc.last_res_no, ntc.ntc
-                )
+        for (const ntc of commands.ntcs.conformations) {
+            conformations.push(
+                new NtCConformation(ntc.chain_name, ntc.first_res_no, ntc.last_res_no, ntc.ntc)
             );
         }
 
-        return ntcs;
+        return { conformations, forceScaleFactor: commands.ntcs.force_scale_factor };
     }
 
     export function toReporting(commands: Api.CommonCommands) {

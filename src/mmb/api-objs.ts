@@ -23,7 +23,7 @@ export const StandardCommands: Api.StandardCommands = {
     compounds: [],
     double_helices: [],
     base_interactions: [],
-    ntcs: [],
+    ntcs: { conformations: [], force_scale_factor: 0 },
     mobilizers: [],
     adv_params: {},
     set_default_MD_parameters: false,
@@ -36,7 +36,7 @@ export const DensityFitCommands: Api.DensityFitCommands = {
     density_map_file_name: '',
     compounds: [],
     mobilizers: [],
-    ntcs: [],
+    ntcs: { conformations: [], force_scale_factor: 0 },
     set_default_MD_parameters: false,
 };
 
@@ -76,10 +76,15 @@ export const DoubleHelixParameter: Api.DoubleHelix = {
     last_res_no_2: 0,
 };
 
-export const NtCParameter: Api.NtC = {
+export const NtCConformation: Api.NtCConformation = {
     chain_name: '',
     first_res_no: 0,
     last_res_no: 0,
-    ntc: '',
+    ntc: 'AA00',
     weight: 0,
+};
+
+export const NtCs: Api.NtCs = {
+    conformations: [],
+    force_scale_factor: 0,
 };

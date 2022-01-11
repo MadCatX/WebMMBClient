@@ -126,7 +126,7 @@ export class AdditionalFilesInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys
                 <AddedTable
                     className='mol-in-additional-files-added spaced-grid'
                     valuesKey='mol-in-additional-files-added'
-                    deleter={f => this.fileRemoved(f)}
+                    onRowDeleted={f => this.fileRemoved(f)}
                     columns={[
                         { caption: 'Name', k: 'name' },
                         { caption: 'Size', k: 'size', stringify: FileUploadUtil.sizeToHuman },

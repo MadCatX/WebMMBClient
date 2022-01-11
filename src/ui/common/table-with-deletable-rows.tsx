@@ -30,17 +30,23 @@ export class GTableWithDeletableRows<KE, KV, T, U extends T & Array<any>> extend
         );
     }
 
-    removeRow = (index: number, data: FormModel.ContextData<KE, KV, T>) => {
-        const rows = data.values.get(this.props.valuesKey) as U;
-        const item: ArrayType<U> = rows[index];
-        rows.splice(index, 1);
-        this.FU.updateValue(data, { key: this.props.valuesKey, value: rows });
-        if (this.props.deleter !== undefined)
-            this.props.deleter(item);
+    removeRow = (idx: number, data: FormModel.ContextData<KE, KV, T>) => {
+        const rows = this.props.rowsGetter ? this.props.rowsGetter(data) : this.FU.getArray<U>(data, this.props.valuesKey);
+        const item: ArrayType<U> = rows[idx];
+
+        if (this.props.deleter)
+            this.props.deleter(idx, data);
+        else {
+            rows.splice(idx, 1);
+            this.FU.updateValue(data, { key: this.props.valuesKey, value: rows });
+        }
+
+        if (this.props.onRowDeleted)
+            this.props.onRowDeleted(item, idx);
     }
 
     render() {
-        const values = this.FU.getArray<U>(this.props.ctxData, this.props.valuesKey);
+        const values = this.props.rowsGetter ? this.props.rowsGetter(this.props.ctxData) : this.FU.getArray<U>(this.props.ctxData, this.props.valuesKey);
 
         return (
             <div className={this.props.className} key='top'>
@@ -75,8 +81,16 @@ export class GTableWithDeletableRows<KE, KV, T, U extends T & Array<any>> extend
 export namespace GTableWithDeletableRows {
     type ValueOf<T> = ArrayType<T>[keyof ArrayType<T>];
 
-    export interface Deleter<T> {
-        (item: ArrayType<T>): void;
+    export interface RowsGetter<KE, KV, T, U> {
+        (ctxData: FormModel.ContextData<KE, KV, T>): U;
+    }
+
+    export interface Deleter<KE, KV, T> {
+        (idx: number, ctxData: FormModel.ContextData<KE, KV, T>): void;
+    }
+
+    export interface OnRowDeleted<T> {
+        (item: ArrayType<T>, index: number): void;
     }
 
     export interface Props<KE, KV, T, U> {
@@ -88,8 +102,10 @@ export namespace GTableWithDeletableRows {
             stringify?: (v: ValueOf<ArrayType<U>>, item: ArrayType<U>) => string;
         }[];
         valuesKey: KV;
-        deleter?: Deleter<U>;
+        deleter?: Deleter<KE, KV, T>;
+        onRowDeleted?: OnRowDeleted<U>;
         hideHeader?: boolean;
+        rowsGetter?: RowsGetter<KE, KV, T, U>;
     }
 }
 
