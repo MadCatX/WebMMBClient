@@ -1,24 +1,23 @@
 /**
- * Copyright (c) 2020 WebMMB contributors, licensed under MIT, See LICENSE file for defails.
+ * Copyright (c) 2020-2022 WebMMB contributors, licensed under MIT, See LICENSE file for defails.
  *
  * @author Michal Malý (michal.maly@ibt.cas.cz)
  * @author Samuel C. Flores (samuelfloresc@gmail.com)
  * @author Jiří Černý (jiri.cerny@ibt.cas.cz)
  */
 
-import { Parameters, ParameterNames } from '../mmb/available-parameters';
-import { AdditionalFile } from '../model/additional-file';
-import { BaseInteraction } from '../model/base-interaction';
-import { Compound, ResidueNumber } from '../model/compound';
-import { DensityFitFiles } from '../model/density-fit-files';
-import { DoubleHelix } from '../model/double-helix';
-import { GlobalConfig } from '../model/global-config';
-import { MdParameters } from '../model/md-parameters';
-import { Mobilizer, ResidueSpan } from '../model/mobilizer';
-import { NtCConformation } from '../model/ntc-conformation';
-import { Parameter as P } from '../model/parameter';
-import { Reporting } from '../model/reporting';
-import { StagesSpan } from '../model/stages-span';
+import { Parameters } from '../mmb/available-parameters';
+import { AdditionalFile } from '../model/mmb/additional-file';
+import { AdvancedParameters } from '../model/mmb/advanced-parameters';
+import { BaseInteraction } from '../model/mmb/base-interaction';
+import { Chain, Compound, ResidueNumber } from '../model/mmb/compound';
+import { DoubleHelix } from '../model/mmb/double-helix';
+import { GlobalConfig } from '../model/mmb/global-config';
+import { MdParameters } from '../model/mmb/md-parameters';
+import { Mobilizer, ResidueSpan } from '../model/mmb/mobilizer';
+import { NtC } from '../model/mmb/ntc';
+import { Parameter as P } from '../model/mmb/parameter';
+import { Reporting } from '../model/mmb/reporting';
 import { Num } from '../util/num';
 import * as Api from './api';
 
@@ -33,11 +32,11 @@ export namespace JsonCommandsDeserializer {
         const advParams = {} as Api.JsonAdvancedParameters;
 
         for (const key in commands.adv_params) {
-            if (!Parameters.has(key as ParameterNames))
+            if (!AdvancedParameters.isParameterName(key))
                 throw new Error(`Advanced parameter ${key} does not exist`);
 
             const value = commands.adv_params[key];
-            const param = Parameters.get(key as ParameterNames)!;
+            const param = Parameters.get(key)!;
 
             if (P.isStatic(param)) {
                 const arg = param.getArgument();
@@ -70,13 +69,13 @@ export namespace JsonCommandsDeserializer {
                         throw new Error(`Advanced parameter ${key} has invalid value ${value}`);
                 }
             } else {
-                if (key === 'densityFileName' ||
-                    key === 'electroDensityFileName' ||
-                    key === 'inQVectorFileName' ||
-                    key === 'leontisWesthofInFileName' ||
-                    key === 'tinkerParameterFileName') {
+                if (AdvancedParameters.isFileInputParameter(key)) {
+                    /* We are allowing file input parameters to have invalid values
+                     * because files can be removed by the user */
                     if (!files.find(f => f.name === value))
-                        throw new Error(`Advanced parameter ${key} has invalid value ${value}`);
+                        advParams[key] = null;
+                    else
+                        advParams[key] = value;
                 }
                 advParams[key] = value;
             }
@@ -102,10 +101,10 @@ export namespace JsonCommandsDeserializer {
     }
 
     export function toDensityFitFiles(commands: Api.DensityFitCommands) {
-        return new DensityFitFiles(
-            commands.structure_file_name,
-            commands.density_map_file_name
-        );
+        return {
+            structure: commands.structure_file_name,
+            densityMap: commands.density_map_file_name,
+        };
     }
 
     export function toDoubleHelices(commands: Api.StandardCommands) {
@@ -132,7 +131,7 @@ export namespace JsonCommandsDeserializer {
             if (!Compound.isType(type))
                 throw new Error(`Compound type ${type} is not a valid compound type`);
 
-            const chain = { name: c.chain.name, authName: c.chain.auth_name };
+            const chain = new Chain(c.chain.name, c.chain.auth_name);
             const residues: ResidueNumber[] = [];
             for (const res of c.residues)
                 residues.push({ number: res.number, authNumber: res.auth_number });
@@ -172,8 +171,8 @@ export namespace JsonCommandsDeserializer {
             else {
                 const chain = getChain(m.chain);
 
-                if (m.first_residue !== null && m.last_residue !== null)
-                    mobilizers.push(new Mobilizer(bondMobility, chain, new ResidueSpan(m.first_residue!, m.last_residue!)));
+                if (m.first_residue && m.last_residue)
+                    mobilizers.push(new Mobilizer(bondMobility, chain, new ResidueSpan(m.first_residue, m.last_residue)));
                 else
                     mobilizers.push(new Mobilizer(bondMobility, chain));
             }
@@ -183,11 +182,11 @@ export namespace JsonCommandsDeserializer {
     }
 
     export function toNtCs(commands: Api.DensityFitCommands|Api.StandardCommands) {
-        const conformations: NtCConformation[] = [];
+        const conformations: NtC.Conformation[] = [];
 
         for (const ntc of commands.ntcs.conformations) {
             conformations.push(
-                new NtCConformation(ntc.chain_name, ntc.first_res_no, ntc.last_res_no, ntc.ntc)
+                new NtC.Conformation(ntc.chain_name, ntc.first_res_no, ntc.last_res_no, ntc.ntc)
             );
         }
 
@@ -206,10 +205,11 @@ export namespace JsonCommandsDeserializer {
         return new Reporting(interval, count);
     }
 
-    export function toStages(commands: Api.CommonCommands) {
-        const first = Num.parseIntStrict(commands.first_stage);
-        const last = Num.parseIntStrict(commands.last_stage);
+    export function toStage(commands: Api.CommonCommands) {
+        const stage = Num.parseIntStrict(commands.stage);
+        if (isNaN(stage))
+            throw new Error('Invalid stage number');
 
-        return new StagesSpan(first, last);
+        return stage;
     }
 }

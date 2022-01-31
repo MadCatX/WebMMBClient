@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020 WebMMB contributors, licensed under MIT, See LICENSE file for details.
+ * Copyright (c) 2020-2022 WebMMB contributors, licensed under MIT, See LICENSE file for details.
  *
  * @author Michal Malý (michal.maly@ibt.cas.cz)
  * @author Samuel C. Flores (samuelfloresc@gmail.com)
@@ -35,7 +35,7 @@ export namespace Num {
         if (s[0] === MinusChar)
             idx++;
         for (; idx < s.length; idx++) {
-            if (s.charAt(idx) == '.') {
+            if (s.charAt(idx) === '.') {
                 decSepCnt++;
                 if (decSepCnt > 1)
                     return NaN;
@@ -54,7 +54,7 @@ export namespace Num {
         if (typeof obj === 'number')
             return obj;
         if (typeof obj !== 'string')
-         return NaN;
+            return NaN;
 
         const s = obj.trim();
 

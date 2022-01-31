@@ -9,10 +9,10 @@
 import * as Api from './api';
 
 export const CommonCommands: Api.CommonCommands = {
+    job_type: 'Standard',
     reporting_interval: 0,
     num_reporting_intervals: 0,
-    first_stage: 0,
-    last_stage: 0,
+    stage: 0,
     base_interaction_scale_factor: 0,
     temperature: 0,
 };

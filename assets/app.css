@@ -609,6 +609,10 @@ body {
     resize: none;
 }
 
+.text-area-full-width {
+    width: 100%;
+}
+
 .tooltip-container {
     position: relative;
 }

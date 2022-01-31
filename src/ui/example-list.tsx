@@ -67,7 +67,7 @@ export class ExampleList extends React.Component<ExampleList.Props, State> {
         } catch (e) {
             this.setState({
                 ...this.state,
-                error: e.toString(),
+                error: (e as Error).toString(),
             });
         }
     }

@@ -7,8 +7,7 @@
  */
 
 import { Num } from './num';
-
-export type AnyObject = Record<string, unknown>;
+import { AnyObject } from './types';
 
 export interface TypeChecker<V> {
     (v: unknown): v is V;
@@ -26,11 +25,17 @@ export function assignAll<T>(dst: AnyObject, src: AnyObject, template: T): T {
     return dst as T;
 }
 
-export function checkProps<T>(checked: AnyObject, template: T) {
+export function checkProps<T>(checked: unknown, template: T): checked is T {
+    if (!isObj(checked))
+        return false;
     for (const prop in template) {
-        if (!checked.hasOwnProperty(prop))
-            throw new Error(`No property ${prop} on object`);
+        if (!Object.prototype.hasOwnProperty.call(checked, prop)) {
+            console.log(`No property ${prop} on object`);
+            return false;
+        }
     }
+
+    return true;
 }
 
 export function checkType<V, T, K extends keyof T>(obj: T, prop: K, checker: TypeChecker<V>) {

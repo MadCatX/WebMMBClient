@@ -1,81 +1,48 @@
 /**
- * Copyright (c) 2020 WebMMB contributors, licensed under MIT, See LICENSE file for details.
+ * Copyright (c) 2020-2022 WebMMB contributors, licensed under MIT, See LICENSE file for details.
  *
  * @author Michal Malý (michal.maly@ibt.cas.cz)
  * @author Samuel C. Flores (samuelfloresc@gmail.com)
  * @author Jiří Černý (jiri.cerny@ibt.cas.cz)
  */
 
-import { BaseInteraction } from '../model/base-interaction';
-import { Compound } from '../model/compound';
-import { DensityFitFiles } from '../model/density-fit-files';
-import { DoubleHelix } from '../model/double-helix';
-import { GlobalConfig } from '../model/global-config';
-import { MdParameters } from '../model/md-parameters';
-import { Mobilizer } from '../model/mobilizer';
-import { NtCs } from '../model/ntc-conformation';
-import { Parameter as P } from '../model/parameter';
-import { Reporting } from '../model/reporting';
-import { StagesSpan } from '../model/stages-span';
+import { Commands } from './commands';
+import { Parameters } from '../mmb/available-parameters';
+import { AdvancedParameters } from '../model/mmb/advanced-parameters';
+import { BaseInteraction } from '../model/mmb/base-interaction';
+import { Compound } from '../model/mmb/compound';
+import { DoubleHelix } from '../model/mmb/double-helix';
+import { GlobalConfig } from '../model/mmb/global-config';
+import { MdParameters } from '../model/mmb/md-parameters';
+import { Mobilizer } from '../model/mmb/mobilizer';
+import { NtC } from '../model/mmb/ntc';
+import { Reporting } from '../model/mmb/reporting';
 import { Num } from '../util/num';
 import * as Api from './api';
 import * as AO from './api-objs';
 
-export namespace CommandsSerializer {
-    export type AdvancedParameters<K extends (string extends K ? never : string)> = {
-        parameters: ReadonlyMap<K, P.Parameter<K>>,
-        values: Map<K, unknown>,
-    }
-
-    export type CommonParameters = {
-        reporting: Reporting,
-        stages: StagesSpan,
-        global: GlobalConfig,
-    }
-
-    export type DensityFitParameters = CommonParameters & {
-        jobType: 'density-fit',
-        densityFitFiles: DensityFitFiles,
-        compounds: Compound[],
-        mobilizers: Mobilizer[],
-        ntcs: NtCs,
-        mdParameters: MdParameters,
-    }
-
-    export type StandardParameters<K extends (string extends K ? never : string)> = CommonParameters & {
-        jobType: 'standard';
-        baseInteractions: BaseInteraction[],
-        compounds: Compound[],
-        doubleHelices: DoubleHelix[],
-        mdParameters: MdParameters,
-        ntcs: NtCs,
-        mobilizers: Mobilizer[],
-        advParams: AdvancedParameters<K>,
-    }
-
-    export function trueFalse(b: boolean) {
-        return b ? 'True' : 'False';
-    }
-}
-
 export namespace TextCommandsSerializer {
-    function advancedParameters<K extends (string extends K ? never : string)>(advParams: CommandsSerializer.AdvancedParameters<K>) {
-        const ret = [ '', '# Advanced parameters'];
+    function advancedParameters<K extends (string extends K ? never : string)>(advParams: AdvancedParameters.Type) {
+        const ret = ['', '# Advanced parameters'];
 
-        for (const [name, value] of advParams.values.entries()) {
-            const param = advParams.parameters.get(name)!;
+        for (const [name, value] of advParams.entries()) {
+            const param = Parameters.get(name);
+            if (!param)
+                throw new Error(`Parameter ${name} does not exist`);
 
             if (param.getType() === 'boolean')
-                ret.push(`${name} ${CommandsSerializer.trueFalse(value as boolean)}`);
-            else
-                ret.push(`${name} ${value}`);
+                ret.push(`${name} ${trueFalse(value as boolean)}`);
+            else {
+                const txt = value === undefined ? '<NO VALUE>' : value;
+                ret.push(`${name} ${txt}`);
+            }
         }
 
         return ret;
     }
 
     function global(config: GlobalConfig) {
-        return [ '',
+        return ['',
             '# Common configuration',
             `baseInteractionScaleFactor ${config.baseInteractionScaleFactor}`,
             `temperature ${config.temperature}`];
@@ -91,31 +58,28 @@ export namespace TextCommandsSerializer {
     }
 
     function reporting(rep: Reporting) {
-        return [ '',
+        return ['',
             '# Reporting',
             `reportingInterval ${rep.interval}`,
             `numReportingIntervals ${rep.count}`];
     }
 
-    function stages(stages: StagesSpan) {
-        return [ '',
+    function stage(stage: number) {
+        return ['',
             '# Stages',
-            `firstStage ${stages.first}`,
-            `lastStage ${stages.last}`];
+            `firstStage ${stage}`,
+            `lastStage ${stage}`];
     }
 
-    function serializeDensityFit(params: CommandsSerializer.DensityFitParameters, commands: string[]) {
-        commands.push(`loadSequencesFromPdb ${params.densityFitFiles.structureFileName}`);
-        commands.push(`densityFileName ${params.densityFitFiles.densityMapFileName}`);
+    function serializeDensityFit(params: Commands.DensityFitParameters, commands: string[]) {
+        commands.push(`loadSequencesFromPdb ${params.densityFitFiles.structure}`);
+        commands.push(`densityFileName ${params.densityFitFiles.densityMap}`);
         commands.push('fitToDensity');
 
         return commands;
     }
 
-    function serializeStandard<K extends (string extends K ? never : string)>(params: CommandsSerializer.StandardParameters<K>, commands: string[]) {
-        // Write general config
-        commands = commands.concat(global(params.global));
-
+    function serializeStandard<K extends (string extends K ? never : string)>(params: Commands.StandardParameters<K>, commands: string[]) {
         // Write MD parameters
         commands = commands.concat(mdParams(params.mdParameters));
 
@@ -125,36 +89,38 @@ export namespace TextCommandsSerializer {
         // Write sequences
         commands.push('', '# Sequences');
         params.compounds.forEach(c => {
-            const entry = `${c.type.toLocaleUpperCase()} ${c.chain.name} ${c.firstResidue().authNumber} ${Compound.sequenceAsString(c.sequence)}`;
+            const entry = `${c.type.toLocaleUpperCase()} ${c.chain.name} ${c.firstResidue.authNumber} ${Compound.sequenceAsString(c.sequence)}`;
             commands.push(entry);
         });
 
         // Double helices
         commands.push('', '# Double helices');
         params.doubleHelices.forEach(dh => {
-            const cOne = params.compounds.find(c => c.chain.name === dh.chainNameOne)!;
-            const cTwo = params.compounds.find(c => c.chain.name === dh.chainNameTwo)!;
-            const entry = `nucleicAcidDuplex ${cOne.chain.authName} ${cOne.residueByNumber(dh.firstResidueNoOne)!.authNumber} ${cOne.residueByNumber(dh.lastResidueNoOne)} ${cTwo.chain.authName} ${cTwo.residueByNumber(dh.firstResidueNoTwo)!.authNumber} ${cTwo.residueByNumber(dh.lastResidueNoTwo)!.authNumber}`;
+            const cA = params.compounds.find(c => c.chain.name === dh.chainNameA)!;
+            const cB = params.compounds.find(c => c.chain.name === dh.chainNameB)!;
+            const entry = `nucleicAcidDuplex ${cA.chain.authName} ${cA.residueByNumber(dh.firstResNoA)!.authNumber} ${cA.residueByNumber(dh.lastResNoA)} ${cB.chain.authName} ${cB.residueByNumber(dh.firstResNoB)!.authNumber} ${cB.residueByNumber(dh.lastResNoB)!.authNumber}`;
             commands.push(entry);
         });
 
         // Base interactions
         commands.push('', '# Base interactions');
         params.baseInteractions.forEach(bi => {
-            const cOne = params.compounds.find(c => c.chain.name === bi.chainNameOne)!;
-            const cTwo = params.compounds.find(c => c.chain.name === bi.chainNameTwo)!;
-            const entry = `baseInteraction ${cOne.chain.authName} ${cOne.residueByNumber(bi.residueNoTwo)!.authNumber} ${bi.edgeOne} ${cTwo.chain.authName} ${cTwo.residueByNumber(bi.residueNoTwo)} ${bi.edgeTwo} ${bi.orientation}`;
+            const cA = params.compounds.find(c => c.chain.name === bi.chainNameA)!;
+            const cB = params.compounds.find(c => c.chain.name === bi.chainNameB)!;
+            const entry = `baseInteraction ${cA.chain.authName} ${cA.residueByNumber(bi.resNoB)!.authNumber} ${bi.edgeA} ${cB.chain.authName} ${cB.residueByNumber(bi.resNoB)} ${bi.edgeB} ${bi.orientation}`;
             commands.push(entry);
         });
 
         // NtCs
         commands.push('', '# NtCs');
-        params.ntcs.conformations.forEach((ntc) => {
-            const c = params.compounds.find(c => c.chain.name === ntc.chainName)!;
-            const entry  = `NtC ${c.chain.authName} ${c.residueByNumber(ntc.firstResidueNo)!.authNumber} ${c.residueByNumber(ntc.lastResidueNo)!.authNumber} ${ntc.ntc} 1.5`;
-            commands.push(entry);
-        });
-        commands.push(`NtCForceScaleFactor ${params.ntcs.forceScaleFactor}`);
+        if (params.ntcs.conformations.length > 0) {
+            params.ntcs.conformations.forEach(ntc => {
+                const c = params.compounds.find(c => c.chain.name === ntc.chainName)!;
+                const entry  = `NtC ${c.chain.authName} ${c.residueByNumber(ntc.firstResNo)!.authNumber} ${c.residueByNumber(ntc.lastResNo)!.authNumber} ${ntc.ntc} 1.5`;
+                commands.push(entry);
+            });
+            commands.push(`NtCForceScaleFactor ${params.ntcs.forceScaleFactor}`);
+        }
 
         // Mobilizers
         commands.push('', '# Mobilizers');
@@ -170,12 +136,11 @@ export namespace TextCommandsSerializer {
         });
 
         return commands;
-
     }
 
-    export function serialize<K extends (string extends K ? never : string)>(params: CommandsSerializer.DensityFitParameters|CommandsSerializer.StandardParameters<K>) {
+    export function serialize<K extends (string extends K ? never : string)>(params: Commands.DensityFitParameters|Commands.StandardParameters<K>) {
         let commands: string[] = [];
-        commands = commands.concat(stages(params.stages));
+        commands = commands.concat(stage(params.stage));
         commands = commands.concat(reporting(params.reporting));
         commands = commands.concat(global(params.global));
 
@@ -190,30 +155,36 @@ export namespace TextCommandsSerializer {
 
         return commands;
     }
+
+    export function trueFalse(b: boolean) {
+        return b ? 'True' : 'False';
+    }
 }
 
 export namespace JsonCommandsSerializer {
-    function advancedParameters<K extends (string extends K ? never : string)>(advParams: CommandsSerializer.AdvancedParameters<K>) {
+    function advancedParameters(advParams: AdvancedParameters.Type) {
         const defs: Api.JsonAdvancedParameters = {};
 
-        for (const [name, value] of advParams.values.entries()) {
-            const param = advParams.parameters.get(name)!;
+        for (const [name, value] of advParams.entries()) {
+            const param = Parameters.get(name);
+            if (!param)
+                throw new Error(`Parameter ${name} does not exist`);
 
             switch (param.getType()) {
-                case 'integral':
-                    defs[name] = Num.parseIntStrict(value);
-                    break;
-                case 'real':
-                    defs[name] = Num.parseFloatStrict(value);
-                    break;
-                case 'boolean':
-                    defs[name] = value as boolean;
-                    break;
-                case 'options':
-                    defs[name] = value as string;
-                    break;
-                default:
-                    throw new Error('Unknown advanced parameter type');
+            case 'integral':
+                defs[name] = Num.parseIntStrict(value);
+                break;
+            case 'real':
+                defs[name] = Num.parseFloatStrict(value);
+                break;
+            case 'boolean':
+                defs[name] = value as boolean;
+                break;
+            case 'options':
+                defs[name] = value as string;
+                break;
+            default:
+                throw new Error('Unknown advanced parameter type');
             }
         }
 
@@ -224,18 +195,19 @@ export namespace JsonCommandsSerializer {
         const defs: Api.BaseInteraction[] = [];
 
         bis.forEach(bi => {
-            const cOne = compounds.find(c => c.chain.name === bi.chainNameOne)!;
-            const cTwo = compounds.find(c => c.chain.name === bi.chainNameTwo)!;
-            const def: Api.BaseInteraction = {
-                chain_name_1: cOne.chain.name,
-                res_no_1: bi.residueNoOne,
-                edge_1: bi.edgeTwo,
-                chain_name_2: cTwo.chain.name,
-                res_no_2: bi.residueNoTwo,
-                edge_2: bi.edgeTwo,
-                orientation: bi.orientation,
-            }
-            defs.push(def);
+            const cA = compounds.find(c => c.chain.name === bi.chainNameA)!;
+            const cB = compounds.find(c => c.chain.name === bi.chainNameB)!;
+            defs.push(
+                {
+                    chain_name_1: cA.chain.name,
+                    res_no_1: bi.resNoA,
+                    edge_1: bi.edgeB,
+                    chain_name_2: cB.chain.name,
+                    res_no_2: bi.resNoB,
+                    edge_2: bi.edgeB,
+                    orientation: bi.orientation,
+                }
+            );
         });
 
         return defs;
@@ -249,7 +221,7 @@ export namespace JsonCommandsSerializer {
                 chain: { name: c.chain.name, auth_name: c.chain.authName },
                 ctype: c.type === 'DNA' ? 'DNA' : c.type === 'RNA' ? 'RNA' : 'Protein',
                 sequence: Compound.sequenceAsString(c.sequence),
-                residues: c.residues.map(res => { return { number: res.number, auth_number: res.authNumber }; }),
+                residues: c.residues.map(res => ({ number: res.number, auth_number: res.authNumber }) ),
             });
         }
 
@@ -260,11 +232,11 @@ export namespace JsonCommandsSerializer {
         const defs: Api.DoubleHelix[] = [];
 
         dhs.forEach(dh => {
-            const cOne = compounds.find(c => c.chain.name === dh.chainNameOne)!;
-            const cTwo = compounds.find(c => c.chain.name === dh.chainNameTwo)!;
+            const cA = compounds.find(c => c.chain.name === dh.chainNameA)!;
+            const cB = compounds.find(c => c.chain.name === dh.chainNameB)!;
             const def = {
-                chain_name_1: cOne.chain.name, first_res_no_1: dh.firstResidueNoOne, last_res_no_1: dh.lastResidueNoOne,
-                chain_name_2: cTwo.chain.name, first_res_no_2: dh.firstResidueNoTwo, last_res_no_2: dh.lastResidueNoTwo,
+                chain_name_1: cA.chain.name, first_res_no_1: dh.firstResNoA, last_res_no_1: dh.lastResNoA,
+                chain_name_2: cB.chain.name, first_res_no_2: dh.firstResNoB, last_res_no_2: dh.lastResNoB,
             };
             defs.push(def);
         });
@@ -298,7 +270,7 @@ export namespace JsonCommandsSerializer {
         return defs;
     }
 
-    function ntcs(ntcs: NtCs, compounds: Compound[]) {
+    function ntcs(ntcs: NtC.NtCs, compounds: Compound[]) {
         const defs: Api.NtCs = Object.assign({}, AO.NtCs);
         defs.conformations = new Array<Api.NtCConformation>();
 
@@ -306,8 +278,8 @@ export namespace JsonCommandsSerializer {
             const c = compounds.find(c => c.chain.name === ntc.chainName)!;
             const def = {
                 chain_name: c.chain.name,
-                first_res_no: ntc.firstResidueNo,
-                last_res_no: ntc.lastResidueNo,
+                first_res_no: ntc.firstResNo,
+                last_res_no: ntc.lastResNo,
                 ntc: ntc.ntc,
                 weight: 1.5, // Temporary
             };
@@ -318,25 +290,27 @@ export namespace JsonCommandsSerializer {
         return defs;
     }
 
-    function serializeDensityFit(params: CommandsSerializer.DensityFitParameters) {
+    function serializeDensityFit(params: Commands.DensityFitParameters) {
         let cmds = Object.assign({}, AO.DensityFitCommands);
 
-        cmds.structure_file_name = params.densityFitFiles.structureFileName;
-        cmds.density_map_file_name = params.densityFitFiles.densityMapFileName;
+        cmds.structure_file_name = params.densityFitFiles.structure;
+        cmds.density_map_file_name = params.densityFitFiles.densityMap;
         cmds.compounds = compounds(params.compounds);
         cmds.mobilizers = mobilizers(params.mobilizers, params.compounds);
         cmds.ntcs = ntcs(params.ntcs, params.compounds);
+        cmds.stage = params.stage;
 
         cmds = mdParams(cmds, params.mdParameters);
 
         return cmds;
     }
 
-    function serializeStandard<K extends (string extends K ? never : string)>(params: CommandsSerializer.StandardParameters<K>) {
+    function serializeStandard<K extends (string extends K ? never : string)>(params: Commands.StandardParameters<K>) {
         let cmds = Object.assign({}, AO.StandardCommands);
 
         // Global
         cmds.base_interaction_scale_factor = params.global.baseInteractionScaleFactor;
+        cmds.stage = params.stage;
         cmds.temperature = params.global.temperature;
 
         cmds = mdParams(cmds, params.mdParameters);
@@ -353,7 +327,7 @@ export namespace JsonCommandsSerializer {
         return cmds;
     }
 
-    export function serialize<K extends (string extends K ? never : string)>(params: CommandsSerializer.DensityFitParameters|CommandsSerializer.StandardParameters<K>) {
+    export function serialize<K extends (string extends K ? never : string)>(params: Commands.DensityFitParameters|Commands.StandardParameters<K>) {
         let cmds = Object.assign({}, AO.CommonCommands);
 
         // Do concrete data first
@@ -365,10 +339,6 @@ export namespace JsonCommandsSerializer {
             cmds = Object.assign(cmds, serializeStandard(params));
             break;
         }
-
-        // Stages
-        cmds.first_stage = params.stages.first;
-        cmds.last_stage = params.stages.last;
 
         // Reporting
         cmds.reporting_interval = params.reporting.interval;

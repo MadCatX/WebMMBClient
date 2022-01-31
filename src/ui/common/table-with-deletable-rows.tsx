@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020-2021 WebMMB contributors, licensed under MIT, See LICENSE file for details.
+ * Copyright (c) 2020-2022 WebMMB contributors, licensed under MIT, See LICENSE file for details.
  *
  * @author Michal Malý (michal.maly@ibt.cas.cz)
  * @author Samuel C. Flores (samuelfloresc@gmail.com)
@@ -7,14 +7,10 @@
  */
 
 import * as React from 'react';
-import { FormModel, FormUtil } from '../../model/common/form';
 import { PushButton } from './push-button';
+import { Dearray } from '../../util/types';
 
-type ArrayType<T> = T extends (infer AT)[] ? AT : never;
-
-export class GTableWithDeletableRows<KE, KV, T, U extends T & Array<any>> extends React.Component<GTableWithDeletableRows.Props<KE, KV, T, U>> {
-    private FU = new FormUtil<KE, KV, T>();
-
+export class GTableWithDeletableRows<T extends Array<any>> extends React.Component<GTableWithDeletableRows.Props<T>> {
     private renderHeader() {
         if (this.props.hideHeader === true)
             return undefined;
@@ -30,32 +26,19 @@ export class GTableWithDeletableRows<KE, KV, T, U extends T & Array<any>> extend
         );
     }
 
-    removeRow = (idx: number, data: FormModel.ContextData<KE, KV, T>) => {
-        const rows = this.props.rowsGetter ? this.props.rowsGetter(data) : this.FU.getArray<U>(data, this.props.valuesKey);
-        const item: ArrayType<U> = rows[idx];
-
-        if (this.props.deleter)
-            this.props.deleter(idx, data);
-        else {
-            rows.splice(idx, 1);
-            this.FU.updateValue(data, { key: this.props.valuesKey, value: rows });
-        }
-
-        if (this.props.onRowDeleted)
-            this.props.onRowDeleted(item, idx);
+    private removeRow(idx: number) {
+        this.props.onRemoveRow(idx, this.props.data[idx]);
     }
 
     render() {
-        const values = this.props.rowsGetter ? this.props.rowsGetter(this.props.ctxData) : this.FU.getArray<U>(this.props.ctxData, this.props.valuesKey);
-
         return (
             <div className={this.props.className} key='top'>
                 {this.renderHeader()}
-                {values.map((v, index) => {
+                {this.props.data.map((v, index) => {
                     return (
-                        <React.Fragment key={`row-item-${index}`}>
+                        <React.Fragment key={index}>
                             {this.props.columns.map((col, n) => {
-                                const key = `col-item-${index}-${n}`
+                                const key = n;
                                 if (col.stringify !== undefined)
                                     return (<div className='column-item' key={key}>{col.stringify(v[col.k], v)}</div>);
                                 else
@@ -63,12 +46,9 @@ export class GTableWithDeletableRows<KE, KV, T, U extends T & Array<any>> extend
                             })}
                             <PushButton
                                 className='pushbutton-common pushbutton-delete'
-                                key={`delbtn-${index}`}
                                 value='-'
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    this.removeRow(index, this.props.ctxData);
-                                }} />
+                                onClick={() => this.removeRow(index) }
+                            />
                         </React.Fragment>
                     );
                 })
@@ -79,36 +59,25 @@ export class GTableWithDeletableRows<KE, KV, T, U extends T & Array<any>> extend
 }
 
 export namespace GTableWithDeletableRows {
-    type ValueOf<T> = ArrayType<T>[keyof ArrayType<T>];
+    type ValueOf<T> = Dearray<T>[keyof Dearray<T>];
 
-    export interface RowsGetter<KE, KV, T, U> {
-        (ctxData: FormModel.ContextData<KE, KV, T>): U;
+    export interface OnRemoveRow<T> {
+        (index: number, item: T): void;
     }
 
-    export interface Deleter<KE, KV, T> {
-        (idx: number, ctxData: FormModel.ContextData<KE, KV, T>): void;
-    }
-
-    export interface OnRowDeleted<T> {
-        (item: ArrayType<T>, index: number): void;
-    }
-
-    export interface Props<KE, KV, T, U> {
-        ctxData: FormModel.ContextData<KE, KV, T>;
+    export interface Props<T extends Array<any>> {
         className: string;
+        data: T;
         columns: {
             caption: string;
-            k: keyof ArrayType<U>;
-            stringify?: (v: ValueOf<ArrayType<U>>, item: ArrayType<U>) => string;
+            k: keyof Dearray<T>;
+            stringify?: (v: ValueOf<Dearray<T>>, item: Dearray<T>) => string;
         }[];
-        valuesKey: KV;
-        deleter?: Deleter<KE, KV, T>;
-        onRowDeleted?: OnRowDeleted<U>;
         hideHeader?: boolean;
-        rowsGetter?: RowsGetter<KE, KV, T, U>;
+        onRemoveRow: OnRemoveRow<Dearray<T>>;
     }
 }
 
-export function TableWithDeletableRows<KE, KV, T, U extends T & Array<any>>() {
-    return GTableWithDeletableRows as new(props: GTableWithDeletableRows.Props<KE, KV, T, U>) => GTableWithDeletableRows<KE, KV, T, U>;
+export function TableWithDeletableRows<T extends Array<any>>() {
+    return GTableWithDeletableRows as new(props: GTableWithDeletableRows.Props<T>) => GTableWithDeletableRows<T>;
 }

@@ -22,7 +22,7 @@ import {AppQuery} from './mmb/app-query';
 type Tabs = 'job-list' | 'job-control' | 'example-list';
 
 interface State {
-    session_id?: string;
+    session_id?: string; // TODO: camelCase
     jobId: string|null;
     activeTab: Tabs;
 }

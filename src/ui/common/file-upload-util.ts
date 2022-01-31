@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020-2021 WebMMB contributors, licensed under MIT, See LICENSE file for details.
+ * Copyright (c) 2020-2022 WebMMB contributors, licensed under MIT, See LICENSE file for details.
  *
  * @author Michal Malý (michal.maly@ibt.cas.cz)
  * @author Samuel C. Flores (samuelfloresc@gmail.com)
@@ -8,12 +8,8 @@
 
 import { FileQuery } from '../../mmb/file-query';
 import { FileUploader } from '../../mmb/file-uploader';
-import { FormUtil } from '../../model/common/form';
-import { AdditionalFileImpl } from '../../model/additional-file';
-import { MmbInputModel as MIM } from '../../model/mmb-input-model';
+import { AdditionalFileImpl } from '../../model/mmb/additional-file';
 import { FilesUploadProgress } from './files-upload-progress';
-
-const FU = new FormUtil<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes>();
 
 function cpyXfrs(xfrs: FileUploadUtil.TransferMap) {
     const m = new Map<string, FileUploadUtil.Transfer>();
@@ -35,8 +31,8 @@ export namespace FileUploadUtil {
 
     export type TransferMap = Map<string, Transfer>;
 
-    export interface CompletionHandler {
-        (xfrs: TransferMap, completed: string): void;
+    export interface CompletionHandler<TFile extends AdditionalFileImpl> {
+        (xfrs: TransferMap, completed: TFile): void;
     }
 
     export interface ErrorHandler {
@@ -47,15 +43,7 @@ export namespace FileUploadUtil {
         (xfrs: TransferMap): void;
     }
 
-    export interface CancelFunc {
-        (id: string): void;
-    }
-
-    export interface UploadFunc {
-        (data: MIM.ContextData, jobId: string): void;
-    }
-
-    export function Uploader(key: MIM.ValueKeys, progressHandler: ProgressHandler, errorHandler: ErrorHandler, completionHandler?: CompletionHandler) {
+    export function Uploader<TFile extends AdditionalFileImpl>(progressHandler: ProgressHandler, errorHandler: ErrorHandler, completionHandler: CompletionHandler<TFile>) {
         const xfrs = new Map<string, Transfer>();
         return {
             cancel: (xfrId: string) => {
@@ -63,16 +51,13 @@ export namespace FileUploadUtil {
                 if (xfr)
                     xfr.cancel = true;
             },
-            upload: (data: MIM.ContextData, jobId: string) => {
-                const files = FU.getArray<AdditionalFileImpl[]>(data, key);
-                const toUpload = files.filter(f => f.isUploaded === false && f.file).map(f => f.file!);
-
+            upload: (files: TFile[], jobId: string) => {
                 xfrs.clear();
-                for (const f of toUpload) {
+                for (const f of files) {
                     xfrs.set(
                         f.name,
                         {
-                            file: f,
+                            file: f.file!,
                             doneRatio: 0,
                             state: 'not-started',
                             cancel: false,
@@ -83,12 +68,11 @@ export namespace FileUploadUtil {
 
                 FileUploader.upload(
                     jobId,
-                    toUpload,
-                    (file, reader, transferId, doneRatio, isDone) => {
+                    files.map(f => f.file!),
+                    (file, transferId, doneRatio, isDone) => {
                         const xfr = xfrs.get(file.name)!;
 
                         if (xfr.cancel) {
-                            reader.cancel();
                             FileQuery.cancelUpload(jobId, transferId).performer().then(() => {
                                 xfr.state = 'canceled';
                                 progressHandler(cpyXfrs(xfrs));
@@ -99,16 +83,13 @@ export namespace FileUploadUtil {
                         }
 
                         if (isDone) {
-                            const xfiles = FU.getArray<AdditionalFileImpl[]>(data, key);
-                            for (const f of xfiles) {
+                            for (const f of files) {
                                 if (f.name === file.name) {
-                                    f.isUploaded = true;
-                                    FU.updateValue(data, { key, value: xfiles });
-
                                     xfr.state = 'done';
+
+                                    f.isUploaded = true;
                                     progressHandler(cpyXfrs(xfrs));
-                                    if (completionHandler)
-                                        completionHandler(cpyXfrs(xfrs), f.name);
+                                    completionHandler(cpyXfrs(xfrs), f);
                                     return;
                                 }
                             }

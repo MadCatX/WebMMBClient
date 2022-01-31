@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020 WebMMB contributors, licensed under MIT, See LICENSE file for details.
+ * Copyright (c) 2020-2022 WebMMB contributors, licensed under MIT, See LICENSE file for details.
  *
  * @author Michal Malý (michal.maly@ibt.cas.cz)
  * @author Samuel C. Flores (samuelfloresc@gmail.com)
@@ -13,14 +13,6 @@ export namespace JobRequest {
     export function commands(jobId: string)  {
         const req: Api.ApiRequest<Api.SimpleJobRqData> = {
             req_type: 'JobCommands',
-            data: { id: jobId },
-        };
-        return Request.api(req);
-    }
-
-    export function commands_raw(jobId: string)  {
-        const req: Api.ApiRequest<Api.SimpleJobRqData> = {
-            req_type: 'JobCommandsRaw',
             data: { id: jobId },
         };
         return Request.api(req);
@@ -62,7 +54,7 @@ export namespace JobRequest {
         const req: Api.ApiRequest<Api.SimpleJobRqData> = {
             req_type: 'ListAdditionalFiles',
             data: { id },
-        }
+        };
         return Request.api(req);
     }
 
@@ -82,17 +74,9 @@ export namespace JobRequest {
         return Request.api(req);
     }
 
-    export function start(id: string, commands: Api.StandardCommands | Api.DensityFitCommands) {
+    export function start(id: string, commands: Api.JobCommandsSynthetic|Api.JobCommandsRaw) {
         const req: Api.ApiRequest<Api.StartJobRqData> = {
             req_type: 'StartJob',
-            data: { id, commands },
-        };
-        return Request.api(req);
-    }
-
-    export function startRaw(id: string, commands: string) {
-        const req: Api.ApiRequest<Api.StartJobRawRqData> = {
-            req_type: 'StartJobRaw',
             data: { id, commands },
         };
         return Request.api(req);

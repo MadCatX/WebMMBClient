@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020 WebMMB contributors, licensed under MIT, See LICENSE file for details.
+ * Copyright (c) 2020-2022 WebMMB contributors, licensed under MIT, See LICENSE file for details.
  *
  * @author Michal Malý (michal.maly@ibt.cas.cz)
  * @author Samuel C. Flores (samuelfloresc@gmail.com)
@@ -8,7 +8,6 @@
 
 type ApiRequestType =
     'StartJob'           |
-    'StartJobRaw'        |
     'StopJob'            |
     'CreateJob'          |
     'DeleteJob'          |
@@ -16,7 +15,6 @@ type ApiRequestType =
     'ListJobs'           |
     'MmbOutput'          |
     'JobCommands'        |
-    'JobCommandsRaw'     |
     'SessionInfo'        |
     'CloneJob'           |
     'ListExamples'       |
@@ -98,10 +96,10 @@ export type NtCs = {
 }
 
 export type CommonCommands = {
+    job_type: JobType;
     reporting_interval: number,
     num_reporting_intervals: number,
-    first_stage: number,
-    last_stage: number,
+    stage: number,
     base_interaction_scale_factor: number,
     temperature: number,
 }
@@ -174,7 +172,7 @@ export type ResumeJobRqData = {
 
 export type StartJobRqData = {
     id: string,
-    commands: StandardCommands|DensityFitCommands,
+    commands: JobCommandsSynthetic|JobCommandsRaw,
 }
 
 export type StartJobRawRqData = {
@@ -217,14 +215,18 @@ export type FileTransferAck = {
     id: string,
 }
 
-export type JobCommands = {
-    is_empty: boolean;
-    commands: StandardCommands|DensityFitCommands|null;
+export type JobCommandsNone = {
+    mode: 'None';
+}
+
+export type JobCommandsSynthetic = {
+    mode: 'Synthetic';
+    commands: StandardCommands|DensityFitCommands;
 }
 
 export type JobCommandsRaw = {
-    is_empty: boolean;
-    commands: string|null;
+    mode: 'Raw';
+    commands: string;
 }
 
 export type JobCreated = {
@@ -235,8 +237,8 @@ export type JobInfo = {
     id: string,
     name: string,
     state: JobState,
-    available_stages: number[],
-    current_stage: number|null,
+    first_stage: number,
+    last_stage: number,
     created_on: number,
     commands_mode: JobCommandsMode,
     progress: JobProgress|null,

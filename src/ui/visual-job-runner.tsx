@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020-2021 WebMMB contributors, licensed under MIT, See LICENSE file for details.
+ * Copyright (c) 2020-2022 WebMMB contributors, licensed under MIT, See LICENSE file for details.
  *
  * @author Michal Malý (michal.maly@ibt.cas.cz)
  * @author Samuel C. Flores (samuelfloresc@gmail.com)
@@ -9,26 +9,27 @@
 import * as React from 'react';
 import { JobControls } from './job-controls';
 import { JobStatus } from './job-status';
-import { MmbInputForm } from './mmb-input-form';
 import { Viewer } from './viewer';
 import { ErrorBox } from './common/error-box';
 import { LabeledField } from './common/controlled/labeled-field';
+import { JsonCommandsSerializer } from '../mmb/commands-serializer';
+import { MmbInputSimple } from './mmb/mmb-input-simple';
+import { MmbInputAdvanced } from './mmb/mmb-input-advanced';
+import { MmbInputDensityFit } from './mmb/mmb-input-density-fit';
+import { MmbInputRaw } from './mmb/mmb-input-raw';
 import * as Api from '../mmb/api';
 import { JobQuery } from '../mmb/job-query';
 import { Query } from '../mmb/query';
-import { AdditionalFile } from '../model/additional-file';
-import { MmbInputModel as MIM } from '../model/mmb-input-model';
+import { Conversion } from '../model/conversion';
+import { Mmb } from '../model/mmb';
+import { MmbSetup } from '../model/mmb/mmb-setup';
+import { StagesSpan } from '../model/mmb/stages-span';
+import { AdditionalFile } from '../model/mmb/additional-file';
 import { Net } from '../util/net';
 
 const DefaultAutoRefreshEnabled = true;
 const DefaultAutoRefreshInterval = 10;
-const ModeLField = LabeledField.ComboBox<MIM.UiMode>();
-const UiModeMessage = {
-    simple: '',
-    advanced: 'Warning: Be aware that any changes made here will not be erased if you switch back to simple mode.',
-    maverick: 'Warning: Commands entered in this mode will be submitted directly to MMB with no additional validation. You are on a highway to the danger zone unless you know what you are doing.',
-    'density-fit': '',
-};
+const ModeLField = LabeledField.ComboBox<Mmb.SyntheticModes | Mmb.RawModes>();
 
 function forceResize() {
     const elem = document.getElementById('viewer');
@@ -43,26 +44,25 @@ interface State {
     jobState: Api.JobState;
     jobStep: Api.JobStep;
     jobTotalSteps: Api.JobTotalSteps;
-    jobAvailableStages: number[];
     jobCurrentStage: number|null;
     jobCommandsMode: Api.JobCommandsMode;
     jobError: string;
     autoRefreshEnabled: boolean;
     autoRefreshInterval: number;
     mmbOutput: Viewer.MmbOutput;
-    uiMode: MIM.UiMode;
-    setup: Map<MIM.ValueKeys, MIM.V<MIM.ValueTypes>>;
+    rawCommands: string;
     startJobError: string[];
+    uiMode: Mmb.SyntheticModes | Mmb.RawModes;
 }
 
 export class VisualJobRunner extends React.Component<VisualJobRunner.Props, State> {
-    private mmbInputFormRef: React.RefObject<MmbInputForm>;
     private commandsQueryAborter: AbortController | null = null;
     private additionalFilesAborter: AbortController | null = null;
     private jobQueryAborter: AbortController | null = null;
     private startJobAborter: AbortController | null = null;
     private stopJobAborter: AbortController | null = null;
     private autoRefresherId: number | null = null;
+    private setup: MmbSetup = new MmbSetup();
 
     constructor(props: VisualJobRunner.Props) {
         super(props);
@@ -72,34 +72,29 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
             jobState: 'NotStarted',
             jobStep: 'none',
             jobTotalSteps: 'none',
-            jobAvailableStages: [],
             jobCurrentStage: null,
             jobCommandsMode: 'None',
             jobError: '',
             autoRefreshEnabled: true,
             autoRefreshInterval: 10,
             mmbOutput: { text: undefined, errors: undefined },
-            uiMode: 'simple',
-            setup: MIM.defaultSetupValues(),
-            startJobError: []
+            rawCommands: '',
+            startJobError: [],
+            uiMode: 'standard-simple',
         };
 
-
-        this.makeMmbInputForm = this.makeMmbInputForm.bind(this);
         this.onAutoRefreshChanged = this.onAutoRefreshChanged.bind(this);
         this.refreshJob = this.refreshJob.bind(this);
-
-        this.mmbInputFormRef = React.createRef();
     }
 
     private densityMap(): { url: string, format: Viewer.DensityMapFormat }|undefined {
         if (this.state.uiMode === 'density-fit') {
             return {
                 url: `/density/${this.props.username}/${this.props.jobId}`,
-                format: 'ccp4'
-            }
+                format: 'ccp4',
+            };
         } else
-            return undefined;
+            return void 0;
     }
 
     private jobInfoErrorBlock(errorMsg: string, step?: Api.JobStep, totalSteps?: Api.JobTotalSteps) {
@@ -115,8 +110,6 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
         let obj = {
             jobName: data.name,
             jobState: data.state,
-            jobAvailableStages: data.available_stages,
-            jobCurrentStage: data.current_stage,
             jobCommandsMode: data.commands_mode,
             jobError: '',
         };
@@ -133,56 +126,74 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
     }
 
     private makeMmbInputForm() {
-        try {
-            const stages = (() => {
-                const sorted = [...this.state.jobAvailableStages].sort((a, b) => a - b);
-                if (sorted.length === 0) {
-                    if (this.state.uiMode === 'density-fit')
-                        sorted.push(2);
-                    else
-                        sorted.push(1);
-                }
-                else {
-                    const last = sorted[sorted.length - 1];
-                    sorted.push(last + 1);
-                }
-                return sorted;
-            })();
+        const stagesList = new Array<number>();
+        if (this.state.uiMode === 'density-fit') {
+            stagesList.push(2); // Density fit job requires stage to be 2
+            this.setup.set('stage', 2);
+        } else {
+            const s = this.setup.stages;
+            for (let n = 1; n <= s.last; n++)
+                stagesList.push(n);
+            stagesList.push(s.last + 1);
+            this.setup.set('stage', s.last + 1);
+        }
 
+        switch (this.state.uiMode) {
+        case 'standard-simple':
             return (
-                <>
-                    <div className='ui-mode-container'>
-                        <ModeLField
-                            id='mmb-in-ui-mode'
-                            label='User interface mode'
-                            style='left'
-                            value={this.state.uiMode}
-                            options={
-                                [
-                                    { value: 'simple', caption: 'Simple' },
-                                    { value: 'advanced', caption: 'Advanced' },
-                                    { value: 'density-fit', caption: 'Density fit' },
-                                    { value: 'maverick', caption: 'Maverick' },
-                                ]
-                            }
-                            updateNotifier={uiMode => this.setState({ ...this.state, uiMode })} />
-                        <div className='warning-message'>{UiModeMessage[this.state.uiMode]}</div>
-                    </div>
-                    <MmbInputForm
-                        ref={this.mmbInputFormRef}
-                        jobId={this.props.jobId}
-                        jobName={this.state.jobName}
-                        availableStages={stages}
-                        mode={this.state.uiMode}
-                        initialValues={this.state.setup} />
-                </>
+                <MmbInputSimple
+                    availableStages={stagesList}
+                    setup={this.setup}
+                />
             );
-        } catch (e) {
+        case 'standard-advanced':
             return (
-                <ErrorBox
-                    errors={[`Invalid job parameters: ${e.toString()}`]} />
+                <MmbInputAdvanced
+                    availableStages={stagesList}
+                    jobId={this.props.jobId}
+                    setup={this.setup}
+                />
+            );
+        case 'density-fit':
+            return (
+                <MmbInputDensityFit
+                    availableStages={stagesList}
+                    jobId={this.props.jobId}
+                    setup={this.setup}
+                />
+            );
+        case 'maverick':
+            return (
+                <MmbInputRaw
+                    commands={this.state.rawCommands}
+                    onChanged={v => this.setState({ ...this.state, rawCommands: v })}
+                />
             );
         }
+    }
+
+    private makeMmbInputBlock() {
+        return (
+            <>
+                <div className='ui-mode-container'>
+                    <ModeLField
+                        id='mmb-in-ui-mode'
+                        label='User interface mode'
+                        style='left'
+                        value={this.state.uiMode}
+                        options={
+                            [
+                                { value: 'standard-simple', caption: 'Simple' },
+                                { value: 'standard-advanced', caption: 'Advanced' },
+                                { value: 'density-fit', caption: 'Density fit' },
+                                { value: 'maverick', caption: 'Maverick' },
+                            ]
+                        }
+                        updateNotifier={uiMode => this.setState({ ...this.state, uiMode })} />
+                </div>
+                {this.makeMmbInputForm()}
+            </>
+        );
     }
 
     private mmbOutputErrorBlock(err: string) {
@@ -224,17 +235,24 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
             this.additionalFilesAborter = qAdditionalFiles.aborter;
             const additionalFilesPromise = qAdditionalFiles.performer();
 
-            const qCommands = jobInfo.commands_mode === 'Raw' ? JobQuery.commandsRaw(this.props.jobId) : JobQuery.commands(this.props.jobId);
+            const qCommands = JobQuery.commands(this.props.jobId);
             this.commandsQueryAborter = qCommands.aborter;
             const commandsPromise = qCommands.performer();
 
             const mmbOutput = await mmbOutputPromise;
             const additionalFiles = await additionalFilesPromise;
             const commands = await commandsPromise;
-            const setup = (() => {
-                if (!commands || commands.is_empty)
-                    return MIM.defaultSetupValues();
 
+            let newState: Partial<State> = {
+                jobName: jobInfo.name,
+                jobState: jobInfo.state,
+                jobCommandsMode: jobInfo.commands_mode,
+                jobError: '',
+            };
+
+            if (!commands || commands.mode === 'None')
+                Mmb.setDefaultSetup(this.setup);
+            else if (commands.mode === 'Synthetic') {
                 const files: AdditionalFile[] = [];
                 if (additionalFiles) {
                     for (const f of additionalFiles) {
@@ -242,18 +260,17 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
                         files.push(AdditionalFile.fromInfo(f.name, size));
                     }
                 }
+                const stages = new StagesSpan(jobInfo.first_stage, jobInfo.last_stage);
+                const ret = Conversion.setupFromCommands(this.setup, commands.commands, stages, files);
+                if (Conversion.isErrorResult(ret)) {
+                    const err = ret.errors.reduce((s, l) => s += `${l}\n`);
+                    throw new Error(err);
+                }
+            } else if (commands.mode === 'Raw')
+                newState = { ...newState, rawCommands: commands.commands };
 
-                if (jobInfo.commands_mode === 'Raw')
-                    return MIM.rawCommandsToValues(jobInfo.name, jobInfo.available_stages, jobInfo.current_stage, (commands as Api.JobCommandsRaw).commands!, files);
-                return MIM.jsonCommandsToValues(jobInfo.name, jobInfo.available_stages, jobInfo.current_stage, (commands as Api.JobCommands).commands!, files);
-            })();
-
-            let newState: Partial<State> = { ...this.jobInfoOkBlock(jobInfo) };
             if (mmbOutput)
                 newState = { ...newState, ...this.mmbOutputOkBlock(mmbOutput) };
-
-            if (commands)
-                newState = { ...newState, setup };
 
             this.setState({
                 ...this.state,
@@ -265,7 +282,7 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
         } catch (e) {
             this.setState({
                 ...this.state,
-                ...this.jobInfoErrorBlock(e.toString()),
+                ...this.jobInfoErrorBlock((e as Error).toString()),
             });
         }
     }
@@ -303,14 +320,14 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
                 this.setState({
                     ...this.state,
                     ...this.jobInfoOkBlock(jobInfo),
-                    ...this.mmbOutputErrorBlock(e.toString()),
+                    ...this.mmbOutputErrorBlock((e as Error).toString()),
                 });
             }
         } catch (e) {
             // Failure when fetching JobInfo
             this.setState({
                 ...this.state,
-                ...this.jobInfoErrorBlock(e.toString()),
+                ...this.jobInfoErrorBlock((e as Error).toString()),
             });
         }
     }
@@ -320,9 +337,6 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
     }
 
     private async startJob() {
-        if (this.mmbInputFormRef.current === null)
-            return;
-
         if (this.state.jobState === 'Running') {
             this.setState({
                 ...this.state,
@@ -333,13 +347,24 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
 
         Net.abortFetch(this.startJobAborter);
 
-        try {
-            const commands = this.mmbInputFormRef.current.commandsToJob();
-            const task = JobQuery.start(this.props.jobId, commands);
+        if (Mmb.isSyntheticMode(this.state.uiMode)) {
+            const result = Conversion.setupToParameters(this.setup, this.state.uiMode);
+            if (Conversion.isErrorResult(result)) {
+                this.setState({ ...this.state, startJobError: result.errors });
+                return;
+            }
 
+            const errors = Mmb.isSetupStartable(this.setup, this.state.uiMode);
+            if (errors) {
+                this.setState({ ...this.state, startJobError: errors });
+                return;
+            }
+
+            const task = JobQuery.start(this.props.jobId, JsonCommandsSerializer.serialize(result.data));
             this.startJobCommon(task);
-        } catch (e) {
-            this.setState({ ...this.state, startJobError: e });
+        } else {
+            const task = JobQuery.startRaw(this.props.jobId, this.state.rawCommands);
+            this.startJobCommon(task);
         }
     }
 
@@ -366,31 +391,10 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
         } catch (e) {
             this.setState({
                 ...this.state,
-                ...this.jobInfoErrorBlock(e.toString(), 'none', 'none'),
+                ...this.jobInfoErrorBlock((e as Error).toString(), 'none', 'none'),
                 startJobError: [],
             });
         }
-    }
-
-    private startJobRaw() {
-        if (this.mmbInputFormRef.current === null)
-            return;
-
-        if (this.state.jobState === 'Running') {
-            this.setState({
-                ...this.state,
-                jobError: 'Job is already running',
-                startJobError: [],
-            });
-            return;
-        }
-
-        Net.abortFetch(this.startJobAborter);
-
-        const commands = this.mmbInputFormRef.current.rawCommandsToJob();
-        const task = JobQuery.startRaw(this.props.jobId, commands);
-
-        this.startJobCommon(task);
     }
 
     private setupAutoRefresh(enabled: boolean, interval: number, state: Api.JobState) {
@@ -429,7 +433,7 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
         } catch (e) {
             this.setState({
                 ...this.state,
-                ...this.jobInfoErrorBlock(e.toString()),
+                ...this.jobInfoErrorBlock((e as Error).toString()),
             });
         }
     }
@@ -455,14 +459,14 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
         }
 
         switch (this.state.jobCommandsMode) {
-            case 'Raw':
-                if (this.state.uiMode !== 'maverick')
-                    this.setState({ ...this.state, uiMode: 'maverick' });
-                break;
-            case 'Synthetic':
-                if (this.state.uiMode === 'maverick')
-                    this.setState({ ...this.state, uiMode: 'simple' });
-                break;
+        case 'Raw':
+            if (this.state.uiMode !== 'maverick')
+                this.setState({ ...this.state, uiMode: 'maverick' });
+            break;
+        case 'Synthetic':
+            if (this.state.uiMode === 'maverick')
+                this.setState({ ...this.state, uiMode: 'standard-simple' });
+            break;
         }
     }
 
@@ -474,6 +478,7 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
         Net.abortFetch(this.stopJobAborter);
 
         this.killAutoRefresh();
+        this.setup.destroy();
     }
 
     render() {
@@ -483,34 +488,28 @@ export class VisualJobRunner extends React.Component<VisualJobRunner.Props, Stat
                     densityMap={this.densityMap()}
                     structureUrl={this.structureUrl()}
                     structureName={this.state.jobName}
-                    availableStages={this.state.jobAvailableStages}
+                    availableStages={this.setup.stages}
                     step={((this.state.jobStep === 'preparing' || this.state.jobState === 'NotStarted') ? 0 : this.state.jobStep) as number}
                     autoRefreshChanged={this.onAutoRefreshChanged}
                     defaultAutoRefreshEnabled={DefaultAutoRefreshEnabled}
                     defaultAutoRefreshInterval={DefaultAutoRefreshInterval}
-                    mmbOutput={this.state.mmbOutput} />
+                    mmbOutput={this.state.mmbOutput}
+                />
                 <div className='mmb-controls'>
                     <JobStatus
                         state={this.state.jobState}
                         step={this.state.jobStep}
                         totalSteps={this.state.jobTotalSteps}
-                        error={this.state.jobError} />
-                    {this.makeMmbInputForm()}
+                        error={this.state.jobError}
+                    />
+                    {this.makeMmbInputBlock()}
                     <ErrorBox errors={this.state.startJobError} />
                     <JobControls
-                        handleStart={() => {
-                            switch (this.state.uiMode) {
-                                case 'maverick':
-                                    this.startJobRaw();
-                                    break;
-                                default:
-                                    this.startJob();
-                                    break;
-                            }
-                        }}
+                        handleStart={() => this.startJob()}
                         handleStatus={() => this.queryJobStatus()}
                         handleStop={() => this.stopJob()}
-                        jobState={this.state.jobState} />
+                        jobState={this.state.jobState}
+                    />
                 </div>
             </div>
         );

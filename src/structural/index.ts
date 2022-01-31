@@ -1,12 +1,12 @@
 /**
- * Copyright (c) 2020-2021 WebMMB contributors, licensed under MIT, See LICENSE file for details.
+ * Copyright (c) 2020-2022 WebMMB contributors, licensed under MIT, See LICENSE file for details.
  *
  * @author Michal Malý (michal.maly@ibt.cas.cz)
  * @author Samuel C. Flores (samuelfloresc@gmail.com)
  * @author Jiří Černý (jiri.cerny@ibt.cas.cz)
  */
 
-import { Compound, ResidueNumber } from '../model/compound';
+import { Chain, Compound, ResidueNumber } from '../model/mmb/compound';
 import { ungzip } from '../zip/unzip';
 import { parseCif } from './cif';
 import { parsePdb } from './pdb';
@@ -104,8 +104,8 @@ export namespace Structural {
             }
             const type = decideType(possible, considerNA);
 
-            const ch = { name: k, authName: v.authName };
-            compounds.push(new Compound(type, ch, Compound.stringToSequence(seq, type), residues));
+            const chain = new Chain(k, v.authName);
+            compounds.push(new Compound(type, chain, Compound.stringToSequence(seq, type), residues));
         }
 
         return compounds;

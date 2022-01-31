@@ -22,7 +22,7 @@ export class TextArea<T extends string> extends CtrldComponent<T, TextArea.Props
                 break;
             case 'none':
                 cls += ' text-area-no-resize';
-                    break;
+                break;
             }
         }
 

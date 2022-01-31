@@ -16,10 +16,6 @@ export namespace JobQuery {
         return Q.query(() => JobRequest.commands(id), ResponseDeserializers.toJobCommands, 'Cannot query synthetic job commands');
     }
 
-    export function commandsRaw(id: string) {
-        return Q.query(() => JobRequest.commands_raw(id), ResponseDeserializers.toJobCommandsRaw, 'Cannot query raw job commands');
-    }
-
     export function create(name: string) {
         return Q.query(() => JobRequest.create(name), ResponseDeserializers.toJobCreated, 'Cannot create job');
     }
@@ -44,12 +40,12 @@ export namespace JobQuery {
         return Q.query(() => JobRequest.listAdditionalFiles(id), ResponseDeserializers.toAdditionalFileList, 'Cannot query list of additional files');
     }
 
-    export function start(id: string, commands: Api.StandardCommands | Api.DensityFitCommands) {
-        return Q.query(() => JobRequest.start(id, commands), ResponseDeserializers.toEmpty, 'Cannot start job');
+    export function start(id: string, commands: Api.DensityFitCommands|Api.StandardCommands) {
+        return Q.query(() => JobRequest.start(id, { mode: 'Synthetic', commands }), ResponseDeserializers.toEmpty, 'Cannot start job');
     }
 
     export function startRaw(id: string, commands: string) {
-        return Q.query(() => JobRequest.startRaw(id, commands), ResponseDeserializers.toEmpty, 'Cannot start raw job');
+        return Q.query(() => JobRequest.start(id, { mode: 'Raw', commands }), ResponseDeserializers.toEmpty, 'Cannot start job');
     }
 
     export function stop(id: string) {

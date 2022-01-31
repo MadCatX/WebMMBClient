@@ -10,7 +10,9 @@ import * as React from 'react';
 import { ErrorBox } from './common/error-box';
 import { LinkButton } from './common/link-button';
 import { PushButton } from './common/push-button';
+import { ComboBoxModel } from '../model/common/combo-box-model';
 import { LabeledField } from './common/controlled/labeled-field';
+import { StagesSpan } from '../model/mmb/stages-span';
 import { Num } from '../util/num';
 
 declare let WebMmbViewer: any;
@@ -84,10 +86,10 @@ export class Viewer extends React.Component<Viewer.Props, State> {
             <div className='section'>
                 <div className='section-caption'>MMB Output</div>
                 {(() => {
-                if (output.errors !== undefined)
-                    return (<ErrorBox errors={output.errors} />);
-                if (output.text !== undefined)
-                    return (<pre className='mmb-output' id='mmb-output-item'>{output.text}</pre>);
+                    if (output.errors !== undefined)
+                        return (<ErrorBox errors={output.errors} />);
+                    if (output.text !== undefined)
+                        return (<pre className='mmb-output' id='mmb-output-item'>{output.text}</pre>);
                 })()}
             </div>
         );
@@ -112,7 +114,7 @@ export class Viewer extends React.Component<Viewer.Props, State> {
         let didFullLoad = false;
         if (this.props.step === 0 && prevProps.step !== 0)
             this.clear();
-        else if (this.props.availableStages.length !== prevProps.availableStages.length ||
+        else if (!this.props.availableStages.equals(prevProps.availableStages) ||
                  this.props.step !== prevProps.step ||
                  this.state.selectedStage !== prevState.selectedStage) {
             this.load();
@@ -142,7 +144,11 @@ export class Viewer extends React.Component<Viewer.Props, State> {
     }
 
     render() {
-        const stageOptions = this.props.availableStages.map(n => { return { caption: n.toString(), value: n }} );
+        const stageOptions = new Array<ComboBoxModel.Option<number>>();
+        if (this.props.availableStages.last > 0) {
+            for (let n = this.props.availableStages.first; n <= this.props.availableStages.last; n++)
+                stageOptions.push({ caption: n.toString(), value: n });
+        }
         const stageValue = (() => {
             if (this.state.selectedStage)
                 return this.state.selectedStage;
@@ -230,6 +236,6 @@ export namespace Viewer {
         defaultAutoRefreshEnabled: boolean;
         defaultAutoRefreshInterval: number;
         mmbOutput: MmbOutput;
-        availableStages: number[];
+        availableStages: StagesSpan;
     }
 }

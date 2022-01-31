@@ -60,7 +60,7 @@ export class JobList extends React.Component<JobList.Props, State> {
         } catch (e) {
             this.setState({
                 ...this.state,
-                error: e.toString(),
+                error: (e as Error).toString(),
             });
         }
     }
@@ -68,7 +68,7 @@ export class JobList extends React.Component<JobList.Props, State> {
     private async deleteJob(id: string) {
         Net.abortFetch(this.deleteJobAborter);
 
-        const task = JobQuery.del(id)
+        const task = JobQuery.del(id);
         this.deleteJobAborter = task.aborter;
 
         try {
@@ -77,7 +77,7 @@ export class JobList extends React.Component<JobList.Props, State> {
         } catch (e) {
             this.setState({
                 ...this.state,
-                error: e.toString(),
+                error: (e as Error).toString(),
             });
         }
     }
@@ -101,7 +101,7 @@ export class JobList extends React.Component<JobList.Props, State> {
             this.setState({
                 ...this.state,
                 jobs: [],
-                error: e.toString(),
+                error: (e as Error).toString(),
             });
         }
     }
@@ -121,15 +121,15 @@ export class JobList extends React.Component<JobList.Props, State> {
                         <div></div>
                     </div>
                     {sorted.map(e =>
-                            <JobItem
-                                key={e.id}
-                                id={e.id}
-                                name={e.name}
-                                state={e.state}
-                                created_on={e.created_on}
-                                notifyCloned={(_id: string) => this.refresh()}
-                                onSelect={() => this.selectJob(e.id)}
-                                onDelete={() => this.deleteJob(e.id)} />
+                        <JobItem
+                            key={e.id}
+                            id={e.id}
+                            name={e.name}
+                            state={e.state}
+                            created_on={e.created_on}
+                            notifyCloned={(_id: string) => this.refresh()}
+                            onSelect={() => this.selectJob(e.id)}
+                            onDelete={() => this.deleteJob(e.id)} />
                     )}
                 </div>
             );

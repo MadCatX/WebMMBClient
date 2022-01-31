@@ -7,8 +7,9 @@
  */
 
 import * as Api from './api';
-import { isDensityFitCommands, isStandardCommands, commandsFromJson } from './commands';
-import { assignAll, checkProps, checkType, isArr, isBool, isInt, isObj, isStr, TypeChecker } from '../util/json';
+import * as AO from './api-objs';
+import { Commands } from './commands';
+import { assignAll, checkProps, checkType, isArr, isInt, isObj, isStr, TypeChecker } from '../util/json';
 import { Num } from '../util/num';
 
 const NOT_AN_OBJ = 'Input variable is not an object';
@@ -18,24 +19,33 @@ const ExampleListItemObj: Api.ExampleListItem = {
     name: '',
     description: '',
 };
-const FileTransferAck: Api.FileTransferAck = { id: '', };
-const JobCommands: Api.JobCommands = { is_empty: true, commands: null };
-const JobCommandsRaw: Api.JobCommandsRaw = { is_empty: true, commands: null };
+const FileTransferAck: Api.FileTransferAck = { id: '' };
+const JobCommandsNone: Api.JobCommandsNone = {
+    mode: 'None',
+};
+const JobCommandsSynthetic: Api.JobCommandsSynthetic = {
+    mode: 'Synthetic',
+    commands: AO.StandardCommands,
+};
+const JobCommandsRaw: Api.JobCommandsRaw = {
+    mode: 'Raw',
+    commands: '',
+};
 const JobCreated: Api.JobCreated = { id: '' };
 const JobInfo: Api.JobInfo = {
     id: '',
     name: '',
     state: 'NotStarted',
-    available_stages: [] as number[],
-    current_stage: null,
+    first_stage: 0,
+    last_stage: 0,
     created_on: 0,
-    commands_mode: 'Synthetic',
+    commands_mode: 'None',
     progress: null,
 };
 const JobProgress: Api.JobProgress = {
     step: 'none',
     total_steps: 0,
-}
+};
 
 const SessionInfoObj: Api.SessionInfo = { id: '' };
 
@@ -44,11 +54,11 @@ function isAdditionalFile(v: unknown): v is Api.AdditionalFile {
         return false;
 
     try {
-        checkProps(v, AdditionalFile);
+        if (!checkProps(v, AdditionalFile))
+            return false;
 
-        const tObj = v as Api.AdditionalFile;
-        checkType(tObj, 'name', isStr);
-        checkType(tObj, 'size', isStr);
+        checkType(v, 'name', isStr);
+        checkType(v, 'size', isStr);
 
         return true;
     } catch (e) {
@@ -62,7 +72,9 @@ function isExampleListItem(v: unknown): v is Api.ExampleListItem {
         return false;
 
     try {
-        checkProps(v, ExampleListItemObj);
+        if (!checkProps(v, ExampleListItemObj))
+            return false;
+
         checkType(v, 'name', isStr);
         checkType(v, 'description', isStr);
         return true;
@@ -77,10 +89,10 @@ function isFileTransferAck(v: unknown): v is Api.FileTransferAck {
         return false;
 
     try {
-        checkProps(v, FileTransferAck);
+        if (!checkProps(v, FileTransferAck))
+            return false;
 
-        const tObj = v as Api.FileTransferAck;
-        checkType(tObj, 'id', isStr);
+        checkType(v, 'id', isStr);
 
         return true;
     } catch (e) {
@@ -94,10 +106,10 @@ function isJobCreated(v: unknown): v is Api.JobCreated {
         return false;
 
     try {
-        checkProps(v, JobCreated);
+        if (!checkProps(v, JobCreated))
+            return false;
 
-        const tObj = v as Api.JobCreated;
-        checkType(tObj, 'id', isStr);
+        checkType(v, 'id', isStr);
         return true;
     } catch (e) {
         console.error(e);
@@ -110,27 +122,18 @@ function isJobInfo(v: unknown): v is Api.JobInfo {
         return false;
 
     try {
-        checkProps(v, JobInfo);
-    } catch (e) {
-        console.error(e);
-        return false;
-    }
+        if (!checkProps(v, JobInfo))
+            return false;
 
-    const tObj = v as Api.JobInfo;
-    try {
-        checkType(tObj, 'id', isStr);
-        checkType(tObj, 'name', isStr);
-        checkType(tObj, 'state', isJobState);
-        checkType(tObj, 'available_stages', (v: unknown): v is number[] => isArr<number>(v, isInt));
-        checkType(tObj, 'current_stage', (v: unknown): v is number|null => {
-            if (v === null)
-                return true;
-            return isInt(v);
-        });
-        checkType(tObj, 'created_on', isInt);
-        checkType(tObj, 'commands_mode', isJobCommandsMode);
-        if (tObj.progress !== null)
-            checkType(tObj, 'progress', isJobProgress);
+        checkType(v, 'id', isStr);
+        checkType(v, 'name', isStr);
+        checkType(v, 'state', isJobState);
+        checkType(v, 'first_stage', isInt),
+        checkType(v, 'last_stage', isInt),
+        checkType(v, 'created_on', isInt);
+        checkType(v, 'commands_mode', isJobCommandsMode);
+        if (v.progress !== null)
+            checkType(v, 'progress', isJobProgress);
     } catch (e) {
         console.error(e);
         return false;
@@ -144,11 +147,11 @@ function isJobProgress(v: unknown): v is Api.JobProgress {
         return false;
 
     try {
-        checkProps(v, JobProgress);
+        if (!checkProps(v, JobProgress))
+            return false;
 
-        const tObj = v as Api.JobProgress;
-        checkType(tObj, 'step', isJobStep);
-        checkType(tObj, 'total_steps', isInt);
+        checkType(v, 'step', isJobStep);
+        checkType(v, 'total_steps', isInt);
         return true;
     } catch (e) {
         console.error(e);
@@ -156,27 +159,36 @@ function isJobProgress(v: unknown): v is Api.JobProgress {
     }
 }
 
-function isJobCommands(v: unknown): v is Api.JobCommands {
+function isJobCommands(v: unknown): v is Api.JobCommandsNone|Api.JobCommandsSynthetic|Api.JobCommandsRaw {
     if (!isObj(v))
         return false;
 
+    if (v['mode'] === undefined)
+        return false;
+
+    return isJobCommandsMode(v['mode']);
+}
+
+function isJobCommandsNone(v: unknown): v is Api.JobCommandsNone {
+    if (!isJobCommands(v))
+        return false;
+
+    if (!checkProps(v, JobCommandsNone))
+        return false;
+    return v.mode === 'None';
+}
+
+function isJobCommandsSynthetic(v: unknown): v is Api.JobCommandsSynthetic {
+    if (!isJobCommands(v))
+        return false;
+
     try {
-        checkProps(v, JobCommands);
+        if (!checkProps(v, JobCommandsSynthetic))
+            return false;
+        if (v.mode !== 'Synthetic')
+            return false;
 
-        const tObj = v as Api.JobCommands;
-        checkType(tObj, 'is_empty', isBool);
-
-        if (!tObj.is_empty) {
-            if (!(isDensityFitCommands(tObj.commands) || isStandardCommands(tObj.commands)))
-                return false;
-        } else {
-            if (tObj.commands !== null) {
-                console.error('Non-null commands in commands object that was expected empty');
-                return false;
-            }
-        }
-
-        return true;
+        return (Commands.isDensityFit(v.commands) || Commands.isStandard(v.commands));
     } catch (e) {
         console.error(e);
         return false;
@@ -184,24 +196,16 @@ function isJobCommands(v: unknown): v is Api.JobCommands {
 }
 
 function isJobCommandsRaw(v: unknown): v is Api.JobCommandsRaw {
-    if (!isObj(v))
+    if (!isJobCommands(v))
         return false;
 
     try {
-        checkProps(v, JobCommandsRaw);
+        if (!checkProps(v, JobCommandsRaw))
+            return false;
+        if (v.mode !== 'Raw')
+            return false;
 
-        const tObj = v as Api.JobCommandsRaw;
-        checkType(tObj, 'is_empty', isBool);
-
-
-        if (!tObj.is_empty)
-            checkType(tObj, 'commands', isStr);
-        else {
-            if (tObj.commands !== null) {
-                console.error('Non-null commands in commands object that was expected empty');
-                return false;
-            }
-        }
+        checkType(v, 'commands', isStr);
 
         return true;
     } catch (e) {
@@ -291,23 +295,15 @@ export namespace ResponseDeserializers {
         throw new Error('Object is not FileTransferAck');
     }
 
-    export function toJobCommands(obj: unknown): Api.JobCommands {
-        if (isJobCommands(obj)) {
-            if (obj.is_empty)
-                return obj;
-            return {
-                is_empty: false,
-                commands: commandsFromJson(obj.commands),
-            };
-        }
+    export function toJobCommands(obj: unknown): Api.JobCommandsNone|Api.JobCommandsSynthetic|Api.JobCommandsRaw {
+        if (isJobCommandsNone(obj))
+            return obj;
+        else if (isJobCommandsSynthetic(obj))
+            return obj;
+        else if (isJobCommandsRaw(obj))
+            return obj;
 
         throw new Error('Object is not JobCommands');
-    }
-
-    export function toJobCommandsRaw(obj: unknown): Api.JobCommandsRaw {
-        if (isJobCommandsRaw(obj))
-            return obj;
-        throw new Error('Object is not JobCommandsRaw');
     }
 
     export function toJobCreated(obj: unknown): Api.JobCreated {
@@ -324,8 +320,8 @@ export namespace ResponseDeserializers {
                 id: obj.id,
                 name: obj.name,
                 state: obj.state,
-                available_stages: obj.available_stages,
-                current_stage: obj.current_stage,
+                first_stage: obj.first_stage,
+                last_stage: obj.last_stage,
                 created_on: Num.parseIntStrict(obj.created_on),  // On-wire value is a string to prevent rounding
                 commands_mode: obj.commands_mode,
                 progress,
@@ -352,11 +348,11 @@ export namespace ResponseDeserializers {
         if (!isObj(obj))
             throw new Error(NOT_AN_OBJ);
 
-        checkProps(obj, SessionInfoObj);
+        if (!checkProps(obj, SessionInfoObj))
+            throw new Error('Object is not SessionInfo');
 
-        const tObj = obj as Api.SessionInfo;
-        checkType(tObj, 'id', isStr);
+        checkType(obj, 'id', isStr);
 
-        return { id: tObj.id };
+        return { id: obj.id };
     }
 }

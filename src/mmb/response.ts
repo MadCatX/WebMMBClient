@@ -7,7 +7,7 @@
  */
 
 import { BaseResponse, BaseResponseObj, ErrorResponse, ErrorResponseObj, OkResponse } from './api';
-import { AnyObject } from '../util/json';
+import { AnyObject } from '../util/types';
 
 export namespace Response {
     export interface DataParser<T> {

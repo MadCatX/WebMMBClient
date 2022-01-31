@@ -85,7 +85,7 @@ export namespace Query {
                 const { status, json } = await handleReq(pending.promise, pending.aborter);
                 return handleResp(json, respParser, status, errorPrefix);
             } catch (e) {
-                if (Net.isAbortError(e))
+                if (Net.isAbortError(e as Error))
                     return null;
                 else
                     throw e;

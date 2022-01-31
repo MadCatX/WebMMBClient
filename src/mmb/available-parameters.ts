@@ -1,12 +1,12 @@
 /**
- * Copyright (c) 2020 WebMMB contributors, licensed under MIT, See LICENSE file for details.
+ * Copyright (c) 2020-2022 WebMMB contributors, licensed under MIT, See LICENSE file for details.
  *
  * @author Michal Malý (michal.maly@ibt.cas.cz)
  * @author Samuel C. Flores (samuelfloresc@gmail.com)
  * @author Jiří Černý (jiri.cerny@ibt.cas.cz)
  */
 
-import { Parameter as P } from '../model/parameter';
+import { Parameter as P } from '../model/mmb/parameter';
 
 function options<T, K extends keyof T>(o: T): K[] {
     return Object.keys(o) as K[];
@@ -21,7 +21,7 @@ export type Integrators = keyof typeof Integrators;
 const PotentialTypes = { 'HarmonicInverse': null, 'HarmonicInverseLorentzian': null };
 export type PotentialTypes = keyof typeof PotentialTypes;
 
-const ThermostatTypes = { 'NoseHoover': null };
+export const ThermostatTypes = { 'NoseHoover': null };
 export type ThermostatTypes = keyof typeof ThermostatTypes;
 
 export type ParameterNames = 'addAllAtomSterics' | 'addAllHeavyAtomSterics' | 'addProteinBackboneSterics' |
@@ -104,7 +104,7 @@ export const Parameters: ReadonlyMap<ParameterNames, P.Parameter<ParameterNames>
     ['guessCoordinates', new P.StaticParameter('guessCoordinates', 'If true, invents coordinates for any atoms missing from the input PDB file', new P.BooleanArgument())],
     ['inQVectorFileName', new P.OptionsDynamicParameter('inQVectorFileName', '')],
     ['initialSeparation', new P.StaticParameter('initialSeparation', '', new P.RealArgument())],
-    ['integratorAccuracy', new P.StaticParameter('integratorAccuracy', '', new P.RealArgument(P.PositiveRange))],
+    ['integratorAccuracy', new P.StaticParameter('integratorAccuracy', '', new P.RealArgument(P.PositiveRange, 0.0001))],
     ['integratorStepSize', new P.StaticParameter('integratorStepSize', '', new P.RealArgument(P.PositiveRange))],
     ['integratorType', new P.StaticParameter('integratorType', '', new P.OptionsArgument(options(Integrators)))],
     // new MP.IntegralParameter('lastStage', '', MP.PositiveRange), NOTE: This is set elsewhere, allowing to manually override this would break stuff
@@ -125,7 +125,7 @@ export const Parameters: ReadonlyMap<ParameterNames, P.Parameter<ParameterNames>
     // nw MP.IntegralParameter<ParameterNames>('numReportingIntervals', ''), NOTE: This is set elsewhere, allowing to manually override this would break stuff
     ['outMonteCarloFileName', new P.StaticParameter('outMonteCarloFileName', '', new P.TextualArgument())],
     ['outTrajectoryFileName', new P.StaticParameter('outTrajectoryFileName', '', new P.TextualArgument())],
-    ['physicsRadius', new P.StaticParameter('physicsRadius', 'All residues within physicsRadius of \"flexible\" atoms are included in the physics zone. \"flexible\" is defined as belonging to a body of mass < 40', new P.RealArgument())],
+    ['physicsRadius', new P.StaticParameter('physicsRadius', 'All residues within physicsRadius of "flexible" atoms are included in the physics zone. "flexible" is defined as belonging to a body of mass < 40', new P.RealArgument())],
     ['planarityThreshold', new P.StaticParameter('planarityThreshold', '', new P.RealArgument())],
     ['potentialType', new P.StaticParameter('potentialType', '', new P.OptionsArgument(options(PotentialTypes)))],
     ['prioritize', new P.StaticParameter('prioritize', '', new P.IntegralArgument(P.IZeroIOneRange))], // NOTE: This is obviously a boolean but MMB expects an integer here
@@ -142,7 +142,7 @@ export const Parameters: ReadonlyMap<ParameterNames, P.Parameter<ParameterNames>
     ['scrubberPeriod', new P.StaticParameter('scrubberPeriod', '', new P.RealArgument())],
     // new MP.BooleanParamete<ParameterNames>r('safeParameters', ''), NOTE: If enabled, MMB forgoes some sanity check of input parameters. Allowing this would raise a brand new level of hell I am not ready to deal with
     ['setChiBondMobility', new P.StaticParameter('setChiBondMobility', '', new P.RealArgument())],
-    // setDefaultMDParameters -> This is a meI agree with most of your other points, and I've long reached the conclusion that birdie is nothing more than a flamer with an agenda so I don't much care about him or what he says anymore, but here I must disagree: the single devastatingly, painfully valid argument against Wayland in its current state is that a library like wlroots should have been the default, official implementation, and all toolkits and window managers should have been provided the option to build off it, right from the start. Wayland should have been developed (not only designed, developed) as a neutral component for the whole Linux ecosystem, just like Xorg, and not like the pet project of a corporation that only really cares about integrating it with their own line of products (i.e. Gnome).taparameter that sets a bunch of other parameters to some predefined values. I recommend to not handle this as an actual parameter
+    // setDefaultMDParameters -> This is a metaparameter that sets a bunch of other parameters to some predefined values. I recommend to not handle this as an actual parameter
     ['setForceAndStericScrubber', new P.StaticParameter('setForceAndStericScrubber', '', new P.BooleanArgument())],
     ['setForceScrubber', new P.StaticParameter('setForceScrubber', '', new P.BooleanArgument())],
     ['setHelicalStacking', new P.StaticParameter('setHelicalStacking', '', new P.BooleanArgument())],
@@ -173,3 +173,8 @@ export const Parameters: ReadonlyMap<ParameterNames, P.Parameter<ParameterNames>
     ['overallBondMobility', new P.StaticParameter('overallBondMobility', '', new P.OptionsArgument(options(BondMobility)))],
     ['chiBondMobility', new P.StaticParameter('chiBondMobility', '', new P.OptionsArgument(options(BondMobility)))],
 ]);
+
+export const FileInputParameterNames: ParameterNames[] = [
+    'densityFileName', 'electroDensityFileName', 'inQVectorFileName',
+    'leontisWesthofInFileName', 'tinkerParameterFileName',
+];

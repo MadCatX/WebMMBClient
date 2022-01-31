@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020-2021 WebMMB contributors, licensed under MIT, See LICENSE file for details.
+ * Copyright (c) 2020-2022 WebMMB contributors, licensed under MIT, See LICENSE file for details.
  *
  * @author Michal Malý (michal.maly@ibt.cas.cz)
  * @author Samuel C. Flores (samuelfloresc@gmail.com)
@@ -7,26 +7,22 @@
  */
 
 import * as React from 'react';
-import { ErrorBox } from './common/error-box';
-import { FormBlock } from './common/form/form-block';
-import { LabeledField } from './common/form/labeled-field';
-import { MmbInputModel as MIM } from '../model/mmb-input-model';
+import { LabeledField } from './common/controlled/labeled-field';
 
-const StrLField = LabeledField.LineEdit<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes>();
+const StrLField = LabeledField.LineEdit<string>();
 
-export class JobNameInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes, JobNameInput.Props> {
+export class JobNameInput extends React.Component<JobNameInput.Props> {
     renderName() {
-        if (this.props.name === undefined) {
+        if (!this.props.name) {
             return (
                 <>
                     <StrLField
                         id='mol-in-job-name'
-                        keyId='mol-in-job-name'
                         style='left'
                         label='Job name'
-                        ctxData={this.props.ctxData} />
-                    <ErrorBox
-                        errors={this.props.ctxData.errors.get('mol-in-no-name') ?? new Array<string>()} />
+                        value={this.props.name}
+                        updateNotifier={v => this.props.onNameChanged(v) }
+                    />
                 </>
             );
         }
@@ -47,7 +43,8 @@ export class JobNameInput extends FormBlock<MIM.ErrorKeys, MIM.ValueKeys, MIM.Va
 }
 
 export namespace JobNameInput {
-    export interface Props extends FormBlock.Props<MIM.ErrorKeys, MIM.ValueKeys, MIM.ValueTypes> {
-        name?: string;
+    export interface Props {
+        onNameChanged(name: string): void;
+        name: string;
     }
 }

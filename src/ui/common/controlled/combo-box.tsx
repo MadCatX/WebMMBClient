@@ -6,7 +6,7 @@
  */
 
 import * as React from 'react';
-import { ComboBox as Model } from '../../../model/common/combo-box';
+import { ComboBoxModel } from '../../../model/common/combo-box-model';
 import { CtrldComponent } from './ctrld-component';
 
 function defStrfr<T>(v?: T) {
@@ -54,8 +54,8 @@ export class ComboBox<T> extends CtrldComponent<T, ComboBox.Props<T>> {
 
 export namespace ComboBox {
     export interface Props<T> extends CtrldComponent.Props<T> {
-        options: Model.Option<T>[];
-        stringifier?: Model.Stringifier<T>;
+        options: ComboBoxModel.Option<T>[];
+        stringifier?: ComboBoxModel.Stringifier<T>;
         disabled?: boolean;
         className?: string;
     }
