@@ -53,9 +53,6 @@ export class BaseInteractionsInput extends MmbSetupComponent<BaseInteractionsInp
         super(props);
 
         const initial = this.props.setup.compounds[0];
-
-        // @nocheckin: Figure out what is the FIXME below about
-        // FIXME: Account for author residue numbering too! (This need to be done in more places)
         const resSel: ResidueSelection|null = initial ?
             {
                 chainNameA: initial.chain.name,
