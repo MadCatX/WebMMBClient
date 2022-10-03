@@ -98,7 +98,7 @@ export namespace TextCommandsSerializer {
         params.doubleHelices.forEach(dh => {
             const cA = params.compounds.find(c => c.chain.name === dh.chainNameA)!;
             const cB = params.compounds.find(c => c.chain.name === dh.chainNameB)!;
-            const entry = `nucleicAcidDuplex ${cA.chain.authName} ${cA.residueByNumber(dh.firstResNoA)!.authNumber} ${cA.residueByNumber(dh.lastResNoA)} ${cB.chain.authName} ${cB.residueByNumber(dh.firstResNoB)!.authNumber} ${cB.residueByNumber(dh.lastResNoB)!.authNumber}`;
+            const entry = `nucleicAcidDuplex ${cA.chain.authName} ${cA.residueByNumber(dh.firstResNoA).authNumber} ${cA.residueByNumber(dh.lastResNoA)} ${cB.chain.authName} ${cB.residueByNumber(dh.firstResNoB).authNumber} ${cB.residueByNumber(dh.lastResNoB)!.authNumber}`;
             commands.push(entry);
         });
 
@@ -107,7 +107,7 @@ export namespace TextCommandsSerializer {
         params.baseInteractions.forEach(bi => {
             const cA = params.compounds.find(c => c.chain.name === bi.chainNameA)!;
             const cB = params.compounds.find(c => c.chain.name === bi.chainNameB)!;
-            const entry = `baseInteraction ${cA.chain.authName} ${cA.residueByNumber(bi.resNoB)!.authNumber} ${bi.edgeA} ${cB.chain.authName} ${cB.residueByNumber(bi.resNoB)} ${bi.edgeB} ${bi.orientation}`;
+            const entry = `baseInteraction ${cA.chain.authName} ${cA.residueByNumber(bi.resNoB).authNumber} ${bi.edgeA} ${cB.chain.authName} ${cB.residueByNumber(bi.resNoB).authNumber} ${bi.edgeB} ${bi.orientation}`;
             commands.push(entry);
         });
 
@@ -116,7 +116,7 @@ export namespace TextCommandsSerializer {
         if (params.ntcs.conformations.length > 0) {
             params.ntcs.conformations.forEach(ntc => {
                 const c = params.compounds.find(c => c.chain.name === ntc.chainName)!;
-                const entry  = `NtC ${c.chain.authName} ${c.residueByNumber(ntc.firstResNo)!.authNumber} ${c.residueByNumber(ntc.lastResNo)!.authNumber} ${ntc.ntc} 1.5`;
+                const entry  = `NtC ${c.chain.authName} ${c.residueByNumber(ntc.firstResNo).authNumber} ${c.residueByNumber(ntc.lastResNo).authNumber} ${ntc.ntc} 1.5`;
                 commands.push(entry);
             });
             commands.push(`NtCForceScaleFactor ${params.ntcs.forceScaleFactor}`);
